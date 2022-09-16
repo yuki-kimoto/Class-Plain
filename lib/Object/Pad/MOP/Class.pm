@@ -343,17 +343,15 @@ set (such value may still be C<undef>).
 
 =item writer => STRING
 
-=item mutator => STRING
-
 I<Since version 0.46.>
 
 =item accessor => STRING
 
 I<Since version 0.56.>
 
-Provides method names for generated reader, writer, lvalue-mutator or
+Provides method names for generated reader, writer or
 reader+writer accessor methods, similar to setting them via the C<:reader>,
-C<:writer>, C<:mutator> or C<:accessor> attributes.
+C<:writer or C<:accessor> attributes.
 
 =item weak => BOOL
 

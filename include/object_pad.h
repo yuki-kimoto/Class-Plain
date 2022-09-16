@@ -23,7 +23,7 @@ enum AccessorType {
 
 struct AccessorGenerationCtx {
   PADOFFSET padix;
-  OP *bodyop;       /* OP_SASSIGN for :writer, empty for :reader, :mutator */
+  OP *bodyop;       /* OP_SASSIGN for :writer, empty for :reader */
   OP *post_bodyops;
   OP *retop;        /* OP_RETURN */
 };

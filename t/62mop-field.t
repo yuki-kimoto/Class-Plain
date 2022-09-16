@@ -9,7 +9,7 @@ use Test::Fatal;
 use Object::Pad ':experimental(mop)';
 
 class Example {
-   has $field :mutator :param(initial_field) = undef;
+   has $field :accessor :param(initial_field) = undef;
 }
 
 my $classmeta = Object::Pad::MOP::Class->for_class( "Example" );
@@ -20,9 +20,9 @@ is( $fieldmeta->name, "\$field", '$fieldmeta->name' );
 is( $fieldmeta->sigil, "\$", '$fieldmeta->sigil' );
 is( $fieldmeta->class->name, "Example", '$fieldmeta->class gives class' );
 
-ok( $fieldmeta->has_attribute( "mutator" ), '$fieldmeta has "mutator" attribute' );
-is( $fieldmeta->get_attribute_value( "mutator" ), "field",
-   'value of $fieldmeta "mutator" attribute' );
+ok( $fieldmeta->has_attribute( "accessor" ), '$fieldmeta has "accessor" attribute' );
+is( $fieldmeta->get_attribute_value( "accessor" ), "field",
+   'value of $fieldmeta "accessor" attribute' );
 
 is( $fieldmeta->get_attribute_value( "param" ), "initial_field",
    'value of $fieldmeta "param" attribute' );
@@ -33,20 +33,20 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
 # $fieldmeta->value as accessor
 {
    my $obj = Example->new;
-   $obj->field = "the value";
+   $obj->field("the value");
 
    is( $fieldmeta->value( $obj ), "the value",
       '$fieldmeta->value as accessor' );
 }
 
-# $fieldmeta->value as mutator
+# $fieldmeta->value as accessor
 {
    my $obj = Example->new;
 
    $fieldmeta->value( $obj ) = "a new value";
 
    is( $obj->field, "a new value",
-      '$obj->field after $fieldmeta->value as mutator' );
+      '$obj->field after $fieldmeta->value as accessor' );
 }
 
 # fieldmeta on roles (RT138927)

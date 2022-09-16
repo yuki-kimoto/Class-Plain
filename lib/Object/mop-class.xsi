@@ -369,7 +369,6 @@ add_field(self, fieldname, ...)
       "param",
       "reader",
       "writer",
-      "mutator",
       "accessor",
       "weak",
       NULL,
@@ -394,15 +393,11 @@ add_field(self, fieldname, ...)
           mop_field_apply_attribute(fieldmeta, "writer", kwval);
           break;
 
-        case 4: /* mutator */
-          mop_field_apply_attribute(fieldmeta, "mutator", kwval);
-          break;
-
-        case 5: /* accessor */
+        case 4: /* accessor */
           mop_field_apply_attribute(fieldmeta, "accessor", kwval);
           break;
 
-        case 6: /* weak */
+        case 5: /* weak */
           mop_field_apply_attribute(fieldmeta, "weak", NULL);
           break;
       }

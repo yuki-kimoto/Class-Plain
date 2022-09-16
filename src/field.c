@@ -540,9 +540,9 @@ static struct FieldHookFuncs fieldhooks_writer = {
   .gen_accessor_ops = &fieldhook_gen_writer_ops,
 };
 
-/* :mutator */
+/* :accessor */
 
-static bool fieldhook_mutator_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
+static bool fieldhook_accessor_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
   if(SvPVX(fieldmeta->name)[0] != '$')
     /* TODO: A reader for an array or hash field should also be fine */
@@ -551,30 +551,6 @@ static bool fieldhook_mutator_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **
   *hookdata_ptr = make_accessor_mnamesv(aTHX_ fieldmeta, value, "%s");
   return TRUE;
 }
-
-static void fieldhook_mutator_seal(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata)
-{
-  S_generate_field_accessor_method(aTHX_ fieldmeta, hookdata, ACCESSOR_LVALUE_MUTATOR);
-}
-
-static void fieldhook_gen_mutator_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata, enum AccessorType type, struct AccessorGenerationCtx *ctx)
-{
-  if(type != ACCESSOR_LVALUE_MUTATOR)
-    return;
-
-  CvLVALUE_on(PL_compcv);
-
-  ctx->retop = newLISTOP(OP_RETURN, 0,
-    newOP(OP_PUSHMARK, 0),
-    newPADxVOP(OP_PADSV, 0, ctx->padix));
-}
-
-static struct FieldHookFuncs fieldhooks_mutator = {
-  .ver              = OBJECTPAD_ABIVERSION,
-  .apply            = &fieldhook_mutator_apply,
-  .seal             = &fieldhook_mutator_seal,
-  .gen_accessor_ops = &fieldhook_gen_mutator_ops,
-};
 
 /* :accessor */
 
@@ -604,7 +580,7 @@ static void fieldhook_gen_accessor_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata,
 
 static struct FieldHookFuncs fieldhooks_accessor = {
   .ver              = OBJECTPAD_ABIVERSION,
-  .apply            = &fieldhook_mutator_apply, /* generate method name the same as :mutator */
+  .apply            = &fieldhook_accessor_apply,
   .seal             = &fieldhook_accessor_seal,
   .gen_accessor_ops = &fieldhook_gen_accessor_ops,
 };
@@ -640,6 +616,5 @@ void ObjectPad__boot_fields(pTHX)
   register_field_attribute("param",    &fieldhooks_param,    NULL);
   register_field_attribute("reader",   &fieldhooks_reader,   NULL);
   register_field_attribute("writer",   &fieldhooks_writer,   NULL);
-  register_field_attribute("mutator",  &fieldhooks_mutator,  NULL);
   register_field_attribute("accessor", &fieldhooks_accessor, NULL);
 }

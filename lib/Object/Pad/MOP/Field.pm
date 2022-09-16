@@ -62,11 +62,6 @@ which this field is a member.
 An accessor method which returns the current value of the field from an object
 instance.
 
-   $metafield->value( $instance ) = $new
-
-On scalar fields, this method can also act as an lvalue mutator allowing a new
-value to be set.
-
 =head2 has_attribute
 
    $exists = $metafield->has_attribute( $name )

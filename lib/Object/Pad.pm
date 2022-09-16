@@ -512,24 +512,6 @@ versions only allowed them on scalar fields. On arrays or hashes, the writer
 method takes a list of values to be assigned into the field, completely
 replacing any values previously there.
 
-=head3 :mutator, :mutator(NAME)
-
-I<Since version 0.27.>
-
-Generates an lvalue mutator method to return or set the value of the field.
-These are only permitted for scalar fields. If no name is given, the name of
-the field is used. A single prefix character C<_> will be removed if present.
-
-   field $x :mutator;
-
-   # equivalent to
-   field $x;  method x :lvalue { $x }
-
-I<Since version 0.28> all of these generated accessor methods will include
-argument checking similar to that used by subroutine signatures, to ensure the
-correct number of arguments are passed - usually zero, but exactly one in the
-case of a C<:writer> method.
-
 =head3 :accessor, :accessor(NAME)
 
 I<Since version 0.53.>
@@ -681,7 +663,7 @@ that is handled directly.
 
 A list of attributes may be supplied as for C<sub>. The most useful of these
 is C<:lvalue>, allowing easy creation of read-write accessors for fields (but
-see also the C<:reader>, C<:writer> and C<:mutator> field attributes).
+see also the C<:reader> and C<:writer>> field attributes).
 
    class Counter {
       field $count;
@@ -978,8 +960,8 @@ lowercase, name components separated by underscores. For tiny examples such as
 "dumb record" structures this may be sufficient.
 
    class Tag {
-      field $name  :mutator;
-      field $value :mutator;
+      field $name  :accessor;
+      field $value :accessor;
    }
 
 In larger examples with lots of non-trivial method bodies, it can get

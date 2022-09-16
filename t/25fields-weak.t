@@ -27,7 +27,7 @@ is_oneref( $arr, '$arr has one reference before we start' );
    my $obj = WithWeak->new( field => [] );
    $obj->set_field( $arr );
 
-   is_oneref( $arr, '$arr has one reference after WithWeak mutator' );
+   is_oneref( $arr, '$arr has one reference after WithWeak accessor' );
 }
 
 # RT139665

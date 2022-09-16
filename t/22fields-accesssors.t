@@ -14,7 +14,7 @@ my $MATCH_ARGCOUNT =
 class Colour {
    field $red   :reader            :writer;
    field $green :reader(get_green) :writer;
-   field $blue  :mutator;
+   field $blue  :accessor;
    field $white :accessor;
 
    BUILD {
@@ -69,7 +69,7 @@ class Colour {
 
    $col->set_red( 80 );
    is( $col->set_green( 90 ), $col, '->set_* writer returns invocant' );
-   $col->blue = 100;
+   $col->blue(100);
    $col->white( 110 );
 
    is_deeply( [ $col->rgbw ], [ 80, 90, 100, 110 ],
