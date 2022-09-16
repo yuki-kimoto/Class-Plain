@@ -698,48 +698,6 @@ instances. Within the method body there is a lexical C<$class> available,
 rather than C<$self>. Because it is not associated with a particular object
 instance, a class-common method cannot see instance fields.
 
-=head2 method (lexical)
-
-   method $var { ... }
-
-   method $var :ATTRS... (SIGNATURE) { ... }
-
-I<Since version 0.59.>
-
-Declares a new lexical method. Lexical methods are not visible via the package
-namespace, but instead are stored directly in a lexical variable (with the
-same scoping rules as regular C<my> variables). These can be invoked by
-subsequent method code in the same block by using C<< $self->$var(...) >>
-method call syntax.
-
-   class WithPrivate {
-      field $var;
-
-      # Lexical methods can still see instance fields as normal
-      method $inc_var { $var++; say "Var was incremented"; }
-      method $dec_var { $var--; say "Var was decremented"; }
-
-      method bump {
-         $self->$inc_var;
-         say "In the middle";
-         $self->$dec_var;
-      }
-   }
-
-   my $obj = WithPrivate->new;
-
-   $obj->bump;
-
-   # Neither $inc_var nor $dec_var are visible here
-
-This effectively provides the ability to define B<private> methods, as they
-are inaccessible from outside the block that defines the class. In addition,
-there is no chance of a name collision because lexical variables in different
-scopes are independent, even if they share the same name. This is particularly
-useful in roles, to create internal helper methods without letting those
-methods be visible to callers, or risking their names colliding with other
-named methods defined on the consuming class.
-
 =head2 BUILD
 
    BUILD {

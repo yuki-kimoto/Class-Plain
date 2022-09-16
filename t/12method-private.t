@@ -22,21 +22,4 @@ class AClass {
    is( $obj->m, "data<value>", 'method can invoke captured method ref' );
 }
 
-class BClass {
-   field $data :param;
-
-   method $priv {
-      "data<$data>";
-   }
-
-   method m {
-      return $self->$priv
-   }
-}
-
-{
-   my $obj = BClass->new( data => "second" );
-   is( $obj->m, "data<second>", 'method can invoke private lexical method' );
-}
-
 done_testing;

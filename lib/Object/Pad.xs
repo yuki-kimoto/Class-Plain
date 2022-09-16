@@ -886,24 +886,6 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   AV *fields = compclassmeta->direct_fields;
   U32 nfields = av_count(fields);
 
-  /* XS::Parse::Sublike doesn't support lexical `method $foo`, but we can hack
-   * it up here
-   */
-  if(type == PHASER_NONE && !ctx->name &&
-     lex_peek_unichar(0) == '$') {
-    ctx->name = lex_scan_lexvar();
-    if(!ctx->name)
-      croak("Expected a lexical variable name");
-
-    lex_read_space(0);
-    hv_stores(ctx->moddata, "Object::Pad/method_varname", SvREFCNT_inc(ctx->name));
-
-    /* XPS should set a CV name */
-    ctx->actions |= XS_PARSE_SUBLIKE_ACTION_SET_CVNAME;
-    /* XPS should not CVf_ANON, install a named symbol, or emit an anoncode expr */
-    ctx->actions &= ~(XS_PARSE_SUBLIKE_ACTION_CVf_ANON|XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL|XS_PARSE_SUBLIKE_ACTION_REFGEN_ANONCODE|XS_PARSE_SUBLIKE_ACTION_RET_EXPR);
-  }
-
   switch(type) {
     case PHASER_NONE:
       if(ctx->name && strEQ(SvPVX(ctx->name), "BUILD"))
