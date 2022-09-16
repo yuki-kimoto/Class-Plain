@@ -38,13 +38,9 @@ class Counter {
 
    class AllTheTypes {
       has $scalar = 123;
-      has @array  = ( 45, 67 );
-      has %hash   = ( 89 => 10 );
 
       method test {
          Test::More::is( $scalar, 123, '$scalar field' );
-         Test::More::is_deeply( \@array, [ 45, 67 ], '@array field' );
-         Test::More::is_deeply( \%hash, { 89 => 10 }, '%hash field' );
       }
    }
 
@@ -59,23 +55,19 @@ class Counter {
    # changes the representation so that the output here differs, just change
    # the test as long as it is something sensible.
    is( Dumper($instance) =~ s/\s+//gr,
-      q($VAR1=bless([123,[45,67],{'89'=>10}],'AllTheTypes');),
+      q($VAR1=bless([123],'AllTheTypes');),
       'Dumper($instance) sees field data' );
    HAVE_DATA_DUMP and is( Data::Dump::pp($instance),
-      q(bless([123, [45, 67], { 89 => 10 }], "AllTheTypes")),
+      q(bless([123], "AllTheTypes")),
       'pp($instance) sees field data' );
 }
 
 {
    class AllTheTypesByBlock {
       field $scalar { "one" }
-      field @array  { "two", "three" }
-      field %hash   { four => "five" }
 
       method test {
          Test::More::is( $scalar, "one", '$scalar field' );
-         Test::More::is_deeply( \@array, [qw( two three )], '@array field' );
-         Test::More::is_deeply( \%hash, { four => "five" }, '%hash field' );
       }
    }
 

@@ -672,7 +672,7 @@ static const struct XSParseKeywordHooks kwhooks_role = {
 static void check_field(pTHX_ void *hookdata)
 {
   char *kwname = hookdata;
-
+  
   if(!have_compclassmeta)
     croak("Cannot '%s' outside of 'class'", kwname);
 
@@ -740,30 +740,13 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
        * defaultsv SV by setting it SvREADONLY_on().
        */
       OP *fieldop = newSVOP_CUSTOM(PL_ppaddr[OP_CONST], 0, SvREFCNT_inc(defaultsv));
-
-      OP *lhs, *rhs;
-
+      
       switch(sigil) {
         case '$':
           *out = newBINOP(OP_SASSIGN, 0, op_contextualize(op, G_SCALAR), fieldop);
           break;
-
-        case '@':
-          sv_setrv_noinc(defaultsv, (SV *)newAV());
-          lhs = newUNOP(OP_RV2AV, OPf_MOD|OPf_REF, fieldop);
-          goto field_array_hash_common;
-
-        case '%':
-          sv_setrv_noinc(defaultsv, (SV *)newHV());
-          lhs = newUNOP(OP_RV2HV, OPf_MOD|OPf_REF, fieldop);
-          goto field_array_hash_common;
-
-field_array_hash_common:
-          rhs = op_contextualize(op, G_LIST);
-          *out = newBINOP(OP_AASSIGN, 0,
-            force_list_keeping_pushmark(rhs),
-            force_list_keeping_pushmark(lhs));
-          break;
+        default:
+          croak("Invalid filed name");
       }
     }
     break;
@@ -778,10 +761,6 @@ field_array_hash_common:
       switch(sigil) {
         case '$':
           want = G_SCALAR;
-          break;
-        case '@':
-        case '%':
-          want = G_LIST;
           break;
       }
 
@@ -1534,14 +1513,6 @@ static U32 S_deconstruct_object_class(pTHX_ AV *backingav, ClassMeta *classmeta,
       case '$':
         value = newSVsv(value);
         break;
-
-      case '@':
-        value = newRV_noinc((SV *)newAVav((AV *)SvRV(value)));
-        break;
-
-      case '%':
-        value = newRV_noinc((SV *)newHVhv((HV *)SvRV(value)));
-        break;
     }
 
     mPUSHs(value);
@@ -1573,10 +1544,6 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
     switch(SvPV_nolen(fieldmeta->name)[0]) {
       case '$':
         return newRV_inc(sv);
-
-      case '@':
-      case '%':
-        return newSVsv(sv);
     }
   }
 
