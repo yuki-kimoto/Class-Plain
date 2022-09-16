@@ -357,11 +357,11 @@ KEYWORDS
     A role does not provide a constructor, and instances cannot directly be
     constructed. A role cannot extend a class.
 
-    A role can declare that it requires methods of given names from any
+    A role can declare that it rquired methods of given names from any
     class that implements the role.
 
        role Name {
-          requires METHOD;
+          method METHOD;
        }
 
     A role can provide instance fields. These are visible to any BUILD
@@ -798,17 +798,6 @@ KEYWORDS
     kind of adjust block that receives a reference to the parameters hash.
     Since version 0.66, regular ADJUST blocks also receive this, so the two
     keywords are now synonyms.
-
- requires
-
-       requires NAME;
-
-    Declares that this role requires a method of the given name from any
-    class that implements it. It is an error at compiletime if the
-    implementing class does not provide such a method.
-
-    This form of declaring a required method is now vaguely discouraged, in
-    favour of the bodyless method form described above.
 
 CREPT FEATURES
 

@@ -1319,41 +1319,6 @@ static const struct XSParseKeywordHooks kwhooks_ADJUST = {
   .parse = &parse_phaser,
 };
 
-static void check_requires(pTHX_ void *hookdata)
-{
-  if(!have_compclassmeta)
-    croak("Cannot 'requires' outside of 'role'");
-
-  if(compclassmeta->type == METATYPE_CLASS)
-    croak("A class may not declare required methods");
-}
-
-static int build_requires(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs, void *hookdata)
-{
-  SV *mname = args[0]->sv;
-
-  warn_deprecated("'requires' is now discouraged; use an empty 'method NAME;' declaration instead");
-
-  mop_class_add_required_method(compclassmeta, mname);
-
-  *out = newOP(OP_NULL, 0);
-
-  return KEYWORD_PLUGIN_STMT;
-}
-
-static const struct XSParseKeywordHooks kwhooks_requires = {
-  .flags = XPK_FLAG_STMT|XPK_FLAG_AUTOSEMI,
-  .permit_hintkey = "Object::Pad/requires",
-
-  .check = &check_requires,
-
-  .pieces = (const struct XSParseKeywordPieceType []){
-    XPK_IDENT,
-    {0}
-  },
-  .build = &build_requires,
-};
-
 #ifdef HAVE_DMD_HELPER
 static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
 {
@@ -1854,8 +1819,6 @@ BOOT:
   register_xs_parse_keyword("BUILD",        &kwhooks_BUILD, (void *)PHASER_BUILD);
   register_xs_parse_keyword("ADJUST",       &kwhooks_ADJUST, (void *)PHASER_ADJUST);
   register_xs_parse_keyword("ADJUSTPARAMS", &kwhooks_ADJUST, (void *)PHASER_ADJUST);
-
-  register_xs_parse_keyword("requires", &kwhooks_requires, NULL);
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 

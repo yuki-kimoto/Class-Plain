@@ -11,7 +11,7 @@ role Example {
    no warnings 'deprecated';
 
    method a_method;
-   requires b_method;
+   method b_method;
 }
 
 my $meta = Object::Pad::MOP::Class->for_class( "Example" );

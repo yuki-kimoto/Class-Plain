@@ -375,11 +375,11 @@ Like a class, a role can have a version, and named methods.
 A role does not provide a constructor, and instances cannot directly be
 constructed. A role cannot extend a class.
 
-A role can declare that it requires methods of given names from any class that
+A role can declare that it required methods of given names from any class that
 implements the role.
 
    role Name {
-      requires METHOD;
+      method METHOD;
    }
 
 A role can provide instance fields. These are visible to any C<BUILD> blocks
@@ -807,17 +807,6 @@ adjust block that receives a reference to the parameters hash. Since version
 0.66, regular C<ADJUST> blocks also receive this, so the two keywords are now
 synonyms.
 
-=head2 requires
-
-   requires NAME;
-
-Declares that this role requires a method of the given name from any class
-that implements it. It is an error at compiletime if the implementing class
-does not provide such a method.
-
-This form of declaring a required method is now vaguely discouraged, in favour
-of the bodyless C<method> form described above.
-
 =head1 CREPT FEATURES
 
 While not strictly part of being an object system, this module has
@@ -1061,10 +1050,10 @@ sub import_into
 
    # Default imports
    unless( %syms ) {
-      $syms{$_}++ for qw( class role method field has requires BUILD ADJUST );
+      $syms{$_}++ for qw( class role method field has BUILD ADJUST );
    }
 
-   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has requires BUILD ADJUST );
+   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has BUILD ADJUST );
 
    croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
 }

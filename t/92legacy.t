@@ -56,12 +56,7 @@ BEGIN {
    undef $warnings;
 }
 
-role DRole { requires mmethod; }
-
-BEGIN {
-   like( $warnings, qr/^'requires' is now discouraged; use an empty 'method NAME;' declaration instead at /m,
-      'requires keyword provokes discouraged warning' );
-}
+role DRole { method mmethod; }
 
 BEGIN {
    undef $SIG{__WARN__};

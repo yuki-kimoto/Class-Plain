@@ -1328,41 +1328,6 @@ static const struct XSParseKeywordHooks kwhooks_ADJUST = {
   .parse = &parse_phaser,
 };
 
-static void check_requires(pTHX_ void *hookdata)
-{
-  if(!have_compclassmeta)
-    croak("Cannot 'requires' outside of 'role'");
-
-  if(compclassmeta->type == METATYPE_CLASS)
-    croak("A class may not declare required methods");
-}
-
-static int build_requires(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs, void *hookdata)
-{
-  SV *mname = args[0]->sv;
-
-  warn_deprecated("'requires' is now discouraged; use an empty 'method NAME;' declaration instead");
-
-  mop_class_add_required_method(compclassmeta, mname);
-
-  *out = newOP(OP_NULL, 0);
-
-  return KEYWORD_PLUGIN_STMT;
-}
-
-static const struct XSParseKeywordHooks kwhooks_requires = {
-  .flags = XPK_FLAG_STMT|XPK_FLAG_AUTOSEMI,
-  .permit_hintkey = "Object::Pad/requires",
-
-  .check = &check_requires,
-
-  .pieces = (const struct XSParseKeywordPieceType []){
-    XPK_IDENT,
-    {0}
-  },
-  .build = &build_requires,
-};
-
 #ifdef HAVE_DMD_HELPER
 static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
 {
@@ -1645,7 +1610,7 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
   return NULL;
 }
 
-#line 1649 "lib/Object/Pad.c"
+#line 1614 "lib/Object/Pad.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1789,7 +1754,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1793 "lib/Object/Pad.c"
+#line 1758 "lib/Object/Pad.c"
 
 /* INCLUDE:  Including 'mop-class.xsi' from 'Pad.xs' */
 
@@ -1879,7 +1844,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class__create_class)
       av_push(PL_unitcheckav, (SV *)cv);
     }
   }
-#line 1883 "lib/Object/Pad.c"
+#line 1848 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1903,7 +1868,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_is_class)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = (meta->type == ix);
   }
-#line 1907 "lib/Object/Pad.c"
+#line 1872 "lib/Object/Pad.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
@@ -1925,7 +1890,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_name)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = SvREFCNT_inc(meta->name);
   }
-#line 1929 "lib/Object/Pad.c"
+#line 1894 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1956,7 +1921,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_superclasses)
 
     XSRETURN(0);
   }
-#line 1960 "lib/Object/Pad.c"
+#line 1925 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2006,7 +1971,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_direct_roles)
 
     XSRETURN(count);
   }
-#line 2010 "lib/Object/Pad.c"
+#line 1975 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2054,7 +2019,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_role)
 
     mop_class_add_role(meta, rolemeta);
   }
-#line 2058 "lib/Object/Pad.c"
+#line 2023 "lib/Object/Pad.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2090,7 +2055,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_BUILD)
 
     mop_class_add_BUILD(meta, (CV *)SvREFCNT_inc((SV *)code));
   }
-#line 2094 "lib/Object/Pad.c"
+#line 2059 "lib/Object/Pad.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2153,7 +2118,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_method)
     RETVAL = newSV(0);
     sv_setref_uv(RETVAL, "Object::Pad::MOP::Method", PTR2UV(methodmeta));
   }
-#line 2157 "lib/Object/Pad.c"
+#line 2122 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2205,7 +2170,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_get_direct_method)
     croak("Class %" SVf " does not have a method called '%" SVf "'",
       meta->name, methodname);
   }
-#line 2209 "lib/Object/Pad.c"
+#line 2174 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2263,7 +2228,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_direct_methods)
     } while(recurse && meta);
 
     XSRETURN(retcount);
-#line 2267 "lib/Object/Pad.c"
+#line 2232 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2287,7 +2252,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_required_method)
 
     mop_class_add_required_method(meta, mname);
   }
-#line 2291 "lib/Object/Pad.c"
+#line 2256 "lib/Object/Pad.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2357,7 +2322,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_field)
     RETVAL = newSV(0);
     sv_setref_uv(RETVAL, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
   }
-#line 2361 "lib/Object/Pad.c"
+#line 2326 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2400,7 +2365,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_get_field)
     croak("Class %" SVf " does not have a field called '%" SVf "'",
       meta->name, fieldname);
   }
-#line 2404 "lib/Object/Pad.c"
+#line 2369 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2434,7 +2399,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_fields)
       sv_setref_iv(ST(i), "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
     }
     XSRETURN(nfields);
-#line 2438 "lib/Object/Pad.c"
+#line 2403 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2468,7 +2433,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_required_method_names)
       ST(i) = sv_2mortal(newSVsv(AvARRAY(required_methods)[i]));
     }
     XSRETURN(nmethods);
-#line 2472 "lib/Object/Pad.c"
+#line 2437 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2488,7 +2453,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_seal)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
 
     mop_class_seal(meta);
-#line 2492 "lib/Object/Pad.c"
+#line 2457 "lib/Object/Pad.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2525,7 +2490,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Method_name)
       default: RETVAL = NULL;
     }
   }
-#line 2529 "lib/Object/Pad.c"
+#line 2494 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2568,7 +2533,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_name)
       default: RETVAL = NULL;
     }
   }
-#line 2572 "lib/Object/Pad.c"
+#line 2537 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2645,7 +2610,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_value)
     ST(0) = value;
     XSRETURN(1);
   }
-#line 2649 "lib/Object/Pad.c"
+#line 2614 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2671,7 +2636,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_has_attribute)
     const struct FieldHook *hook = mop_field_get_attribute(meta, SvPV_nolen(name));
     RETVAL = !!hook;
   }
-#line 2675 "lib/Object/Pad.c"
+#line 2640 "lib/Object/Pad.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
@@ -2700,7 +2665,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_value)
 
     RETVAL = newSVsv(hook->hookdata);
   }
-#line 2704 "lib/Object/Pad.c"
+#line 2669 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2739,7 +2704,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_values)
 
     XSRETURN(count);
   }
-#line 2743 "lib/Object/Pad.c"
+#line 2708 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2760,7 +2725,7 @@ XS_EUPXS(XS_Object__Pad__MOP__FieldAttr_register)
 ;
 	SV *	name = ST(1)
 ;
-#line 1658 "lib/Object/Pad.xs"
+#line 1623 "lib/Object/Pad.xs"
   {
     PERL_UNUSED_VAR(class);
     dKWARG(2);
@@ -2800,7 +2765,7 @@ XS_EUPXS(XS_Object__Pad__MOP__FieldAttr_register)
 
     register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
   }
-#line 2804 "lib/Object/Pad.c"
+#line 2769 "lib/Object/Pad.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2816,7 +2781,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass)
 	SV *	RETVAL;
 	SV *	obj = ST(0)
 ;
-#line 1703 "lib/Object/Pad.xs"
+#line 1668 "lib/Object/Pad.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to metaclass");
@@ -2829,7 +2794,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass)
 
     RETVAL = newSVsv(GvSV(*gvp));
   }
-#line 2833 "lib/Object/Pad.c"
+#line 2798 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2848,7 +2813,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_deconstruct_object)
     {
 	SV *	obj = ST(0)
 ;
-#line 1721 "lib/Object/Pad.xs"
+#line 1686 "lib/Object/Pad.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to deconstruct_object");
@@ -2881,7 +2846,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_deconstruct_object)
     SPAGAIN;
     XSRETURN(retcount);
   }
-#line 2885 "lib/Object/Pad.c"
+#line 2850 "lib/Object/Pad.c"
 	PUTBACK;
 	return;
     }
@@ -2900,7 +2865,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_ref_field)
 ;
 	SV *	obj = ST(1)
 ;
-#line 1757 "lib/Object/Pad.xs"
+#line 1722 "lib/Object/Pad.xs"
   {
     SV *want_classname = NULL, *want_fieldname;
 
@@ -2958,7 +2923,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_ref_field)
 done:
     ;
   }
-#line 2962 "lib/Object/Pad.c"
+#line 2927 "lib/Object/Pad.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -3050,7 +3015,7 @@ XS_EXTERNAL(boot_Object__Pad)
 
     /* Initialisation Section */
 
-#line 1818 "lib/Object/Pad.xs"
+#line 1783 "lib/Object/Pad.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -3091,8 +3056,6 @@ XS_EXTERNAL(boot_Object__Pad)
   register_xs_parse_keyword("ADJUST",       &kwhooks_ADJUST, (void *)PHASER_ADJUST);
   register_xs_parse_keyword("ADJUSTPARAMS", &kwhooks_ADJUST, (void *)PHASER_ADJUST);
 
-  register_xs_parse_keyword("requires", &kwhooks_requires, NULL);
-
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)PHASER_NONE);
@@ -3100,7 +3063,7 @@ XS_EXTERNAL(boot_Object__Pad)
   ObjectPad__boot_classes(aTHX);
   ObjectPad__boot_fields(aTHX);
 
-#line 3104 "lib/Object/Pad.c"
+#line 3067 "lib/Object/Pad.c"
 
     /* End of Initialisation Section */
 
