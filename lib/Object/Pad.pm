@@ -438,24 +438,6 @@ This achieves the best combination of DWIM while still allowing the common
 forms of hash reference to be inspected by C<Data::Dumper>, etc. This is the
 default representation type, and does not have to be specifically requested.
 
-=head3 :strict(params)
-
-I<Since version 0.43.>
-
-Can only be applied to classes that contain no C<BUILD> blocks. If set, then
-the constructor will complain about any unrecognised named arguments passed to
-it (i.e. names that do not correspond to the C<:param> of any defined field
-and left unconsumed by any C<ADJUST> block).
-
-Since C<BUILD> blocks can inspect the arguments arbitrarily, the presence of
-any such block means the constructor cannot determine which named arguments
-are not recognised.
-
-This attribute is a temporary stepping-stone for compatibility with existing
-code. It is recommended to enable this whenever possible, as a later version
-of this module will likely perform this behaviour unconditionally whenever no
-C<BUILD> blocks are present.
-
 =head2 role
 
    role Name :ATTRS... {

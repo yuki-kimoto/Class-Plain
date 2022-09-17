@@ -384,8 +384,6 @@ void ObjectPad_mop_class_add_BUILD(pTHX_ ClassMeta *meta, CV *cv)
 {
   if(meta->sealed)
     croak("Cannot add a BUILD block to an already-sealed class");
-  if(meta->strict_params)
-    croak("Cannot add a BUILD block to a class with :strict(params)");
 
   if(!meta->buildblocks)
     meta->buildblocks = newAV();
@@ -998,10 +996,6 @@ void ObjectPad_mop_class_seal(pTHX_ ClassMeta *meta)
     }
   }
 
-  if(meta->strict_params && meta->buildblocks)
-    croak("Class %" SVf " cannot be :strict(params) because it has BUILD blocks",
-      SVfARG(meta->name));
-
   {
     U32 i;
     for(i = 0; i < av_count(meta->direct_fields); i++) {
@@ -1268,7 +1262,7 @@ XS_INTERNAL(injected_constructor)
   }
 
   HV *paramhv = NULL;
-  if(meta->parammap || meta->has_adjust || meta->strict_params) {
+  if(meta->parammap || meta->has_adjust) {
     paramhv = newHV();
     SAVEFREESV((SV *)paramhv);
 
@@ -1368,25 +1362,6 @@ XS_INTERNAL(injected_constructor)
       FREETMPS;
       LEAVE;
     }
-  }
-
-  if(meta->strict_params && hv_iterinit(paramhv) > 0) {
-    HE *he = hv_iternext(paramhv);
-
-    /* Concat all the param names, in no particular order
-     * TODO: consider sorting them but that's quite expensive and tricky in XS */
-
-    SV *params = newSVsv(HeSVKEY_force(he));
-    SAVEFREESV(params);
-
-    while((he = hv_iternext(paramhv)))
-      sv_catpvf(params, ", %" SVf, SVfARG(HeSVKEY_force(he)));
-
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-    PL_curcop = prevcop;
-#endif
-    croak("Unrecognised parameters for %" SVf " constructor: %" SVf,
-      SVfARG(meta->name), SVfARG(params));
   }
 
   if(meta->fieldhooks_construct) {
@@ -1494,7 +1469,6 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
 
   meta->sealed = false;
   meta->role_is_invokable = false;
-  meta->strict_params = false;
   meta->has_adjust = false;
   meta->has_superclass = false;
   meta->start_fieldix = 0;
@@ -1876,30 +1850,11 @@ static const struct ClassHookFuncs classhooks_repr = {
   .apply = &classhook_repr_apply,
 };
 
-/* :strict */
-
-static bool classhook_strict_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  if(strEQ(SvPV_nolen(value), "params"))
-    classmeta->strict_params = TRUE;
-  else
-    croak("Unrecognised class strictness type %" SVf, SVfARG(value));
-
-  return FALSE;
-}
-
-static const struct ClassHookFuncs classhooks_strict = {
-  .ver   = OBJECTPAD_ABIVERSION,
-  .flags = OBJECTPAD_FLAG_ATTR_MUST_VALUE,
-  .apply = &classhook_strict_apply,
-};
-
 void ObjectPad__boot_classes(pTHX)
 {
   register_class_attribute("isa",    &classhooks_isa,    NULL);
   register_class_attribute("does",   &classhooks_does,   NULL);
   register_class_attribute("repr",   &classhooks_repr,   NULL);
-  register_class_attribute("strict", &classhooks_strict, NULL);
 
 #ifdef HAVE_DMD_HELPER
   DMD_ADD_ROOT((SV *)&vtbl_backingav, "the Object::Pad backing AV VTBL");

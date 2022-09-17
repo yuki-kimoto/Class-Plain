@@ -47,19 +47,4 @@ class Point3D :isa(Point) {
       'exception message from missing parameter' );
 }
 
-# Strict params checking
-{
-   class Colour :strict(params) {
-      has $red   :param = 0;
-      has $green :param = 0;
-      has $blue  :param = 0;
-   }
-
-   my $LINE = __LINE__+1;
-   ok( !defined eval { Colour->new( yellow => 1 ); 1 },
-      'constructor complains about unrecognised param name' );
-   like( $@, qr/^Unrecognised parameters for Colour constructor: yellow at \S+ line $LINE\./,
-      'exception message from unrecognised parameter' );
-}
-
 done_testing;
