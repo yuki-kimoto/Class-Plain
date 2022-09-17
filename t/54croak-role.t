@@ -37,13 +37,4 @@ EOPERL
       'message from failure of missing method' );
 }
 
-{
-   ok( !eval <<'EOPERL',
-      role CRole :compat(invokable) { field $field; }
-EOPERL
-      'invokable role with field fails' );
-   like( $@, qr/^Cannot add field data to an invokable role /,
-      'message from failure of invokable role with field' );
-}
-
 done_testing;

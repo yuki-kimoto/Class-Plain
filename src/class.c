@@ -1876,28 +1876,6 @@ static const struct ClassHookFuncs classhooks_repr = {
   .apply = &classhook_repr_apply,
 };
 
-/* :compat */
-
-static bool classhook_compat_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  if(strEQ(SvPV_nolen(value), "invokable")) {
-    if(classmeta->type != METATYPE_ROLE)
-      croak(":compat(invokable) only applies to a role");
-
-    classmeta->role_is_invokable = true;
-  }
-  else
-    croak("Unrecognised class compatibility argument %" SVf, SVfARG(value));
-
-  return FALSE;
-}
-
-static const struct ClassHookFuncs classhooks_compat = {
-  .ver   = OBJECTPAD_ABIVERSION,
-  .flags = OBJECTPAD_FLAG_ATTR_MUST_VALUE,
-  .apply = &classhook_compat_apply,
-};
-
 /* :strict */
 
 static bool classhook_strict_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
@@ -1921,7 +1899,6 @@ void ObjectPad__boot_classes(pTHX)
   register_class_attribute("isa",    &classhooks_isa,    NULL);
   register_class_attribute("does",   &classhooks_does,   NULL);
   register_class_attribute("repr",   &classhooks_repr,   NULL);
-  register_class_attribute("compat", &classhooks_compat, NULL);
   register_class_attribute("strict", &classhooks_strict, NULL);
 
 #ifdef HAVE_DMD_HELPER
