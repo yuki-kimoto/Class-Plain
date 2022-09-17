@@ -75,42 +75,4 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
       '$fieldmeta->value as accessor on role instance subclass fetches correct field' );
 }
 
-# RT136869
-{
-   class A {
-      field @arr;
-      BUILD { @arr = (1,2,3) }
-      method m { @arr }
-   }
-   role R {
-      field $data :param;
-   }
-   class B :isa(A) :does(R) {}
-
-   is_deeply( [ B->new( data => 456 )->m ], [ 1, 2, 3 ],
-      'Role params are embedded correctly' );
-}
-
-# Forbid writing to non-scalar fields via ->value
-{
-   class List {
-      field @values :reader;
-   }
-
-   my $list = List->new;
-
-   my $arrayfieldmeta = Object::Pad::MOP::Class->for_class( "List" )
-      ->get_field( '@values' );
-
-   like( exception { no warnings; $arrayfieldmeta->value( $list ) = [] },
-      qr/^Modification of a read-only value attempted at /,
-      'Attempt to set value of list field fails' );
-
-   my $e;
-   ok( !defined( $e = exception { @{ $arrayfieldmeta->value( $list ) } = (1,2,3) } ),
-      '->value accessor still works fine' ) or
-      diag( "Exception was $e" );
-   is_deeply( [ $list->values ], [ 1,2,3 ], '$list->values after modification via fieldmeta' );
-}
-
 done_testing;

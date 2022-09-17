@@ -11,21 +11,6 @@ BEGIN {
 
 use Object::Pad;
 
-class List {
-   field @values;
-
-   method push ( @more ) { push @values, @more }
-   method nshift ( $n )  { splice @values, 0, $n }
-}
-
-{
-   my $l = List->new;
-   $l->push(qw( a b c d ));
-   is_deeply( [ $l->nshift( 2 ) ],
-      [qw( a b )],
-      '$l->nshift yields values' );
-}
-
 class Greeter {
    field $_who;
 

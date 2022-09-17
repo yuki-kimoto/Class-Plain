@@ -1086,8 +1086,8 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
       U8 private = 0;
       switch(SvPV_nolen(fieldmeta->name)[0]) {
         case '$': private = OPpFIELDPAD_SV; break;
-        case '@': private = OPpFIELDPAD_AV; break;
-        case '%': private = OPpFIELDPAD_HV; break;
+        default :
+          croak("Invalid field name %s", SvPV_nolen(fieldmeta->name));
       }
 
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS

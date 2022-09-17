@@ -42,25 +42,6 @@ class Colour {
    like( $@, qr/^Too many arguments for subroutine 'Colour::red'$MATCH_ARGCOUNT(?: at \S+ line $LINE\.)?$/,
       'exception message from too many arguments to reader' );
 
-   class AllTheTypesReader {
-      field @av :reader;
-      field %hv :reader;
-      ADJUST {
-         @av = qw( one two three );
-         %hv = (one => 1, two => 2);
-      }
-   }
-
-   my $allthetypes = AllTheTypesReader->new;
-   is_deeply( [ $allthetypes->av ], [qw( one two three )], ':reader on array field' );
-   is_deeply( { $allthetypes->hv }, { one => 1, two => 2 }, ':reader on hash field' );
-
-   is( scalar $allthetypes->av, 3, ':reader on array field in scalar context' );
-
-   # On perl 5.26 onwards this yields the number of keys; before that it
-   # stringifies to something like "2/8" but that's not terribly reliable, so
-   # don't bother testing that
-   is( scalar $allthetypes->hv, 2, ':reader on hash field in scalar context' ) if $] >= 5.028;
 }
 
 # writers
@@ -82,20 +63,6 @@ class Colour {
    like( $@, qr/^Too few arguments for subroutine 'Colour::set_red'$MATCH_ARGCOUNT(?: at \S+ line $LINE\.)?$/,
       'exception message from too few arguments to writer' );
 
-   class AllTheTypesWriter {
-      field @av :writer;
-      field %hv :writer;
-      method test
-      {
-         Test::More::is_deeply( \@av, [qw( four five six )], ':writer on array field' );
-         Test::More::is_deeply( \%hv, { three => 3, four => 4 }, ':writer on hash field' );
-      }
-   }
-
-   my $allthetypes = AllTheTypesWriter->new;
-   $allthetypes->set_av(qw( four five six ));
-   $allthetypes->set_hv( three => 3, four => 4 );
-   $allthetypes->test;
 }
 
 done_testing;
