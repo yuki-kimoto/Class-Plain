@@ -542,8 +542,6 @@ the role.
 =head2 field
 
    field $var;
-   field @var;
-   field %var;
 
    field $var :ATTR ATTR...;
 
@@ -578,18 +576,6 @@ be removed if present.
 
    # equivalent to
    field $x;  method x { return $x }
-
-I<Since version 0.55> these are permitted on any field type, but prior
-versions only allowed them on scalar fields. The reader method behaves
-identically to how a lexical variable would behave in the same context; namely
-returning a list of values from an array or key/value pairs from a hash when
-in list context, or the number of items or keys when in scalar context.
-
-   field @items :reader;
-
-   foreach my $item ( $obj->items ) { ... }   # iterates the list of items
-
-   my $count = $obj->items;                   # yields count of items
 
 =head3 :writer, :writer(NAME)
 
