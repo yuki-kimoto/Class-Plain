@@ -323,8 +323,6 @@ static bool fieldhook_param_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **ho
 
   if(!paramname) {
     paramname = SvPVX(fieldmeta->name) + 1;
-    if(paramname[0] == '_')
-      paramname++;
     if(SvUTF8(fieldmeta->name))
       flags |= SVf_UTF8;
   }
@@ -354,9 +352,6 @@ static SV *make_accessor_mnamesv(pTHX_ FieldMeta *fieldmeta, SV *mname, const ch
     return SvREFCNT_inc(mname);
 
   const char *pv;
-  if(SvPVX(fieldmeta->name)[1] == '_')
-    pv = SvPVX(fieldmeta->name) + 2;
-  else
     pv = SvPVX(fieldmeta->name) + 1;
 
   mname = newSVpvf(fmt, pv);
