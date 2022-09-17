@@ -933,18 +933,18 @@ For example; in the following
    }
 
    class DerivedClass :isa(ClassicPerlBaseClass) {
-      has $_value = "B";
+      has $value = "B";
       BUILD {
-         $_value = "C";
+         $value = "C";
       }
-      method get_value { return $_value }
+      method get_value { return $value }
    }
 
    my $obj = DerivedClass->new;
    say "Value seen by user is ", $obj->get_value;
 
 Until the C<ClassicPerlBaseClass::new> superconstructor has returned the
-C<BUILD> block will not have been invoked. The C<$_value> field will still
+C<BUILD> block will not have been invoked. The C<$value> field will still
 exist, but its value will be C<B> during the superconstructor. After the
 superconstructor, the C<BUILD> blocks are invoked before the completed object
 is returned to the user. The result will therefore be:
@@ -1013,22 +1013,6 @@ lowercase, name components separated by underscores. For tiny examples such as
    class Tag {
       field $name  :accessor;
       field $value :accessor;
-   }
-
-In larger examples with lots of non-trivial method bodies, it can get
-confusing to remember where the field variables come from (because we no
-longer have the C<< $self->{ ... } >> visual clue). In these cases it is
-suggested to prefix the field names with a leading underscore, to make them
-more visually distinct.
-
-   class Spudger {
-      field $_grapefruit;
-
-      ...
-
-      method mangle {
-         $_grapefruit->peel; # The leading underscore reminds us this is a field
-      }
    }
 
 =cut
