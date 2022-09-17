@@ -267,13 +267,6 @@ Next, the C<ADJUST> block of every component class is invoked. This happens
 after the fields are assigned their initial values and the C<BUILD> blocks
 have been run.
 
-=head3 The strict-checking phase
-
-Finally, before the object is returned, if the L</:strict(params)> class
-attribute is present, then the constructor will throw an exception if there
-are any remaining named arguments left over after assigning them to fields as
-per C<:param> declarations, and running any C<ADJUST> blocks.
-
 =head1 KEYWORDS
 
 =head2 class
@@ -788,10 +781,6 @@ I<Since version 0.66> it receives a reference to the hash containing the
 current constructor parameters. This hash will not contain any constructor
 parameters already consumed by L</:param> declarations on any fields, but only
 the leftovers once those are processed.
-
-The code in the block should C<delete> from this hash any parameters it wishes
-to consume. Once all the C<ADJUST> blocks have run, any remaining keys in the
-hash will be considered errors, subject to the L</:strict(params)> check.
 
 An adjust block is not a subroutine and thus is not permitted to use
 subroutine attributes. Note that an C<ADJUST> block is a named phaser block
