@@ -28,6 +28,110 @@ require mro;
 
 require Object::Pad::MOP::Class;
 
+sub import
+{
+   my $class = shift;
+   my $caller = caller;
+
+   $class->import_into( $caller, @_ );
+}
+
+sub _import_experimental
+{
+   shift;
+   my ( $syms, @experiments ) = @_;
+
+   my %enabled;
+
+   my $i = 0;
+   while( $i < @$syms ) {
+      my $sym = $syms->[$i];
+
+      if( $sym eq ":experimental" ) {
+         $enabled{$_}++ for @experiments;
+      }
+      elsif( $sym =~ m/^:experimental\((.*)\)$/ ) {
+         my $tags = $1 =~ s/^\s+|\s+$//gr; # trim
+         $enabled{$_}++ for split m/\s+/, $tags;
+      }
+      else {
+         $i++;
+         next;
+      }
+
+      splice @$syms, $i, 1, ();
+   }
+
+   foreach ( @experiments ) {
+      $^H{"Object::Pad/experimental($_)"}++ if delete $enabled{$_};
+   }
+
+   croak "Unrecognised :experimental features @{[ keys %enabled ]}" if keys %enabled;
+}
+
+sub _import_configuration
+{
+   shift;
+   my ( $syms ) = @_;
+
+   # Undocumented options, purely to support Feature::Compat::Class adjusting
+   # the behaviour to closer match core's  use feature 'class'
+
+   my $i = 0;
+   while( $i < @$syms ) {
+      my $sym = $syms->[$i];
+
+      if( $sym =~ m/^:config\((.*)\)$/ ) {
+         my $opts = $1 =~ s/^\s+|\s+$//gr; # trim
+         $^H{"Object::Pad/configure($_)"}++ for split m/\s+/, $opts;
+      }
+      else {
+         $i++;
+         next;
+      }
+
+      splice @$syms, $i, 1, ();
+   }
+}
+
+sub import_into
+{
+   my $class = shift;
+   my $caller = shift;
+
+   $class->_import_experimental( \@_, qw( init_expr mop custom_field_attr ) );
+
+   $class->_import_configuration( \@_ );
+
+   my %syms = map { $_ => 1 } @_;
+
+   # Default imports
+   unless( %syms ) {
+      $syms{$_}++ for qw( class role method field has BUILD ADJUST );
+   }
+
+   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has BUILD ADJUST );
+
+   croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
+}
+
+# The universal base-class methods
+
+sub Object::Pad::UNIVERSAL::BUILDARGS
+{
+   shift; # $class
+   return @_;
+}
+
+# Back-compat wrapper
+sub Object::Pad::MOP::SlotAttr::register
+{
+   shift; # $class
+   carp "Object::Pad::MOP::SlotAttr->register is now deprecated; use Object::Pad::MOP::FieldAttr->register instead";
+   return Object::Pad::MOP::FieldAttr->register( @_ );
+}
+
+
 =encoding UTF-8
 
 =head1 NAME
@@ -929,286 +1033,4 @@ more visually distinct.
 
 =cut
 
-sub import
-{
-   my $class = shift;
-   my $caller = caller;
-
-   $class->import_into( $caller, @_ );
-}
-
-sub _import_experimental
-{
-   shift;
-   my ( $syms, @experiments ) = @_;
-
-   my %enabled;
-
-   my $i = 0;
-   while( $i < @$syms ) {
-      my $sym = $syms->[$i];
-
-      if( $sym eq ":experimental" ) {
-         $enabled{$_}++ for @experiments;
-      }
-      elsif( $sym =~ m/^:experimental\((.*)\)$/ ) {
-         my $tags = $1 =~ s/^\s+|\s+$//gr; # trim
-         $enabled{$_}++ for split m/\s+/, $tags;
-      }
-      else {
-         $i++;
-         next;
-      }
-
-      splice @$syms, $i, 1, ();
-   }
-
-   foreach ( @experiments ) {
-      $^H{"Object::Pad/experimental($_)"}++ if delete $enabled{$_};
-   }
-
-   croak "Unrecognised :experimental features @{[ keys %enabled ]}" if keys %enabled;
-}
-
-sub _import_configuration
-{
-   shift;
-   my ( $syms ) = @_;
-
-   # Undocumented options, purely to support Feature::Compat::Class adjusting
-   # the behaviour to closer match core's  use feature 'class'
-
-   my $i = 0;
-   while( $i < @$syms ) {
-      my $sym = $syms->[$i];
-
-      if( $sym =~ m/^:config\((.*)\)$/ ) {
-         my $opts = $1 =~ s/^\s+|\s+$//gr; # trim
-         $^H{"Object::Pad/configure($_)"}++ for split m/\s+/, $opts;
-      }
-      else {
-         $i++;
-         next;
-      }
-
-      splice @$syms, $i, 1, ();
-   }
-}
-
-sub import_into
-{
-   my $class = shift;
-   my $caller = shift;
-
-   $class->_import_experimental( \@_, qw( init_expr mop custom_field_attr ) );
-
-   $class->_import_configuration( \@_ );
-
-   my %syms = map { $_ => 1 } @_;
-
-   # Default imports
-   unless( %syms ) {
-      $syms{$_}++ for qw( class role method field has BUILD ADJUST );
-   }
-
-   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has BUILD ADJUST );
-
-   croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
-}
-
-# The universal base-class methods
-
-sub Object::Pad::UNIVERSAL::BUILDARGS
-{
-   shift; # $class
-   return @_;
-}
-
-# Back-compat wrapper
-sub Object::Pad::MOP::SlotAttr::register
-{
-   shift; # $class
-   carp "Object::Pad::MOP::SlotAttr->register is now deprecated; use Object::Pad::MOP::FieldAttr->register instead";
-   return Object::Pad::MOP::FieldAttr->register( @_ );
-}
-
-=head1 WITH OTHER MODULES
-
-=head2 Syntax::Keyword::Dynamically
-
-A cross-module integration test asserts that C<dynamically> works correctly
-on object instance fields:
-
-   use Object::Pad;
-   use Syntax::Keyword::Dynamically;
-
-   class Container {
-      has $value = 1;
-
-      method example {
-         dynamically $value = 2;
-         ,..
-         # value is restored to 1 on return from this method
-      }
-   }
-
-=head2 Future::AsyncAwait
-
-As of L<Future::AsyncAwait> version 0.38 and L<Object::Pad> version 0.15, both
-modules now use L<XS::Parse::Sublike> to parse blocks of code. Because of this
-the two modules can operate together and allow class methods to be written as
-async subs which await expressions:
-
-   use Future::AsyncAwait;
-   use Object::Pad;
-
-   class Example
-   {
-      async method perform ($block)
-      {
-         say "$self is performing code";
-         await $block->();
-         say "code finished";
-      }
-   }
-
-These three modules combine; there is additionally a cross-module test to
-ensure that object instance fields can be C<dynamically> set during a
-suspended C<async method>.
-
-=head2 Devel::MAT
-
-When using L<Devel::MAT> to help analyse or debug memory issues with programs
-that use C<Object::Pad>, you will likely want to additionally install the
-module L<Devel::MAT::Tool::Object::Pad>. This will provide new commands and
-extend existing ones to better assist with analysing details related to
-C<Object::Pad> classes and instances of them.
-
-   pmat> fields 0x55d7c173d4b8
-   The field AV ARRAY(3)=NativeClass at 0x55d7c173d4b8
-   Ix Field   Value
-   0  $sfield SCALAR(UV) at 0x55d7c173d938 = 123
-   ...
-
-   pmat> identify 0x55d7c17606d8
-   REF() at 0x55d7c17606d8 is:
-   └─the %hfield field of ARRAY(3)=NativeClass at 0x55d7c173d4b8, which is:
-   ...
-
-=head1 DESIGN TODOs
-
-The following points are details about the design of pad field-based object
-systems in general:
-
-=over 4
-
-=item *
-
-Is multiple inheritance actually required, if role composition is implemented
-including giving roles the ability to use private fields?
-
-=item *
-
-Consider the visibility of superclass fields to subclasses. Do subclasses
-even need to be able to see their superclass's fields, or are accessor methods
-always appropriate?
-
-Concrete example: The C<< $self->{split_at} >> access that
-L<Tickit::Widget::HSplit> makes of its parent class
-L<Tickit::Widget::LinearSplit>.
-
-=back
-
-=head1 IMPLEMENTATION TODOs
-
-These points are more about this particular module's implementation:
-
-=over 4
-
-=item *
-
-Consider multiple inheritance of subclassing, if that is still considered
-useful after adding roles.
-
-=item *
-
-Work out why C<no indirect> doesn't appear to work properly before perl 5.20.
-
-=item *
-
-Work out why we don't get a C<Subroutine new redefined at ...> warning if we
-
-  sub new { ... }
-
-=item *
-
-The C<local> modifier does not work on field variables, because they appear to
-be regular lexicals to the parser at that point. A workaround is to use
-L<Syntax::Keyword::Dynamically> instead:
-
-   use Syntax::Keyword::Dynamically;
-
-   field $loglevel;
-
-   method quietly {
-      dynamically $loglevel = LOG_ERROR;
-      ...
-   }
-
-=back
-
-=cut
-
-=head1 FEEDBACK
-
-The following resources are useful forms of providing feedback, especially in
-the form of reports of what you find good or bad about the module, requests
-for new features, questions on best practice, etc...
-
-=over 4
-
-=item *
-
-The RT queue at L<https://rt.cpan.org/Dist/Display.html?Name=Object-Pad>.
-
-=item *
-
-The C<#cor> IRC channel on C<irc.perl.org>.
-
-=back
-
-=cut
-
-=head1 SPONSORS
-
-With thanks to the following sponsors, who have helped me be able to spend
-time working on this module and other perl features.
-
-=over 4
-
-=item *
-
-Oetiker+Partner AG L<https://www.oetiker.ch/en/>
-
-=item *
-
-Deriv L<http://deriv.com>
-
-=item *
-
-Perl-Verein Schweiz L<https://www.perl-workshop.ch/>
-
-=back
-
-Additional details may be found at
-L<https://github.com/Ovid/Cor/wiki/Sponsors>.
-
-=cut
-
-=head1 AUTHOR
-
-Paul Evans <leonerd@leonerd.org.uk>
-
-=cut
-
-0x55AA;
+1;
