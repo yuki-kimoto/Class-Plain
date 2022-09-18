@@ -17,7 +17,7 @@ role ARole {
 }
 
 class AClass :does(ARole) {
-   has $two = 2;
+   has $two;
    ADJUST {
      $two = 2;
    }
@@ -33,7 +33,7 @@ class AClass :does(ARole) {
 }
 
 class BClass :isa(AClass) {
-   has $three = 3;
+   has $three;
    ADJUST {
      $three = 3;
    }
@@ -49,7 +49,7 @@ class BClass :isa(AClass) {
 }
 
 role CRole :does(ARole) {
-   has $three = 3;
+   has $three;
    ADJUST {
      $three = 3;
    }

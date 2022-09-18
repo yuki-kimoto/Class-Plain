@@ -53,7 +53,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
 # fieldmeta on roles (RT138927)
 {
    role ARole {
-      has $data = 42;
+      has $data;
       ADJUST { $data = 42 }
    }
 
@@ -61,7 +61,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
    is( $fieldmeta->name, '$data', '$fieldmeta->name for field of role' );
 
    class AClass :does(ARole) {
-      has $data = 21;
+      has $data;
       ADJUST { $data = 21 }
    }
 
@@ -70,7 +70,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
       '$fieldmeta->value as accessor on role instance fetches correct field' );
 
    class BClass :isa(AClass) {
-      has $data = 63;
+      has $data;
       ADJUST { $data = 63 }
    }
 

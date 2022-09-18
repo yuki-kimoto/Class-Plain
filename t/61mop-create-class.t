@@ -35,7 +35,8 @@ class Parent { has $thing;  ADJUST { $thing = "parent" }}
 
          ::is( $classmeta->name, "Child", '$classmeta->name for Child' );
       }
-      has $other = "child";
+      has $other;
+      ADJUST { $other = "child" }
       method other { return $other }
    }
 

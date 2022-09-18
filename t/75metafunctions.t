@@ -14,8 +14,8 @@ use Object::Pad::MetaFunctions qw(
 );
 
 class Point {
-   has $x :param = 0;
-   has $y :param = 0;
+   has $x :param;
+   has $y :param;
    ADJUST {
      $x = 0;
      $y = 0;
@@ -26,7 +26,7 @@ is( metaclass( Point->new ), Object::Pad::MOP::Class->for_class( "Point" ),
    'metaclass() returns Point metaclass' );
 
 class AllFieldTypes {
-   has $s = "scalar";
+   has $s;
    ADJUST {
      $s = "scalar";
    }

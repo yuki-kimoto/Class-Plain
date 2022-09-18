@@ -31,7 +31,7 @@ class Point {
 }
 
 class Point3D :isa(Point) {
-   has $z :param = 0;
+   has $z :param;
    ADJUST {
      $z = 0 unless length $z;
    }
