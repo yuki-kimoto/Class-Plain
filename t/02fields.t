@@ -11,7 +11,11 @@ use Object::Pad ':experimental(init_expr)';
 use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
 
 class Counter {
-   has $count = 0;
+   has $count;
+   
+   BUILD {
+     $count = 0;
+   }
 
    method inc { $count++ }
 
@@ -37,8 +41,12 @@ class Counter {
    use Data::Dumper;
 
    class AllTheTypes {
-      has $scalar = 123;
+      has $scalar;
 
+      BUILD {
+        $scalar = 123;
+      }
+      
       method test {
          Test::More::is( $scalar, 123, '$scalar field' );
       }
@@ -91,38 +99,6 @@ class Holder {
    undef $holder;
    is_oneref( $datum, '$datum finally' );
 }
-
-# Sequencing order of `has` expressions
-{
-   my @order;
-   sub seq
-   {
-      push @order, $_[0];
-      return $_[0];
-   }
-
-   seq("start");
-
-   class Sequencing {
-      has $at_BEGIN = "BEGIN";
-      has $at_class = ::seq("class");
-      has $at_construct { ::seq("construct") }
-
-      method test {
-         ::is( $at_BEGIN, "BEGIN", '$at_BEGIN set correctly' );
-         ::is( $at_class, "class", '$at_class set correctly' );
-         ::is( $at_construct, "construct", '$at_construct set correctly' );
-      }
-   }
-
-   seq("new");
-   Sequencing->new->test;
-
-   is_deeply( \@order, [qw( start class new construct )],
-      'seq() calls happened in the correct order' );
-}
-
-Sequencing->new->test;
 
 # Fields are visible to string-eval()
 {

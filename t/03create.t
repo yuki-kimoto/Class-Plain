@@ -25,26 +25,7 @@ class Point {
    is( $p->where, "(10,20)", '$p->where' );
 }
 
-my @buildargs;
 my @build;
-
-class WithBuildargs {
-   sub BUILDARGS {
-      @buildargs = @_;
-      return ( 4, 5, 6 );
-   }
-
-   BUILD {
-      @build = @_;
-   }
-}
-
-{
-   WithBuildargs->new( 1, 2, 3 );
-
-   is_deeply( \@buildargs, [qw( WithBuildargs 1 2 3 )], '@_ to BUILDARGS' );
-   is_deeply( \@build,     [qw( 4 5 6 )],               '@_ to BUILD' );
-}
 
 {
    my @called;
@@ -97,15 +78,11 @@ class WithBuildargs {
    }
 
    class RefcountTest {
-      sub BUILDARGS {
-         return DestroyWatch->new( \$buildargs_result_destroyed )
-      }
    }
 
    RefcountTest->new( DestroyWatch->new( \$newarg_destroyed ) );
 
    is( $newarg_destroyed, 1, 'argument to ->new destroyed' );
-   is( $buildargs_result_destroyed, 1, 'result of BUILDARGS destroyed' );
 }
 
 # Create a base class with HASH representation

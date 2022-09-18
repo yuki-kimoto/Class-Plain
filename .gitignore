@@ -18,3 +18,5 @@ MYMETA.yml
 XSParseKeyword.h
 XSParseSublike.h
 _build
+core
+core.*
