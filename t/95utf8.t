@@ -18,7 +18,7 @@ my $manĝis;
 class Sandviĉon {
    method manĝu { $manĝis++ }
 
-   has $tranĉaĵoj :param :reader :writer = undef;
+   has $tranĉaĵoj :param :reader :writer;
 }
 
 my $s = Sandviĉon->new;
