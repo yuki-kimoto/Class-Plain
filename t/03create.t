@@ -10,8 +10,12 @@ use Scalar::Util qw( reftype );
 use Object::Pad;
 
 class Point {
-   has $x = 0;
-   has $y = 0;
+   has $x;
+   has $y;
+   ADJUST {
+     $x = 0 unless length $x;
+     $y = 0 unless length $y;
+   }
 
    BUILD {
       ( $x, $y ) = @_;
@@ -88,7 +92,10 @@ my @build;
 # Create a base class with HASH representation
 {
    class NativelyHash :repr(HASH) {
-      has $field = "value";
+      has $field;
+      ADJUST {
+        $field = "value";
+      }
       method field { $field }
    }
 

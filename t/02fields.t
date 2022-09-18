@@ -72,8 +72,10 @@ class Counter {
 
 {
    class AllTheTypesByBlock {
-      field $scalar { "one" }
-
+      field $scalar;
+      ADJUST {
+        $scalar = "one";
+      }
       method test {
          Test::More::is( $scalar, "one", '$scalar field' );
       }

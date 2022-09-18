@@ -62,6 +62,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
 
    class AClass :does(ARole) {
       has $data = 21;
+      ADJUST { $data = 21 }
    }
 
    my $obja = AClass->new;
@@ -70,6 +71,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
 
    class BClass :isa(AClass) {
       has $data = 63;
+      ADJUST { $data = 63 }
    }
 
    my $objb = BClass->new;

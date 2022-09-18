@@ -38,7 +38,8 @@ is_oneref( $arr, '$arr has one reference before we start' );
 # RT139665
 {
    class subWithWeak :isa(WithWeak) {
-      has $three = 3;
+      has $three;
+      ADJUST { $three = 3; }
    }
 
    my $obj = subWithWeak->new( field => $arr );

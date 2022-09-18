@@ -11,13 +11,16 @@ use Object::Pad;
 role ARole {
    has $one;
    ADJUST {
-    $one = 1;
+     $one = 1;
    }
    method one { $one }
 }
 
 class AClass :does(ARole) {
    has $two = 2;
+   ADJUST {
+     $two = 2;
+   }
    method two { $two }
 }
 
@@ -31,6 +34,9 @@ class AClass :does(ARole) {
 
 class BClass :isa(AClass) {
    has $three = 3;
+   ADJUST {
+     $three = 3;
+   }
    method three { $three }
 }
 

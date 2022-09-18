@@ -32,6 +32,9 @@ class Point {
 
 class Point3D :isa(Point) {
    has $z :param = 0;
+   ADJUST {
+     $z = 0 unless length $z;
+   }
 
    method pos { return ( $self->next::method, $z ) }
 }
