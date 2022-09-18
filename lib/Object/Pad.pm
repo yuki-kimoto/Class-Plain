@@ -491,22 +491,11 @@ The following role attributes are supported:
 
    field $var :ATTR ATTR...;
 
-   field $var { BLOCK }
-
 I<Since version 0.66.>
 
 Declares that the instances of the class or role have a member field of the
 given name. This member field will be accessible as a lexical variable within
 any C<method> declarations in the class.
-
-Array and hash members are permitted and behave as expected; you do not need
-to store references to anonymous arrays or hashes.
-
-Member fields are private to a class or role. They are not visible to users of
-the class, nor inherited by subclasses nor any class that a role is applied
-to. In order to provide access to them a class may wish to use L</method> to
-create an accessor, or use the attributes such as L</:reader> to get one
-generated.
 
 The following field attributes are supported:
 
@@ -515,8 +504,7 @@ The following field attributes are supported:
 I<Since version 0.27.>
 
 Generates a reader method to return the current value of the field. If no name
-is given, the name of the field is used. A single prefix character C<_> will
-be removed if present.
+is given, the name of the field is used.
 
    field $x :reader;
 
@@ -528,13 +516,13 @@ be removed if present.
 I<Since version 0.27.>
 
 Generates a writer method to set a new value of the field from its arguments.
-If no name is given, the name of the field is used prefixed by C<set_>. A
-single prefix character C<_> will be removed if present.
+If no name is given, the name of the field is used prefixed by C<set_>.
 
    field $x :writer;
 
    # equivalent to
-   field $x;  method set_x { $x = shift; return $self }
+   field $x;
+   method set_x { $x = shift; return $self }
 
 I<Since version 0.28> a generated writer method will return the object
 invocant itself, allowing a chaining style.
@@ -542,11 +530,6 @@ invocant itself, allowing a chaining style.
    $obj->set_x("x")
       ->set_y("y")
       ->set_z("z");
-
-I<Since version 0.55> these are permitted on any field type, but prior
-versions only allowed them on scalar fields. On arrays or hashes, the writer
-method takes a list of values to be assigned into the field, completely
-replacing any values previously there.
 
 =head3 :accessor, :accessor(NAME)
 
@@ -610,54 +593,12 @@ executed.
 Values for fields are assigned by the constructor before any C<BUILD> blocks
 are invoked.
 
-=head3 Field Initialiser Blocks
-
-I<Since version 0.54> a deferred statement block is also permitted, on any
-field variable type. This permits code to be executed as part of the instance
-constructor, rather than running just once when the class is set up. Code in a
-field initialisation block is roughly equivalent to being placed in a C<BUILD>
-or C<ADJUST> block.
-
-This feature should be considered B<experimental>, and will emit warnings to
-that effect. They can be silenced with
-
-   use Object::Pad qw( :experimental(init_expr) );
-
-Control flow that attempts to leave a field initialiser block is not
-permitted. This includes any C<return> expression, any C<next/last/redo>
-outside of a loop, with a dynamically-calculated label expression, or with a
-label that it doesn't appear in. C<goto> statements are also currently
-forbidden, though known-safe ones may be permitted in future.
-
-Loop control expressions that are known at compiletime to affect a loop that
-they appear within are permitted.
-
-   field $x { foreach(@list) { next; } }       # this is fine
-
-   field $x { LOOP: while(1) { last LOOP; } }  # this is fine too
-
 =head2 has
 
    has $var;
-   has @var;
-   has %var;
 
-   has $var = EXPR;
-
-   has $var { BLOCK }
-
-An older version of the L</field> keyword.
-
-This generally behaves like C<field>, except that inline expressions are also
+The alias for the L</field> keyword, except that inline expressions are also
 permitted.
-
-A scalar field may provide a expression that gives an initialisation value,
-which will be assigned into the field of every instance during the constructor
-before the C<BUILD> blocks are invoked. I<Since version 0.29> this expression
-does not have to be a compiletime constant, though it is evaluated exactly
-once, at runtime, after the class definition has been parsed. It is not
-evaluated individually for every object instance of that class. I<Since
-version 0.54> this is also permitted on array and hash fields.
 
 =head2 method
 

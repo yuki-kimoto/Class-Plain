@@ -689,7 +689,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
   int argi = 0;
 
   SV *name = args[argi++]->sv;
-  char sigil = SvPV_nolen(name)[0];
 
   FieldMeta *fieldmeta = mop_class_add_field(compclassmeta, name);
   SvREFCNT_dec(name);
@@ -716,57 +715,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
       argi++;
     }
-  }
-
-  /* It would be nice to just yield some OP to represent the has field here
-   * and let normal parsing of normal scalar assignment accept it. But we can't
-   * because scalar assignment tries to peephole far too deply into us and
-   * everything breaks... :/
-   */
-  switch(args[argi++]->i) {
-    case -1:
-      /* no expr */
-      break;
-
-    case 0:
-    {
-      OP *op = args[argi++]->op;
-
-      SV *defaultsv = newSV(0);
-      mop_field_set_default_sv(fieldmeta, defaultsv);
-
-      /* An OP_CONST whose op_type is OP_CUSTOM.
-       * This way we avoid the opchecker and finalizer doing bad things to our
-       * defaultsv SV by setting it SvREADONLY_on().
-       */
-      OP *fieldop = newSVOP_CUSTOM(PL_ppaddr[OP_CONST], 0, SvREFCNT_inc(defaultsv));
-      
-      switch(sigil) {
-        case '$':
-          *out = newBINOP(OP_SASSIGN, 0, op_contextualize(op, G_SCALAR), fieldop);
-          break;
-        default:
-          croak("Invalid filed name");
-      }
-    }
-    break;
-
-    case 1:
-    {
-      OP *op = args[argi++]->op;
-      U8 want = 0;
-
-      forbid_outofblock_ops(op, "a field initialiser block");
-
-      switch(sigil) {
-        case '$':
-          want = G_SCALAR;
-          break;
-      }
-
-      fieldmeta->defaultexpr = op_contextualize(op_scope(op), want);
-    }
-    break;
   }
 
   mop_field_seal(fieldmeta);
@@ -803,10 +751,6 @@ static const struct XSParseKeywordHooks kwhooks_field = {
   .pieces = (const struct XSParseKeywordPieceType []){
     XPK_LEXVARNAME(XPK_LEXVAR_ANY),
     XPK_ATTRIBUTES,
-    XPK_TAGGEDCHOICE(
-      /* An optional choice of only one item; for compat. with kwhooks_has */
-      XPK_PREFIXED_BLOCK_ENTERLEAVE(XPK_SETUP(&setup_parse_field_initexpr)), XPK_TAG(1)
-    ),
     {0}
   },
   .build = &build_field,
@@ -820,11 +764,6 @@ static const struct XSParseKeywordHooks kwhooks_has = {
   .pieces = (const struct XSParseKeywordPieceType []){
     XPK_LEXVARNAME(XPK_LEXVAR_ANY),
     XPK_ATTRIBUTES,
-    XPK_CHOICE(
-      XPK_SEQUENCE(XPK_EQUALS, XPK_TERMEXPR, XPK_AUTOSEMI),
-      XPK_PREFIXED_BLOCK_ENTERLEAVE(XPK_SETUP(&setup_parse_field_initexpr)),
-      {0}
-    ),
     {0}
   },
   .build = &build_field,
