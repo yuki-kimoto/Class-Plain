@@ -9,7 +9,10 @@ use Test::Refcount;
 use Object::Pad;
 
 role ARole {
-   has $one = 1;
+   has $one;
+   ADJUST {
+    $one = 1;
+   }
    method one { $one }
 }
 
@@ -41,6 +44,9 @@ class BClass :isa(AClass) {
 
 role CRole :does(ARole) {
    has $three = 3;
+   ADJUST {
+     $three = 3;
+   }
    method three { $three }
 }
 
@@ -57,8 +63,8 @@ class CClass :does(CRole) {}
 # diamond inheritence scenario
 {
    role DRole {
-      has $field = 1;
-      ADJUST { $field++ }
+      has $field;
+      ADJUST { $field = 1;$field++ }
       method field { $field }
    }
 

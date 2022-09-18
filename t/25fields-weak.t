@@ -11,9 +11,14 @@ use Object::Pad;
 my $arr = [];
 
 class WithWeak {
-   has $one = 1;
+   has $one;
    has $field :writer :param :weak;
-   has $two = 2;
+   has $two;
+   
+   ADJUST {
+     $one = 1;
+     $two = 2;
+   }
 }
 
 is_oneref( $arr, '$arr has one reference before we start' );

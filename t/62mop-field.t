@@ -9,7 +9,8 @@ use Test::Fatal;
 use Object::Pad ':experimental(mop)';
 
 class Example {
-   has $field :accessor :param(initial_field) = undef;
+   has $field :accessor :param(initial_field);
+   ADJUST { $field = undef }
 }
 
 my $classmeta = Object::Pad::MOP::Class->for_class( "Example" );
@@ -53,6 +54,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
 {
    role ARole {
       has $data = 42;
+      ADJUST { $data = 42 }
    }
 
    my $fieldmeta = Object::Pad::MOP::Class->for_class( 'ARole' )->get_field( '$data' );

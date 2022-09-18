@@ -8,7 +8,10 @@ use Test::More;
 use Object::Pad;
 
 class Counter;
-has $count = 0;
+has $count;
+ADJUST {
+  $count = 0
+}
 method count :lvalue { $count }
 method inc { $count++ }
 

@@ -16,6 +16,10 @@ use Object::Pad::MetaFunctions qw(
 class Point {
    has $x :param = 0;
    has $y :param = 0;
+   ADJUST {
+     $x = 0;
+     $y = 0;
+   }
 }
 
 is( metaclass( Point->new ), Object::Pad::MOP::Class->for_class( "Point" ),
@@ -23,6 +27,9 @@ is( metaclass( Point->new ), Object::Pad::MOP::Class->for_class( "Point" ),
 
 class AllFieldTypes {
    has $s = "scalar";
+   ADJUST {
+     $s = "scalar";
+   }
 }
 
 is_deeply( [ deconstruct_object( AllFieldTypes->new ) ],
@@ -32,13 +39,22 @@ is_deeply( [ deconstruct_object( AllFieldTypes->new ) ],
   'deconstruct_object on AllFieldTypes' );
 
 class AClass {
-   has $a = "a";
+   has $a;
+   ADJUST {
+     $a = "a";
+   }
 }
 role BRole {
-   has $b = "b";
+   has $b;
+   ADJUST {
+     $b = "b";
+   }
 }
 class CClass :isa(AClass) :does(BRole) {
-   has $c = "c";
+   has $c;
+   ADJUST {
+     $c = "c";
+   }
 }
 
 is_deeply( [ deconstruct_object( CClass->new ) ],

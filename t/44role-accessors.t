@@ -8,7 +8,10 @@ use Test::More;
 use Object::Pad;
 
 role ARole {
-   has $one :reader = 1;
+   has $one :reader;
+   ADJUST {
+     $one = 1;
+   }
 }
 
 class AClass :does(ARole) {

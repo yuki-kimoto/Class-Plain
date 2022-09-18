@@ -9,7 +9,11 @@ use Object::Pad;
 
 class Point {
    has $x :param;
-   has $y :param = 0;
+   has $y :param;
+   
+   ADJUST {
+     $y = 0 unless length $y;
+   }
 
    method pos { return ( $x, $y ); }
 }
@@ -36,15 +40,6 @@ class Point3D :isa(Point) {
    my $point = Point3D->new( x => 50, y => 60, z => 70 );
    is_deeply( [ $point->pos ], [ 50, 60, 70 ],
       'Point3D inherits params' );
-}
-
-# Required params checking
-{
-   my $LINE = __LINE__+1;
-   ok( !defined eval { Point->new(); 1 },
-      'constructor complains about missing required params' );
-   like( $@, qr/^Required parameter 'x' is missing for Point constructor at \S+ line $LINE\./,
-      'exception message from missing parameter' );
 }
 
 done_testing;

@@ -24,7 +24,7 @@ use Object::Pad ':experimental(mop)';
       '->begin_class can create a class' );
 }
 
-class Parent { has $thing = "parent"; }
+class Parent { has $thing;  ADJUST { $thing = "parent" }}
 
 {
    package Child {

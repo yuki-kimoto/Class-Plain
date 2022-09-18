@@ -837,12 +837,6 @@ static void S_generate_initfields_method(pTHX_ ClassMeta *meta)
           if(fieldmeta->paramname) {
             SV *paramname = fieldmeta->paramname;
 
-            if(!valueop)
-              valueop = newUNOP_CUSTOM(&pp_croak_from_constructor, 0,
-                newSVOP(OP_CONST, 0,
-                  newSVpvf("Required parameter '%" SVf "' is missing for %" SVf " constructor",
-                    SVfARG(paramname), SVfARG(meta->name))));
-
             valueop = newCONDOP(0,
               /* exists $params{$paramname} */
               newUNOP(OP_EXISTS, 0,
