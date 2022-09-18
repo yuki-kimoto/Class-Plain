@@ -14,7 +14,10 @@ use Object::Pad;
 # See also
 #   https://rt.cpan.org/Ticket/Display.html?id=134456
 class C {
-   has $x = "initial";
+   has $x;
+   ADJUST {
+     $x = "initial"
+   }
 
    method m ( $x = $x ) { $x; }
 }

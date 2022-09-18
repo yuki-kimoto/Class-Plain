@@ -13,7 +13,7 @@ use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
 class Counter {
    has $count;
    
-   BUILD {
+   ADJUST {
      $count = 0;
    }
 
@@ -43,7 +43,7 @@ class Counter {
    class AllTheTypes {
       has $scalar;
 
-      BUILD {
+      ADJUST {
         $scalar = 123;
       }
       

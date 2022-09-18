@@ -10,7 +10,11 @@ use Object::Pad;
 use attributes ();
 
 class Counter {
-   has $count = 0;
+   has $count;
+   
+   ADJUST {
+     $count = 0;
+   }
    method count :lvalue { $count }
 
    method inc { $count++ };

@@ -8,7 +8,11 @@ use Test::More;
 use Object::Pad;
 
 class BaseClass {
-   has $data = 123;
+   has $data;
+   
+   ADJUST {
+     $data = 123;
+   }
 }
 
 package ExtendedClass {
