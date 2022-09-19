@@ -9,10 +9,17 @@ use Test::Refcount;
 use Object::Pad;
 
 class Point {
-   has $x : param;
-   has $y : param;
+   has $x;
+   has $y;
    
-   method where { sprintf "(%d,%d)", @$self }
+   method new : common {
+     
+     my $self = {@_};
+     
+     return bless $self, ref $class || $class;
+   }
+   
+   method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
 }
 
 {
@@ -26,19 +33,29 @@ class Point {
 # anon methods
 {
    class Point3 {
-     has $x : param;
-     has $y : param;
-     has $z : param;
+     has $x;
+     has $y;
+     has $z;
+
+     method new : common {
+       
+       my $self = {@_};
+       
+       return bless $self, ref $class || $class;
+     }
      
-      our $clearer = method {
-         @$self = ( 0 ) x 3;
+     our $clearer = method {
+       
+         $self->{x} = 0;
+         $self->{y} = 0;
+         $self->{z} = 0;
       };
    }
 
    my $p = Point3->new(x => 1, y => 2, z => 3 );
    $p->$Point3::clearer();
 
-   is_deeply( [ @$p ], [ 0, 0, 0 ],
+   is_deeply( [ $p->{x}, $p->{y}, $p->{z} ], [ 0, 0, 0 ],
       'anon method' );
 }
 
@@ -49,16 +66,14 @@ SKIP: {
       has $_genvalue;
 
      method new : common {
-       my $self = bless [], $class;
+       my $self = {@_};
+
+       $self->{_genvalue} //= method { 123 };
        
-       my @field_names = qw(_genvalue);
-       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-       $self->[$field_ids{_genvalue}] = method { 123 };
-       
-       return $self;
+       return bless $self, ref $class || $class;
      }
 
-      method value { $self->$_genvalue() }
+      method value { $self->{_genvalue}->($self) }
    }
 
    my $obj = RT132321->new;
