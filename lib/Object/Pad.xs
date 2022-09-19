@@ -755,20 +755,6 @@ static const struct XSParseKeywordHooks kwhooks_field = {
   },
   .build = &build_field,
 };
-static const struct XSParseKeywordHooks kwhooks_has = {
-  .flags = XPK_FLAG_STMT,
-  .permit_hintkey = "Object::Pad/has",
-
-  .check = &check_field,
-
-  .pieces = (const struct XSParseKeywordPieceType []){
-    XPK_IDENT,
-    XPK_ATTRIBUTES,
-    {0}
-  },
-  .build = &build_field,
-};
-
 /* We use the method-like keyword parser to parse phaser blocks as well as
  * methods. In order to tell what is going on, hookdata will be an integer
  * set to one of the following
@@ -1658,7 +1644,7 @@ BOOT:
   register_xs_parse_keyword("role",  &kwhooks_role,  (void *)METATYPE_ROLE);
 
   register_xs_parse_keyword("field", &kwhooks_field, "field");
-  register_xs_parse_keyword("has",   &kwhooks_has,   "has");
+  register_xs_parse_keyword("has",   &kwhooks_field,   "has");
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 

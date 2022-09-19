@@ -174,36 +174,7 @@ On perl version 5.26 onwards:
 
 =head1 DESCRIPTION
 
-This module provides a simple syntax for creating object classes, which uses
-private variables that look like lexicals as object member fields.
-
-While most of this module has evolved into a stable state in practice, parts
-remain B<experimental> because the design is still evolving, and many features
-and ideas have yet to implemented. I don't yet guarantee I won't have to
-change existing details in order to continue its development. Feel free to try
-it out in experimental or newly-developed code, but don't complain if a later
-version is incompatible with your current code and you'll have to change it.
-
-That all said, please do get in contact if you find the module overall useful.
-The more feedback you provide in terms of what features you are using, what
-you find works, and what doesn't, will help the ongoing development and
-hopefully eventual stability of the design. See the L</FEEDBACK> section.
-
-=head2 Experimental Features
-
-I<Since version 0.63.>
-
-Some of the features of this module are currently marked as experimental. They
-will provoke warnings in the C<experimental> category, unless silenced.
-
-You can silence this with C<no warnings 'experimental'> but then that will
-silence every experimental warning, which may hide others unintentionally. For
-a more fine-grained approach you can instead use the import line for this
-module to only silence the module's warnings selectively:
-
-   use Object::Pad ':experimental(mop)';
-
-   use Object::Pad ':experimental';  # all of the above
+This module provides a class syntax for hash-based Perl OO.
 
 =head2 Inheritance
 
@@ -366,15 +337,14 @@ The following role attributes are supported:
 
 =head2 field
 
-   field var;
+   field Name;
 
-   field var :ATTR ATTR...;
+   field Name : ATTR ATTR...;
 
 I<Since version 0.66.>
 
 Declares that the instances of the class or role have a member field of the
-given name. This member field will be accessible as a lexical variable within
-any C<method> declarations in the class.
+given name.
 
 The following field attributes are supported:
 
@@ -448,10 +418,11 @@ yourself.
 
 =head2 has
 
-   has var;
+   has Name;
 
-The alias for the L</field> keyword, except that inline expressions are also
-permitted.
+   has Name : ATTR ATTR...;
+
+The alias for the L</field> keyword.
 
 =head2 method
 
@@ -594,25 +565,21 @@ L<https://github.com/Perl-Toolchain-Gang/Module-Metadata/issues/33>
 
 =back
 
-=head2 File Layout
+=head2 Experimental Features
 
-Begin the file with a C<use Object::Pad> line; ideally including a
-minimum-required version. This should be followed by the toplevel C<package>
-and C<class> declarations for the file. As it is at toplevel there is no need
-to use the block notation; it can be a unit class.
+I<Since version 0.63.>
 
-There is no need to C<use strict> or apply other usual pragmata; these will
-be implied by the C<class> keyword.
+Some of the features of this module are currently marked as experimental. They
+will provoke warnings in the C<experimental> category, unless silenced.
 
-   use Object::Pad 0.16;
+You can silence this with C<no warnings 'experimental'> but then that will
+silence every experimental warning, which may hide others unintentionally. For
+a more fine-grained approach you can instead use the import line for this
+module to only silence the module's warnings selectively:
 
-   package My::Classname 1.23;
-   class My::Classname;
+   use Object::Pad ':experimental(mop)';
 
-   # other use statements
+   use Object::Pad ':experimental';  # all of the above
 
-   # has, methods, etc.. can go here
-
-=cut
 
 1;
