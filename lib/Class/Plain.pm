@@ -202,13 +202,7 @@ keywords and definitions.
 
 A single superclass is supported by the keyword C<isa>
 
-I<Since version 0.41.>
-
    class Name isa BASECLASS {
-      ...
-   }
-
-   class Name isa BASECLASS BASEVER {
       ...
    }
 
@@ -218,8 +212,6 @@ now deprecated, in favour of the L</:isa> attribute which is preferred
 because it follows a more standard grammar without this special-case.
 
 One or more roles can be composed into the class by the keyword C<does>
-
-I<Since version 0.41.>
 
    class Name does ROLE, ROLE,... {
       ...
@@ -248,10 +240,6 @@ The following class attributes are supported:
 
    :isa(CLASS)
 
-   :isa(CLASS CLASSVER)
-
-I<Since version 0.57.>
-
 Declares a superclass that this class extends. At most one superclass is
 supported.
 
@@ -271,10 +259,6 @@ the semantics of how this operates.
 
    :does(ROLE)
 
-   :does(ROLE ROLEVER)
-
-I<Since version 0.57.>
-
 Composes a role into the class; optionally requiring a version check on the
 role package. This is a newer form of the C<implements> and C<does>
 keywords and should be preferred for new code.
@@ -292,8 +276,6 @@ handled.
    }
 
    role Name :ATTRS...;
-
-I<Since version 0.32.>
 
 Similar to C<class>, but provides a package that defines a new role. A role
 acts similar to a class in some respects, and differently in others.
@@ -315,7 +297,7 @@ implements the role.
       method METHOD;
    }
 
-I<Since version 0.57> a role can declare that it provides another role:
+A role can declare that it provides another role:
 
    role Name :does(OTHERROLE) { ... }
    role Name :does(OTHERROLE OTHERVER) { ... }
@@ -332,16 +314,12 @@ The following role attributes are supported:
 
    field Name : ATTR ATTR...;
 
-I<Since version 0.66.>
-
 Declares that the instances of the class or role have a member field of the
 given name.
 
 The following field attributes are supported:
 
 =head3 :reader, :reader(NAME)
-
-I<Since version 0.27.>
 
 Generates a reader method to return the current value of the field. If no name
 is given, the name of the field is used.
@@ -353,8 +331,6 @@ is given, the name of the field is used.
 
 =head3 :writer, :writer(NAME)
 
-I<Since version 0.27.>
-
 Generates a writer method to set a new value of the field from its arguments.
 If no name is given, the name of the field is used prefixed by C<set_>.
 
@@ -364,7 +340,7 @@ If no name is given, the name of the field is used prefixed by C<set_>.
    field x;
    method set_x { $x = shift; return $self }
 
-I<Since version 0.28> a generated writer method will return the object
+a generated writer method will return the object
 invocant itself, allowing a chaining style.
 
    $obj->set_x("x")
@@ -372,8 +348,6 @@ invocant itself, allowing a chaining style.
       ->set_z("z");
 
 =head3 :accessor, :accessor(NAME)
-
-I<Since version 0.53.>
 
 Generates a combined reader-writer accessor method to set or return the value
 of the field. These are only permitted for scalar fields. If no name is given,
@@ -463,15 +437,11 @@ The following additional attributes are recognised by C<Class::Plain> directly:
 
 =head3 :override
 
-I<Since version 0.29.>
-
 Marks that this method expects to override another of the same name from a
 superclass. It is an error at compiletime if the superclass does not provide
 such a method.
 
 =head3 :common
-
-I<Since version 0.62.>
 
 Marks that this method is a class-common method, instead of a regular instance
 method. A class-common method may be invoked on class names instead of
