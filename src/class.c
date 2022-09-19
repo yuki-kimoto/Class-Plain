@@ -325,17 +325,6 @@ FieldMeta *ObjectPad_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-void ObjectPad_mop_class_add_BUILD(pTHX_ ClassMeta *meta, CV *cv)
-{
-  if(meta->sealed)
-    croak("Cannot add a BUILD block to an already-sealed class");
-
-  if(!meta->buildblocks)
-    meta->buildblocks = newAV();
-
-  av_push(meta->buildblocks, (SV *)cv);
-}
-
 void ObjectPad_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   if(meta->type != METATYPE_ROLE)
@@ -402,18 +391,6 @@ static RoleEmbedding *S_embed_role(pTHX_ ClassMeta *classmeta, ClassMeta *roleme
 
   av_push(classmeta->cls.embedded_roles, (SV *)embedding);
   hv_store_ent(rolemeta->role.applied_classes, classmeta->name, (SV *)embedding, 0);
-
-  U32 nbuilds = rolemeta->buildblocks ? av_count(rolemeta->buildblocks) : 0;
-  for(i = 0; i < nbuilds; i++) {
-    CV *buildblock = (CV *)AvARRAY(rolemeta->buildblocks)[i];
-
-    CV *embedded_buildblock = embed_cv(buildblock, embedding);
-
-    if(!classmeta->buildblocks)
-      classmeta->buildblocks = newAV();
-
-    av_push(classmeta->buildblocks, (SV *)embedded_buildblock);
-  }
 
   U32 nmethods = av_count(rolemeta->direct_methods);
   for(i = 0; i < nmethods; i++) {
@@ -648,229 +625,6 @@ static OP *pp_croak_from_constructor(pTHX)
   croak_sv(POPs);
 }
 
-static void S_generate_initfields_method(pTHX_ ClassMeta *meta)
-{
-  OP *ops = NULL;
-  int i;
-
-  ENTER;
-
-  need_PLparser();
-
-  I32 floor_ix = PL_savestack_ix;
-  {
-    SAVEI32(PL_subline);
-    save_item(PL_subname);
-
-    resume_compcv(&meta->initfields_compcv);
-  }
-
-  SAVEFREESV(PL_compcv);
-
-  I32 save_ix = block_start(TRUE);
-
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-  SAVESPTR(PL_curcop);
-  PL_curcop = meta->tmpcop;
-  CopLINE_set(PL_curcop, __LINE__);
-#endif
-
-  ops = op_append_list(OP_LINESEQ, ops,
-    newSTATEOP(0, NULL, NULL));
-
-  /* A more optimised implementation of this method would be able to generate
-   * a @self lexical and OP_REFASSIGN it, but that would only work on newer
-   * perls. For now we'll take the small performance hit of RV2AV every time
-   */
-
-  enum ReprType repr = meta->repr;
-
-  ops = op_append_list(OP_LINESEQ, ops,
-    newMETHSTARTOP(0 |
-      (meta->type == METATYPE_ROLE ? OPf_SPECIAL : 0) |
-      (repr << 8))
-  );
-
-  ops = op_append_list(OP_LINESEQ, ops,
-    newUNOP_CUSTOM(&pp_alias_params, 0,
-      newOP(OP_SHIFT, OPf_SPECIAL)));
-
-  /* TODO: Icky horrible implementation; if our fieldoffset > 0 then
-   * we must be a subclass
-   */
-  if(meta->start_fieldix) {
-    struct ClassMeta *supermeta = meta->cls.supermeta;
-
-    assert(supermeta->sealed);
-    assert(supermeta->initfields);
-
-    DEBUG_SET_CURCOP_LINE(__LINE__);
-
-    ops = op_append_list(OP_LINESEQ, ops,
-      newSTATEOP(0, NULL, NULL));
-
-    /* Build an OP_ENTERSUB for supermeta's initfields */
-    OP *op = NULL;
-    op = op_append_list(OP_LIST, op,
-      newPADxVOP(OP_PADSV, 0, PADIX_SELF));
-    op = op_append_list(OP_LIST, op,
-      newPADxVOP(OP_PADHV, OPf_REF, PADIX_INITFIELDS_PARAMS));
-    op = op_append_list(OP_LIST, op,
-      newSVOP(OP_CONST, 0, (SV *)supermeta->initfields));
-
-    ops = op_append_list(OP_LINESEQ, ops,
-      op_convert_list(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED, op));
-  }
-
-  AV *fields = meta->direct_fields;
-  I32 nfields = av_count(fields);
-
-  {
-    for(i = 0; i < nfields; i++) {
-      FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
-      char sigil = SvPV_nolen(fieldmeta->name)[0];
-      OP *op = NULL;
-      SV *defaultsv;
-
-      switch(sigil) {
-        case '$':
-        {
-          DEBUG_SET_CURCOP_LINE(__LINE__);
-
-          OP *valueop = NULL;
-
-          if(fieldmeta->defaultexpr) {
-            valueop = fieldmeta->defaultexpr;
-          }
-          else if((defaultsv = mop_field_get_default_sv(fieldmeta))) {
-            /* An OP_CONST whose op_type is OP_CUSTOM.
-             * This way we avoid the opchecker and finalizer doing bad things
-             * to our defaultsv SV by setting it SvREADONLY_on()
-             */
-            valueop = newSVOP_CUSTOM(PL_ppaddr[OP_CONST], 0, defaultsv);
-          }
-
-          if(fieldmeta->paramname) {
-            SV *paramname = fieldmeta->paramname;
-
-            valueop = newCONDOP(0,
-              /* exists $params{$paramname} */
-              newUNOP(OP_EXISTS, 0,
-                newBINOP(OP_HELEM, 0,
-                  newPADxVOP(OP_PADHV, OPf_REF, PADIX_INITFIELDS_PARAMS),
-                  newSVOP(OP_CONST, 0, SvREFCNT_inc(paramname)))),
-
-              /* ? delete $params{$paramname} */
-              newUNOP(OP_DELETE, 0,
-                newBINOP(OP_HELEM, 0,
-                  newPADxVOP(OP_PADHV, OPf_REF, PADIX_INITFIELDS_PARAMS),
-                  newSVOP(OP_CONST, 0, SvREFCNT_inc(paramname)))),
-
-              /* : valueop or die */
-              valueop);
-          }
-
-          if(valueop)
-            op = newBINOP(OP_SASSIGN, 0,
-              valueop,
-              /* $fields[$idx] */
-              newAELEMOP(OPf_MOD,
-                newPADxVOP(OP_PADAV, OPf_MOD|OPf_REF, PADIX_SLOTS),
-                fieldmeta->fieldix));
-          break;
-        }
-        case '@':
-        case '%':
-        {
-          DEBUG_SET_CURCOP_LINE(__LINE__);
-
-          OP *valueop = NULL;
-          U16 coerceop = (sigil == '%') ? OP_RV2HV : OP_RV2AV;
-
-          if(fieldmeta->defaultexpr) {
-            valueop = fieldmeta->defaultexpr;
-          }
-          else if((defaultsv = mop_field_get_default_sv(fieldmeta))) {
-            valueop = newUNOP(coerceop, 0,
-                newSVOP_CUSTOM(PL_ppaddr[OP_CONST], 0, defaultsv));
-          }
-
-          if(valueop) {
-            /* $fields[$idx]->@* or ->%* */
-            OP *lhs = force_list_keeping_pushmark(newUNOP(coerceop, OPf_MOD|OPf_REF,
-                        newAELEMOP(0,
-                          newPADxVOP(OP_PADAV, OPf_MOD|OPf_REF, PADIX_SLOTS),
-                          fieldmeta->fieldix)));
-
-            op = newBINOP(OP_AASSIGN, 0,
-                force_list_keeping_pushmark(valueop),
-                lhs);
-          }
-          break;
-        }
-
-        default:
-          croak("ARGH: not sure how to handle a field sigil %c\n", sigil);
-      }
-
-      if(!op)
-        continue;
-
-      /* TODO: grab a COP at the initexpr time */
-      ops = op_append_list(OP_LINESEQ, ops,
-        newSTATEOP(0, NULL, NULL));
-      ops = op_append_list(OP_LINESEQ, ops,
-        op);
-    }
-  }
-
-  if(meta->type == METATYPE_CLASS) {
-    U32 nroles;
-    RoleEmbedding **embeddings = mop_class_get_direct_roles(meta, &nroles);
-
-    for(i = 0; i < nroles; i++) {
-      RoleEmbedding *embedding = embeddings[i];
-      ClassMeta *rolemeta = embedding->rolemeta;
-
-      if(!rolemeta->sealed)
-        mop_class_seal(rolemeta);
-
-      assert(rolemeta->sealed);
-      assert(rolemeta->initfields);
-
-      DEBUG_SET_CURCOP_LINE(__LINE__);
-
-      ops = op_append_list(OP_LINESEQ, ops,
-        newSTATEOP(0, NULL, NULL));
-
-      OP *op = NULL;
-      op = op_append_list(OP_LIST, op,
-        newPADxVOP(OP_PADSV, 0, PADIX_SELF));
-      op = op_append_list(OP_LIST, op,
-        newPADxVOP(OP_PADHV, OPf_REF, PADIX_INITFIELDS_PARAMS));
-      op = op_append_list(OP_LIST, op,
-        newSVOP(OP_CONST, 0, (SV *)embed_cv(rolemeta->initfields, embedding)));
-
-      ops = op_append_list(OP_LINESEQ, ops,
-        op_convert_list(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED, op));
-    }
-  }
-
-  SvREFCNT_inc(PL_compcv);
-  ops = block_end(save_ix, ops);
-
-  /* newATTRSUB will capture PL_curstash */
-  SAVESPTR(PL_curstash);
-  PL_curstash = meta->stash;
-
-  meta->initfields = newATTRSUB(floor_ix, NULL, NULL, NULL, ops);
-
-  assert(meta->initfields);
-  assert(CvOUTSIDE(meta->initfields));
-
-  LEAVE;
-}
-
 void ObjectPad_mop_class_seal(pTHX_ ClassMeta *meta)
 {
   if(meta->sealed) /* idempotent */
@@ -949,8 +703,6 @@ void ObjectPad_mop_class_seal(pTHX_ ClassMeta *meta)
       }
     }
   }
-
-  S_generate_initfields_method(aTHX_ meta);
 
   meta->sealed = true;
 
@@ -1073,8 +825,6 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->requiremethods = newAV();
   meta->repr   = REPR_AUTOSELECT;
   meta->pending_submeta = NULL;
-  meta->buildblocks = NULL;
-  meta->initfields = NULL;
 
   meta->fieldhooks_initfield = NULL;
   meta->fieldhooks_construct = NULL;
@@ -1095,40 +845,6 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
   }
 
   need_PLparser();
-
-  /* Prepare meta->initfields for containing a CV parsing operation */
-  {
-    if(!PL_compcv) {
-      /* We require the initfields CV to have a CvOUTSIDE, or else cv_clone()
-       * will segv when we compose role fields. Any class dynamically generated
-       * by string eval() will likely not get one, because it won't inherit a
-       * PL_compcv here. We'll fake it up
-       *   See also  https://rt.cpan.org/Ticket/Display.html?id=137952
-       */
-      SAVEVPTR(PL_compcv);
-      PL_compcv = find_runcv(0);
-
-      assert(PL_compcv);
-    }
-
-    I32 floor_ix = start_subparse(FALSE, 0);
-
-    extend_pad_vars(meta);
-
-    /* Skip padix==3 so we're aligned again */
-    if(meta->type != METATYPE_ROLE)
-      pad_add_name_pvs("", 0, NULL, NULL);
-
-    PADOFFSET padix = pad_add_name_pvs("%params", 0, NULL, NULL);
-    if(padix != PADIX_INITFIELDS_PARAMS)
-      croak("ARGH: Expected that padix[%%params] = 4");
-
-    intro_my();
-
-    suspend_compcv(&meta->initfields_compcv);
-
-    LEAVE_SCOPE(floor_ix);
-  }
 
   meta->tmpcop = (COP *)newSTATEOP(0, NULL, NULL);
   CopFILE_set(meta->tmpcop, __FILE__);
