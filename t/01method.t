@@ -62,7 +62,7 @@ SKIP: {
    }
 
    my $obj = RT132321->new;
-   is( $obj->value, 123, '$obj->value from ADJUST-generated anon method' );
+   is( $obj->value, 123, '$obj->value from generated anon method' );
 }
 
 # method warns about redeclared $self (RT132428)
