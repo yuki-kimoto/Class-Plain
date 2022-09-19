@@ -11,8 +11,6 @@ class Counter {
    field $count;
    
    method new : common {
-     warn $class;
-     
      my $self = $class->SUPER::new(@_);
      
      return $self;
