@@ -10,43 +10,26 @@ use Scalar::Util qw( reftype );
 use Object::Pad;
 
 class Point {
-   has $x;
-   has $y;
+   has $x : param;
+   has $y : param;
    ADJUST {
      $x = 0 unless length $x;
      $y = 0 unless length $y;
    }
-
-   BUILD {
-      ( $x, $y ) = @_;
+   
+   method new_xy : common {
+     return $class->new(x => $_[0], y => $_[1]);
    }
 
    method where { sprintf "(%d,%d)", $x, $y }
 }
 
 {
-   my $p = Point->new( 10, 20 );
+   my $p = Point->new_xy(10,20);
    is( $p->where, "(10,20)", '$p->where' );
 }
 
 my @build;
-
-{
-   my @called;
-
-   class WithAdjust {
-      BUILD {
-         push @called, "BUILD";
-      }
-
-      ADJUST {
-         push @called, "ADJUST";
-      }
-   }
-
-   WithAdjust->new;
-   is_deeply( \@called, [qw( BUILD ADJUST )], 'ADJUST invoked after BUILD' );
-}
 
 {
    my @called;
@@ -102,18 +85,6 @@ my @build;
    my $o = NativelyHash->new;
    is( reftype $o, "HASH", 'NativelyHash is natively a HASH reference' );
    is( $o->field, "value", 'native HASH objects still support fields' );
-}
-
-# Subclasses without BUILD shouldn't double-invoke superclass
-{
-   my $BUILD_invoked;
-   class One {
-      BUILD { $BUILD_invoked++ }
-   }
-   class Two :isa(One) {}
-
-   Two->new;
-   is( $BUILD_invoked, 1, 'One::BUILD invoked only once for Two->new' );
 }
 
 done_testing;
