@@ -49,56 +49,6 @@ SV *ObjectPad_mop_field_get_name(pTHX_ FieldMeta *fieldmeta)
   return fieldmeta->name;
 }
 
-char ObjectPad_mop_field_get_sigil(pTHX_ FieldMeta *fieldmeta)
-{
-  return (SvPVX(fieldmeta->name))[0];
-}
-
-#define mop_field_set_param(fieldmeta, paramname)  S_mop_field_set_param(aTHX_ fieldmeta, paramname)
-static void S_mop_field_set_param(pTHX_ FieldMeta *fieldmeta, SV *paramname)
-{
-  ClassMeta *classmeta = fieldmeta->class;
-
-  if(!classmeta->parammap)
-    classmeta->parammap = newHV();
-
-  HV *parammap = classmeta->parammap;
-
-  HE *he;
-  if((he = hv_fetch_ent(parammap, paramname, 0, 0))) {
-    ParamMeta *colliding_parammeta = (ParamMeta *)HeVAL(he);
-    if(colliding_parammeta->field->class != classmeta)
-      croak("Already have a named constructor parameter called '%" SVf "' inherited from %" SVf,
-        SVfARG(paramname), SVfARG(colliding_parammeta->field->class->name));
-    else
-      croak("Already have a named constructor parameter called '%" SVf "'", SVfARG(paramname));
-  }
-
-  ParamMeta *parammeta;
-  Newx(parammeta, 1, struct ParamMeta);
-
-  parammeta->name = SvREFCNT_inc(paramname);
-  parammeta->field = fieldmeta;
-  parammeta->fieldix = fieldmeta->fieldix;
-
-  fieldmeta->paramname = SvREFCNT_inc(paramname);
-
-  hv_store_ent(parammap, paramname, (SV *)parammeta, 0);
-}
-
-SV *ObjectPad_mop_field_get_default_sv(pTHX_ FieldMeta *fieldmeta)
-{
-  return fieldmeta->defaultsv;
-}
-
-void ObjectPad_mop_field_set_default_sv(pTHX_ FieldMeta *fieldmeta, SV *sv)
-{
-  if(fieldmeta->defaultsv)
-    SvREFCNT_dec(fieldmeta->defaultsv);
-
-  fieldmeta->defaultsv = sv;
-}
-
 typedef struct FieldAttributeRegistration FieldAttributeRegistration;
 
 struct FieldAttributeRegistration {
@@ -307,22 +257,6 @@ static struct FieldHookFuncs fieldhooks_weak = {
   .post_construct   = &fieldhook_weak_post_construct,
   .gen_accessor_ops = &fieldhook_weak_gen_accessor,
 };
-
-/* :param */
-
-static bool fieldhook_param_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  U32 flags = 0;
-  char *paramname = SvPVX(fieldmeta->name) + 1;
-  if(SvUTF8(fieldmeta->name))
-    flags |= SVf_UTF8;
-
-  SV *namesv = newSVpvn_flags(paramname, strlen(paramname), flags);
-
-  mop_field_set_param(fieldmeta, namesv);
-
-  return TRUE;
-}
 
 /* :reader */
 
