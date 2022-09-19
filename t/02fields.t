@@ -49,10 +49,16 @@ class Counter {
    class AllTheTypes {
       has $scalar;
 
-      ADJUST {
-        $scalar = 123;
-      }
-      
+     method new : common {
+       my $self = bless [], $class;
+       
+       my @field_names = qw(scalar);
+       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+       $self->[$field_ids{scalar}] = 123;
+       
+       return $self;
+     }
+
       method test {
          Test::More::is( $scalar, 123, '$scalar field' );
       }
@@ -79,9 +85,17 @@ class Counter {
 {
    class AllTheTypesByBlock {
       field $scalar;
-      ADJUST {
-        $scalar = "one";
-      }
+
+     method new : common {
+       my $self = bless [], $class;
+       
+       my @field_names = qw(scalar);
+       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+       $self->[$field_ids{scalar}] = "one";
+       
+       return $self;
+     }
+     
       method test {
          Test::More::is( $scalar, "one", '$scalar field' );
       }
