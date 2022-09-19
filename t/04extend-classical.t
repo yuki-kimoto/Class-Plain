@@ -9,9 +9,15 @@ use Object::Pad;
 
 class BaseClass {
    has $data;
-   
-   ADJUST {
-     $data = 123;
+
+   method new : common {
+     my $self = bless [], $class;
+     
+     my @field_names = qw(data);
+     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+     $self->[$field_ids{data}] = 123;
+     
+     return $self;
    }
 }
 

@@ -16,9 +16,16 @@ use Object::Pad::MetaFunctions qw(
 class Point {
    has $x :param;
    has $y :param;
-   ADJUST {
-     $x = 0;
-     $y = 0;
+   
+   method new : common {
+     my $self = bless [], $class;
+     
+     my @field_names = qw(x y);
+     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+     $self->[$field_ids{x}] = 0;
+     $self->[$field_ids{y}] = 0;
+     
+     return $self;
    }
 }
 
@@ -27,8 +34,14 @@ is( metaclass( Point->new ), Object::Pad::MOP::Class->for_class( "Point" ),
 
 class AllFieldTypes {
    has $s;
-   ADJUST {
-     $s = "scalar";
+   method new : common {
+     my $self = bless [], $class;
+     
+     my @field_names = qw(s);
+     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+     $self->[$field_ids{s}] = "scalar";
+     
+     return $self;
    }
 }
 
