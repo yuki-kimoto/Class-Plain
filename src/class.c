@@ -336,23 +336,6 @@ void ObjectPad_mop_class_add_BUILD(pTHX_ ClassMeta *meta, CV *cv)
   av_push(meta->buildblocks, (SV *)cv);
 }
 
-void ObjectPad_mop_class_add_ADJUST(pTHX_ ClassMeta *meta, CV *cv)
-{
-  if(meta->sealed)
-    croak("Cannot add an ADJUST(PARAMS) block to an already-sealed class");
-  if(!meta->adjustblocks)
-    meta->adjustblocks = newAV();
-
-  AdjustBlock *block;
-  Newx(block, 1, struct AdjustBlock);
-
-  block->cv = cv;
-
-  meta->has_adjust = true;
-
-  av_push(meta->adjustblocks, (SV *)block);
-}
-
 void ObjectPad_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   if(meta->type != METATYPE_ROLE)
@@ -431,18 +414,6 @@ static RoleEmbedding *S_embed_role(pTHX_ ClassMeta *classmeta, ClassMeta *roleme
 
     av_push(classmeta->buildblocks, (SV *)embedded_buildblock);
   }
-
-  U32 nadjusts = rolemeta->adjustblocks ? av_count(rolemeta->adjustblocks) : 0;
-  for(i = 0; i < nadjusts; i++) {
-    AdjustBlock *block = (AdjustBlock *)AvARRAY(rolemeta->adjustblocks)[i];
-
-    CV *embedded_cv = embed_cv(block->cv, embedding);
-
-    mop_class_add_ADJUST(classmeta, embedded_cv);
-  }
-
-  if(rolemeta->has_adjust)
-    classmeta->has_adjust = true;
 
   U32 nmethods = av_count(rolemeta->direct_methods);
   for(i = 0; i < nmethods; i++) {
@@ -1092,7 +1063,6 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
 
   meta->sealed = false;
   meta->role_is_invokable = false;
-  meta->has_adjust = false;
   meta->has_superclass = false;
   meta->start_fieldix = 0;
   meta->next_fieldix = -1;
@@ -1104,7 +1074,6 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->repr   = REPR_AUTOSELECT;
   meta->pending_submeta = NULL;
   meta->buildblocks = NULL;
-  meta->adjustblocks = NULL;
   meta->initfields = NULL;
 
   meta->fieldhooks_initfield = NULL;
@@ -1237,57 +1206,6 @@ void ObjectPad_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassnam
     meta->repr = supermeta->repr;
     meta->cls.foreign_new = supermeta->cls.foreign_new;
 
-    if(supermeta->buildblocks) {
-      if(!meta->buildblocks)
-        meta->buildblocks = newAV();
-
-      av_push_from_av_noinc(meta->buildblocks, supermeta->buildblocks);
-    }
-
-    if(supermeta->adjustblocks) {
-      if(!meta->adjustblocks)
-        meta->adjustblocks = newAV();
-
-      av_push_from_av_noinc(meta->adjustblocks, supermeta->adjustblocks);
-    }
-
-    if(supermeta->fieldhooks_initfield) {
-      if(!meta->fieldhooks_initfield)
-        meta->fieldhooks_initfield = newAV();
-
-      av_push_from_av_noinc(meta->fieldhooks_initfield, supermeta->fieldhooks_initfield);
-    }
-
-    if(supermeta->fieldhooks_construct) {
-      if(!meta->fieldhooks_construct)
-        meta->fieldhooks_construct = newAV();
-
-      av_push_from_av_noinc(meta->fieldhooks_construct, supermeta->fieldhooks_construct);
-    }
-
-    if(supermeta->parammap) {
-      HV *old = supermeta->parammap;
-      HV *new = meta->parammap = newHV();
-
-      hv_iterinit(old);
-
-      HE *iter;
-      while((iter = hv_iternext(old))) {
-        STRLEN klen = HeKLEN(iter);
-        /* Don't SvREFCNT_inc() the values because they aren't really SV *s */
-        /* Subclasses *DIRECTLY SHARE* their param metas because the
-         * information in them is directly compatible
-         */
-        if(klen < 0)
-          hv_store_ent(new, HeSVKEY(iter), HeVAL(iter), HeHASH(iter));
-        else
-          hv_store(new, HeKEY(iter), klen, HeVAL(iter), HeHASH(iter));
-      }
-    }
-
-    if(supermeta->has_adjust)
-      meta->has_adjust = true;
-
     U32 nroles;
     RoleEmbedding **embeddings = mop_class_get_all_roles(supermeta, &nroles);
     if(nroles) {
@@ -1308,8 +1226,6 @@ void ObjectPad_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassnam
       croak("Unable to find SUPER::new for %" SVf, superclassname);
 
     meta->cls.foreign_does = fetch_superclass_method_pv(meta->stash, "DOES", 4, -1);
-
-    av_push(isa, newSVpvs("Object::Pad::Base"));
   }
 
   meta->has_superclass = true;
