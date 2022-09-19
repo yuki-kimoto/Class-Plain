@@ -1175,18 +1175,6 @@ XS_INTERNAL(injected_constructor)
     backingav = (AV *)get_obj_backingav(self, meta->repr, FALSE);
   }
 
-  if(meta->fieldhooks_initfield || meta->fieldhooks_construct) {
-    /* We need to set up a fake pad so these hooks can still get PADIX_SELF / PADIX_SLOTS */
-
-    /* This MVP is just sufficient enough to let PAD_SVl(PADIX_SELF) work */
-    SAVEVPTR(PL_curpad);
-    Newx(PL_curpad, 3, SV *);
-    SAVEFREEPV(PL_curpad);
-
-    PAD_SVl(PADIX_SELF)  = self;
-    PAD_SVl(PADIX_SLOTS) = (SV *)backingav;
-  }
-
 #ifdef DEBUG_OVERRIDE_PLCURCOP
   PL_curcop = prevcop;
 #endif
