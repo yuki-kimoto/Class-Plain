@@ -12,17 +12,15 @@ class Point {
    has $y;
 
    method new : common {
-     my $self = bless [$_[1], $_[3]], $class;
+     my $self = $class->SUPER::new(@_);
      
-     my @field_names = qw(x y);
-     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-     $self->[$field_ids{x}] = 0 unless defined $self->[$field_ids{x}];
-     $self->[$field_ids{y}] = 0 unless defined $self->[$field_ids{y}];
+     $self->{x} //= 0;
+     $self->{y} //= 0;
      
      return $self;
    }
    
-   method pos { return ( $x, $y ); }
+   method pos { return ( $self->{x}, $self->{y} ); }
 }
 
 {
@@ -41,16 +39,14 @@ class Point3D :isa(Point) {
    has $z;
    
    method new : common {
-     my $self = bless [$_[1], $_[3], $_[5]], $class;
+     my $self = $class->SUPER::new(@_);
      
-     my @field_names = qw(x y z);
-     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-     $self->[$field_ids{z}] = 0 unless defined $self->[$field_ids{z}];
+     $self->{z} //= 0;
      
      return $self;
    }
 
-   method pos { return ( $self->next::method, $z ) }
+   method pos { return ( $self->SUPER::pos, $self->{z} ) }
 }
 
 {
