@@ -196,17 +196,6 @@ add_role(self, role)
     mop_class_add_role(meta, rolemeta);
   }
 
-void
-add_BUILD(self, code)
-    SV *self
-    CV *code
-  CODE:
-  {
-    ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
-
-    mop_class_add_BUILD(meta, (CV *)SvREFCNT_inc((SV *)code));
-  }
-
 SV *
 add_method(self, mname, ...)
     SV *self
@@ -223,10 +212,6 @@ add_method(self, mname, ...)
     mname = sv_2mortal(newSVsv(mname));
 
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
-
-    if(SvOK(mname) && SvPOK(mname) && strEQ(SvPVX(mname), "BUILD")) {
-      croak("Adding a method called BUILD is not supported; use ->add_BUILD directly");
-    }
 
     MethodMeta *methodmeta = mop_class_add_method(meta, mname);
 

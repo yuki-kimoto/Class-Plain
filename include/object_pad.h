@@ -156,9 +156,6 @@ MethodMeta *ObjectPad_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname
 #define mop_class_add_field(class, fieldname)  ObjectPad_mop_class_add_field(aTHX_ class, fieldname)
 FieldMeta *ObjectPad_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);
 
-#define mop_class_add_BUILD(class, cv)  ObjectPad_mop_class_add_BUILD(aTHX_ class, cv)
-void ObjectPad_mop_class_add_BUILD(pTHX_ ClassMeta *meta, CV *cv);
-
 #define mop_class_add_ADJUST(class, cv)  ObjectPad_mop_class_add_ADJUST(aTHX_ class, cv)
 void ObjectPad_mop_class_add_ADJUST(pTHX_ ClassMeta *meta, CV *cv);
 

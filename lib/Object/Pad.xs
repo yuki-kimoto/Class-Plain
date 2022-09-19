@@ -776,12 +776,10 @@ static const struct XSParseKeywordHooks kwhooks_has = {
 
 enum PhaserType {
   PHASER_NONE, /* A normal `method`; i.e. not a phaser */
-  PHASER_BUILD,
   PHASER_ADJUST,
 };
 
 static const char *phasertypename[] = {
-  [PHASER_BUILD]  = "BUILD",
   [PHASER_ADJUST] = "ADJUST",
 };
 
@@ -803,17 +801,6 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   U32 i;
   AV *fields = compclassmeta->direct_fields;
   U32 nfields = av_count(fields);
-
-  switch(type) {
-    case PHASER_NONE:
-      if(ctx->name && strEQ(SvPVX(ctx->name), "BUILD"))
-        croak("method BUILD is no longer supported; use a BUILD block instead");
-      break;
-
-    case PHASER_BUILD:
-    case PHASER_ADJUST:
-      break;
-  }
 
   if(type != PHASER_NONE)
     /* We need to fool start_subparse() into thinking this is a named function
@@ -1145,10 +1132,6 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
       }
       break;
 
-    case PHASER_BUILD:
-      mop_class_add_BUILD(compclassmeta, ctx->cv); /* steal CV */
-      break;
-
     case PHASER_ADJUST:
       mop_class_add_ADJUST(compclassmeta, ctx->cv); /* steal CV */
       break;
@@ -1208,11 +1191,6 @@ static int parse_phaser(pTHX_ OP **out, void *hookdata)
 
   return xs_parse_sublike(&parse_phaser_hooks, hookdata, out);
 }
-
-static const struct XSParseKeywordHooks kwhooks_BUILD = {
-  .permit_hintkey = "Object::Pad/BUILD",
-  .parse = &parse_phaser,
-};
 
 static const struct XSParseKeywordHooks kwhooks_ADJUST = {
   .permit_hintkey = "Object::Pad/ADJUST",
@@ -1289,7 +1267,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
       {"the param map HV",           DMD_FIELD_PTR,  .ptr = classmeta->parammap},        \
       {"the requiremethods AV",      DMD_FIELD_PTR,  .ptr = classmeta->requiremethods},  \
       {"the initfields CV",          DMD_FIELD_PTR,  .ptr = classmeta->initfields},      \
-      {"the BUILD blocks AV",        DMD_FIELD_PTR,  .ptr = classmeta->buildblocks},     \
       {"the ADJUST blocks AV",       DMD_FIELD_PTR,  .ptr = classmeta->adjustblocks},    \
       {"the temporary method scope", DMD_FIELD_PTR,  .ptr = classmeta->methodscope}
 
@@ -1704,7 +1681,6 @@ BOOT:
   register_xs_parse_keyword("field", &kwhooks_field, "field");
   register_xs_parse_keyword("has",   &kwhooks_has,   "has");
 
-  register_xs_parse_keyword("BUILD",        &kwhooks_BUILD, (void *)PHASER_BUILD);
   register_xs_parse_keyword("ADJUST",       &kwhooks_ADJUST, (void *)PHASER_ADJUST);
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */

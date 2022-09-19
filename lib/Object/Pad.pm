@@ -107,10 +107,10 @@ sub import_into
 
    # Default imports
    unless( %syms ) {
-      $syms{$_}++ for qw( class role method field has BUILD ADJUST );
+      $syms{$_}++ for qw( class role method field has ADJUST );
    }
 
-   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has BUILD ADJUST );
+   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has ADJUST );
 
    croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
 }
@@ -245,18 +245,10 @@ The constructor will also check for required parameters (these are all the
 parameters for fields that do not have default initialisation expressions). If
 any of these are missing an exception is thrown.
 
-=head3 The BUILD phase
-
-As part of the construction process, the C<BUILD> block of every component
-class will be invoked, passing in the list of arguments the constructor was
-invoked with. Each class should perform its required setup behaviour, but does
-not need to chain to the C<SUPER> class first; this is handled automatically.
-
 =head3 The ADJUST phase
 
 Next, the C<ADJUST> block of every component class is invoked. This happens
-after the fields are assigned their initial values and the C<BUILD> blocks
-have been run.
+after the fields are assigned their initial values.
 
 =head1 KEYWORDS
 
@@ -452,7 +444,7 @@ implements the role.
       method METHOD;
    }
 
-A role can provide instance fields. These are visible to any C<BUILD> blocks
+A role can provide instance fields. These are visible to any C<ADJUST> blocks
 or methods provided by that role.
 
 I<Since version 0.33.>
@@ -460,7 +452,7 @@ I<Since version 0.33.>
    role Name {
       field $f;
 
-      BUILD { $f = "a value"; }
+      ADJUST { $f = "a value"; }
 
       method field { return $f; }
    }
@@ -581,9 +573,6 @@ code in the block if required by the constructor. If a named parameter is
 passed to the constructor for this field, then its code block will not be
 executed.
 
-Values for fields are assigned by the constructor before any C<BUILD> blocks
-are invoked.
-
 =head2 has
 
    has $var;
@@ -666,27 +655,6 @@ instances. Within the method body there is a lexical C<$class> available,
 rather than C<$self>. Because it is not associated with a particular object
 instance, a class-common method cannot see instance fields.
 
-=head2 BUILD
-
-   BUILD {
-      ...
-   }
-
-   BUILD (SIGNATURE) {
-      ...
-   }
-
-I<Since version 0.27.>
-
-Declares the builder block for this component class. A builder block may use
-subroutine signature syntax, as for methods, to assist in unpacking its
-arguments. A build block is not a subroutine and thus is not permitted to use
-subroutine attributes (for example C<:lvalue>).
-
-Note that a C<BUILD> block is a named phaser block and not a method. Attempts
-to create a method named C<BUILD> (i.e. with syntax C<method BUILD {...}>)
-will fail with a compiletime error, to avoid this confusion.
-
 =head2 ADJUST
 
    ADJUST {
@@ -703,11 +671,6 @@ will fail with a compiletime error, to avoid this confusion.
    }
 
 I<Since version 0.43.>
-
-Declares an adjust block for this component class. This block of code runs
-within the constructor, after any C<BUILD> blocks and automatic field value
-assignment. It can make any final adjustments to the instance (such as
-initialising fields from calculated values).
 
 I<Since version 0.66> it receives a reference to the hash containing the
 current constructor parameters. This hash will not contain any constructor
@@ -760,46 +723,6 @@ implemented using C<Object::Pad>.
 =head2 Storage of Instance Data
 
 Instances will pick either the C<:repr(HASH)> or C<:repr(magic)> storage type.
-
-=head2 Object State During Methods Invoked By Superclass Constructor
-
-It is common in classic Perl OO style to invoke methods on C<$self> during
-the constructor. This is supported here since C<Object::Pad> version 0.19.
-Note however that any methods invoked by the superclass constructor may not
-see the object in a fully consistent state. (This fact is not specific to
-using C<Object::Pad> and would happen in classic Perl OO as well). The field
-initialisers will have been invoked but the C<BUILD> blocks will not.
-
-For example; in the following
-
-   package ClassicPerlBaseClass {
-      sub new {
-         my $self = bless {}, shift;
-         say "Value seen by superconstructor is ", $self->get_value;
-         return $self;
-      }
-      sub get_value { return "A" }
-   }
-
-   class DerivedClass :isa(ClassicPerlBaseClass) {
-      has $value = "B";
-      BUILD {
-         $value = "C";
-      }
-      method get_value { return $value }
-   }
-
-   my $obj = DerivedClass->new;
-   say "Value seen by user is ", $obj->get_value;
-
-Until the C<ClassicPerlBaseClass::new> superconstructor has returned the
-C<BUILD> block will not have been invoked. The C<$value> field will still
-exist, but its value will be C<B> during the superconstructor. After the
-superconstructor, the C<BUILD> blocks are invoked before the completed object
-is returned to the user. The result will therefore be:
-
-   Value seen by superconstructor is B
-   Value seen by user is C
 
 =head1 STYLE SUGGESTIONS
 
