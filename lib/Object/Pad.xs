@@ -999,11 +999,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
         continue;
 
       U8 private = 0;
-      switch(SvPV_nolen(fieldmeta->name)[0]) {
-        case '$': private = OPpFIELDPAD_SV; break;
-        default :
-          croak("Invalid field name %s", SvPV_nolen(fieldmeta->name));
-      }
+      private = OPpFIELDPAD_SV;
 
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
       assert((fieldix & ~FIELDIX_MASK) == 0);
@@ -1415,11 +1411,7 @@ static U32 S_deconstruct_object_class(pTHX_ AV *backingav, ClassMeta *classmeta,
         SVfARG(classmeta->name), SVfARG(fieldmeta->name)));
 
     SV *value = AvARRAY(backingav)[offset + fieldmeta->fieldix];
-    switch(SvPV_nolen(fieldmeta->name)[0]) {
-      case '$':
-        value = newSVsv(value);
-        break;
-    }
+    value = newSVsv(value);
 
     mPUSHs(value);
 
@@ -1447,10 +1439,7 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
 
     /* found it */
     SV *sv = AvARRAY(backingav)[offset + fieldmeta->fieldix];
-    switch(SvPV_nolen(fieldmeta->name)[0]) {
-      case '$':
-        return newRV_inc(sv);
-    }
+    return newRV_inc(sv);
   }
 
   return NULL;
