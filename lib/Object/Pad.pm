@@ -119,14 +119,6 @@ sub import_into
 
 # The universal base-class methods
 
-sub Object::Pad::UNIVERSAL::new {
-   my $class = shift;
-   
-   my $self = {@_};
-   
-   return bless $self, ref $class || $class;
-}
-
 sub Object::Pad::UNIVERSAL::_BUILDARGS
 {
    shift; # $class
