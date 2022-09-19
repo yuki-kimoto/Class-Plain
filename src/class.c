@@ -36,9 +36,6 @@
 #define need_PLparser()  ObjectPad__need_PLparser(aTHX)
 void ObjectPad__need_PLparser(pTHX); /* in Object/Pad.xs */
 
-/* Empty MGVTBL simply for locating instance backing AV */
-static MGVTBL vtbl_backingav = {};
-
 typedef struct ClassAttributeRegistration ClassAttributeRegistration;
 
 struct ClassAttributeRegistration {
@@ -1061,119 +1058,13 @@ XS_INTERNAL(injected_constructor)
     LEAVE;
   }
 
-  bool need_makefields = true;
+  HV *stash = gv_stashsv(class, 0);
+  if(!stash)
+    croak("Unable to find stash for class %" SVf, class);
 
-  if(!meta->cls.foreign_new) {
-    HV *stash = gv_stashsv(class, 0);
-    if(!stash)
-      croak("Unable to find stash for class %" SVf, class);
-
-    switch(meta->repr) {
-      case REPR_NATIVE:
-      case REPR_AUTOSELECT:
-        DEBUG_SET_CURCOP_LINE(__LINE__);
-        self = sv_2mortal(newRV_noinc((SV *)newAV()));
-        sv_bless(self, stash);
-        break;
-
-      case REPR_HASH:
-        DEBUG_SET_CURCOP_LINE(__LINE__);
-        self = sv_2mortal(newRV_noinc((SV *)newHV()));
-        sv_bless(self, stash);
-        break;
-
-      case REPR_MAGIC:
-        croak("ARGH cannot use :repr(magic) without a foreign superconstructor");
-        break;
-    }
-  }
-  else {
-    DEBUG_SET_CURCOP_LINE(__LINE__);
-
-    {
-      ENTER;
-      SAVETMPS;
-
-      PUSHMARK(SP);
-      EXTEND(SP, 1 + AvFILL(args));
-
-      SV **argstart = SP - AvFILL(args) - 1;
-      SV **argtop = SP;
-      SV **svp;
-
-      mPUSHs(newSVsv(class));
-
-      /* Push a copy of the args in case the (foreign) constructor mutates
-       * them. We still need them for BUILDALL */
-      for(svp = argstart + 1; svp <= argtop; svp++)
-        PUSHs(*svp);
-      PUTBACK;
-
-      assert(meta->cls.foreign_new);
-      call_sv((SV *)meta->cls.foreign_new, G_SCALAR);
-      SPAGAIN;
-
-      self = SvREFCNT_inc(POPs);
-
-      PUTBACK;
-      FREETMPS;
-      LEAVE;
-    }
-
-    if(!SvROK(self) || !SvOBJECT(SvRV(self))) {
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-      PL_curcop = prevcop;
-#endif
-      croak("Expected %" SVf "->SUPER::new to return a blessed reference", class);
-    }
-    SV *rv = SvRV(self);
-
-    /* It's possible a foreign superclass constructor invoked a `method` and
-     * thus initfields has already been called. Check here and set
-     * need_makefields false if so.
-     */
-
-    switch(meta->repr) {
-      case REPR_NATIVE:
-        croak("ARGH shouldn't ever have REPR_NATIVE with foreign_new");
-
-      case REPR_HASH:
-      case_REPR_HASH:
-        if(SvTYPE(rv) != SVt_PVHV) {
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-          PL_curcop = prevcop;
-#endif
-          croak("Expected %" SVf "->SUPER::new to return a blessed HASH reference", class);
-        }
-
-        need_makefields = !hv_exists(MUTABLE_HV(rv), "Object::Pad/slots", 17);
-        break;
-
-      case REPR_MAGIC:
-      case_REPR_MAGIC:
-        /* Anything goes */
-
-        need_makefields = !mg_findext(rv, PERL_MAGIC_ext, &vtbl_backingav);
-        break;
-
-      case REPR_AUTOSELECT:
-        if(SvTYPE(rv) == SVt_PVHV)
-          goto case_REPR_HASH;
-        goto case_REPR_MAGIC;
-    }
-
-    sv_2mortal(self);
-  }
-
-  AV *backingav;
-
-  if(need_makefields) {
-    backingav = (AV *)get_obj_backingav(self, meta->repr, TRUE);
-    make_instance_fields(meta, backingav, 0);
-  }
-  else {
-    backingav = (AV *)get_obj_backingav(self, meta->repr, FALSE);
-  }
+  DEBUG_SET_CURCOP_LINE(__LINE__);
+  self = sv_2mortal(newRV_noinc((SV *)newAV()));
+  sv_bless(self, stash);
 
 #ifdef DEBUG_OVERRIDE_PLCURCOP
   PL_curcop = prevcop;
