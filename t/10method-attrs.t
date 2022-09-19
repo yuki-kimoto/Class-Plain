@@ -10,7 +10,7 @@ use Object::Pad;
 use attributes ();
 
 class Counter {
-   has $count;
+   has count;
    
    method new : common {
      my $self = $class->SUPER::new(@_);

@@ -12,10 +12,10 @@ my $MATCH_ARGCOUNT =
    $] >= 5.033006 ? qr/ \(got \d+; expected \d+\)/ : "";
 
 class Colour {
-   field $red   ; # :reader            :writer; # Remove reader writer
-   field $green ; # :reader(get_green) :writer; # Remove reader writer
-   field $blue  ; # :accessor; # Remove accessor
-   field $white ; # :accessor; # Remove accessor
+   field red   ; # :reader            :writer; # Remove reader writer
+   field green ; # :reader(get_green) :writer; # Remove reader writer
+   field blue  ; # :accessor; # Remove accessor
+   field white ; # :accessor; # Remove accessor
    
    method red () { $self->{red} }
    method set_red ($red) { $self->{red} = $red; return $self; }

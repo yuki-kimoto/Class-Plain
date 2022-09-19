@@ -8,7 +8,7 @@ use Test::More;
 use Object::Pad;
 
 class Counter {
-   field $count;
+   field count;
    
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -37,9 +37,9 @@ class Counter {
 # RT132249
 {
    class Widget {
-      field $_menu;
+      field _menu;
       method popup_menu {
-         my $on_activate = sub { undef $_menu };
+         my $on_activate = sub { undef $self->{_menu} };
       }
       method on_mouse {
       }

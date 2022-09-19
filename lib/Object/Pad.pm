@@ -148,8 +148,8 @@ On perl version 5.26 onwards:
    use Object::Pad;
 
    class Point {
-      has $x;
-      has $y;
+      has x;
+      has y;
 
      method new : common {
        my $self = $class->SUPER::new(@_);
@@ -201,27 +201,13 @@ silence every experimental warning, which may hide others unintentionally. For
 a more fine-grained approach you can instead use the import line for this
 module to only silence the module's warnings selectively:
 
-   use Object::Pad ':experimental(init_expr)';
-
    use Object::Pad ':experimental(mop)';
-
-   use Object::Pad ':experimental(custom_field_attr)';
 
    use Object::Pad ':experimental';  # all of the above
 
-I<Since version 0.64.>
+=head2 Inheritance
 
-Multiple experimental features can be enabled at once by giving multiple names
-in the parens, separated by spaces:
-
-   use Object::Pad ':experimental(init_expr mop)';
-
-=head2 Automatic Construction
-
-Classes are automatically provided with a constructor method, called C<new>,
-which helps create the object instances. This may respond to passed arguments,
-automatically assigning values of fields, and invoking other blocks of code
-provided by the class. It proceeds in the following stages:
+The class that has not the parent class inherits L<Object::Pad::Base>.
 
 =head1 KEYWORDS
 
@@ -234,8 +220,7 @@ provided by the class. It proceeds in the following stages:
    class Name :ATTRS...;
 
 Behaves similarly to the C<package> keyword, but provides a package that
-defines a new class. Such a class provides an automatic constructor method
-called C<new>.
+defines a new class.
 
 As with C<package>, an optional block may be provided. If so, the contents of
 that block define the new class and the preceding package continues
@@ -381,9 +366,9 @@ The following role attributes are supported:
 
 =head2 field
 
-   field $var;
+   field var;
 
-   field $var :ATTR ATTR...;
+   field var :ATTR ATTR...;
 
 I<Since version 0.66.>
 
@@ -400,10 +385,10 @@ I<Since version 0.27.>
 Generates a reader method to return the current value of the field. If no name
 is given, the name of the field is used.
 
-   field $x :reader;
+   field x :reader;
 
    # equivalent to
-   field $x;  method x { return $x }
+   field x;  method x { return $x }
 
 =head3 :writer, :writer(NAME)
 
@@ -412,10 +397,10 @@ I<Since version 0.27.>
 Generates a writer method to set a new value of the field from its arguments.
 If no name is given, the name of the field is used prefixed by C<set_>.
 
-   field $x :writer;
+   field x :writer;
 
    # equivalent to
-   field $x;
+   field x;
    method set_x { $x = shift; return $self }
 
 I<Since version 0.28> a generated writer method will return the object
@@ -440,10 +425,10 @@ C<undef>). If no argument is passed (i.e. C<scalar @_> is false) then the
 field is not modified. In either case, the value of the field is then
 returned.
 
-   field $x :accessor;
+   field x :accessor;
 
    # equivalent to
-   field $x;
+   field x;
 
    method field {
       $x = shift if @_;
@@ -463,7 +448,7 @@ yourself.
 
 =head2 has
 
-   has $var;
+   has var;
 
 The alias for the L</field> keyword, except that inline expressions are also
 permitted.
@@ -511,7 +496,7 @@ is C<:lvalue>, allowing easy creation of read-write accessors for fields (but
 see also the C<:reader> and C<:writer>> field attributes).
 
    class Counter {
-      field $count;
+      field count;
 
       method count :lvalue { $count }
    }

@@ -11,7 +11,7 @@ use Object::Pad ':experimental(init_expr)';
 use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
 
 class Counter {
-   has $count;
+   has count;
    
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -45,7 +45,7 @@ class Counter {
    use Data::Dumper;
 
    class AllTheTypes {
-      has $scalar;
+      has scalar;
 
      method new : common {
        my $self = $class->SUPER::new(@_);

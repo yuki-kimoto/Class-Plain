@@ -32,7 +32,7 @@ BEGIN {
    my $after_level;
 
    class Logger {
-      has $_level = 1;
+      has _level = 1;
 
       method level { $_level }
 

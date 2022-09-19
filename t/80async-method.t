@@ -26,7 +26,7 @@ BEGIN {
 # async method
 {
    class Thunker {
-      has $_times_thunked = 0;
+      has _times_thunked = 0;
 
       method count { $_times_thunked }
 

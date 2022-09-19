@@ -16,7 +16,7 @@ BEGIN {
 }
 
 class Datum {
-   has $value = 1;
+   has value = 1;
    method value { $value }
 
    method test {

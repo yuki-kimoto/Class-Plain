@@ -9,7 +9,7 @@ use Object::Pad;
 
 {
    ok( !eval <<'EOPERL',
-      field $field;
+      field field;
 EOPERL
       'field outside class fails' );
    like( $@, qr/^Cannot 'field' outside of 'class' at /,
@@ -20,7 +20,7 @@ EOPERL
 {
    ok( !eval <<'EOPERL',
       class AClass { }
-      field $field;
+      field field;
 EOPERL
       'field after closed class block fails' );
    like( $@, qr/^Cannot 'field' outside of 'class' at /);

@@ -8,11 +8,11 @@ use Test::More;
 use Object::Pad;
 
 class Animal 1.23 {
-   field $legs;
+   field legs;
    method legs { $self->{legs} };
 }
 
-is( $Animal::VERSION, 1.23, 'Versioned class has $VERSION' );
+is( $Animal::VERSION, 1.23, 'Versioned class has VERSION' );
 
 class Spider 4.56 :isa(Animal) {
    method new8 : common {
@@ -24,7 +24,7 @@ class Spider 4.56 :isa(Animal) {
    }
 }
 
-is( $Spider::VERSION, 4.56, 'Versioned subclass has $VERSION' );
+is( $Spider::VERSION, 4.56, 'Versioned subclass has VERSION' );
 
 {
    my $spider = Spider->new8;
@@ -44,7 +44,7 @@ EOPERL
 # Extend before base class is sealed (RT133190)
 {
    class BaseClass {
-      field $_afield;
+      field _afield;
 
        method new : common {
          my $self = $class->SUPER::new(@_);

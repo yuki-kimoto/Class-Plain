@@ -9,7 +9,7 @@ use Object::Pad;
 
 {
    class Counter {
-      field $count;
+      field count;
       my $allcount = 0;
 
       method new : common {

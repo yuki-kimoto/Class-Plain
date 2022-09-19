@@ -9,7 +9,7 @@ use Object::Pad;
 
 {
   class Base::Class {
-     field $data;
+     field data;
      method data { $self->{data} }
 
      method new : common {
@@ -22,7 +22,7 @@ use Object::Pad;
   }
 
   class Derived::Class :isa(Base::Class) {
-     field $data;
+     field data;
      method data { $self->{data} }
 
      method new : common {

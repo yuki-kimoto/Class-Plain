@@ -17,7 +17,7 @@ use Object::Pad;
 
 class AClass
 {
-   field $afield :param :reader;
+   field afield :param :reader;
 }
 
 my $obj = AClass->new( afield => 123 );

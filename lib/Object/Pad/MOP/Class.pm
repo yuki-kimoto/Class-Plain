@@ -326,7 +326,7 @@ I<Since version 0.43.>
 
 Provides a default value for the field; similar to using the syntax
 
-   has $field = SCALAR;
+   has field = SCALAR;
 
 This value may be C<undef>, to set the value as being optional if it
 additionally has a parameter name.

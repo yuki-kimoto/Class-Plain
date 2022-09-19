@@ -132,7 +132,7 @@ OP *ObjectPad_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
 
 /* op_private flags on FIELDPAD ops */
 enum {
-  OPpFIELDPAD_SV,  /* has $x */
+  OPpFIELDPAD_SV,  /* has x */
   OPpFIELDPAD_AV,  /* has @y */
   OPpFIELDPAD_HV,  /* has %z */
 };

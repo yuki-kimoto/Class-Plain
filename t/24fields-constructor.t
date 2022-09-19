@@ -8,8 +8,8 @@ use Test::More;
 use Object::Pad;
 
 class Point {
-   has $x;
-   has $y;
+   has x;
+   has y;
 
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -36,7 +36,7 @@ class Point {
 }
 
 class Point3D :isa(Point) {
-   has $z;
+   has z;
    
    method new : common {
      my $self = $class->SUPER::new(@_);

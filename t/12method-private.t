@@ -8,7 +8,7 @@ use Test::More;
 use Object::Pad;
 
 class AClass {
-   field $data;
+   field data;
 
    method new : common {
      my $self = $class->SUPER::new(@_);

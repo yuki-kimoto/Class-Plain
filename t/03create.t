@@ -10,8 +10,8 @@ use Scalar::Util qw( reftype );
 use Object::Pad;
 
 class Point {
-   has $x;
-   has $y;
+   has x;
+   has y;
 
    method new : common {
      my $self = $class->SUPER::new(x => $_[0], y => $_[1]);

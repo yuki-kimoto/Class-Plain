@@ -749,7 +749,7 @@ static const struct XSParseKeywordHooks kwhooks_field = {
   .check = &check_field,
 
   .pieces = (const struct XSParseKeywordPieceType []){
-    XPK_LEXVARNAME(XPK_LEXVAR_ANY),
+    XPK_IDENT,
     XPK_ATTRIBUTES,
     {0}
   },
@@ -762,7 +762,7 @@ static const struct XSParseKeywordHooks kwhooks_has = {
   .check = &check_field,
 
   .pieces = (const struct XSParseKeywordPieceType []){
-    XPK_LEXVARNAME(XPK_LEXVAR_ANY),
+    XPK_IDENT,
     XPK_ATTRIBUTES,
     {0}
   },

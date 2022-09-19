@@ -34,7 +34,7 @@ use Object::Pad ':experimental(mop)';
   my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
 
   class Parent {
-    has $thing;
+    has thing;
      method new : common {
        my $self = $class->SUPER::new(@_);
        
@@ -53,7 +53,7 @@ use Object::Pad ':experimental(mop)';
 
            ::is( $classmeta->name, "Child", '$classmeta->name for Child' );
         }
-        has $other;
+        has other;
         
        method new : common {
          my $self = $class->SUPER::new(@_);

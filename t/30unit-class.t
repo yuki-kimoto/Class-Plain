@@ -8,7 +8,7 @@ use Test::More;
 use Object::Pad;
 
 class Counter;
-has $count;
+has count;
 
 method new : common {
   my $self = $class->SUPER::new(@_);

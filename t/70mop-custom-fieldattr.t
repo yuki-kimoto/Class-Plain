@@ -23,8 +23,8 @@ ok(
    defined eval <<'EOPERL',
       BEGIN { $^H{"t/SomeAttr"}++ }
       class MyClass {
-         field $x;
-         field $y :SomeAttr(the value) :SomeAttr(the value);
+         field x;
+         field y :SomeAttr(the value) :SomeAttr(the value);
       }
 EOPERL
    'class using field attribute can be compiled' ) or
@@ -35,7 +35,7 @@ EOPERL
    BEGIN { $^H{"t/SomeAttr"}++ }
 
    my $classmeta = Object::Pad::MOP::Class->for_class( "MyClass" );
-   my $fieldmeta = $classmeta->get_field( '$y' );
+   my $fieldmeta = $classmeta->get_field( 'y' );
 
    ok( $fieldmeta->has_attribute( "SomeAttr" ), '$y field has :SomeAttr' );
    is( $fieldmeta->get_attribute_value( "SomeAttr" ), "result-1", 'stored value for :SomeAttr' );

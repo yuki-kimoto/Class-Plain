@@ -8,8 +8,8 @@ use Test::More;
 use Object::Pad;
 
 class Point {
-   field $x;
-   method clear { $x = 0 }
+   field x;
+   method clear { $self->{x} = 0 }
 }
 
 {

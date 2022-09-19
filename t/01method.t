@@ -9,8 +9,8 @@ use Test::Refcount;
 use Object::Pad;
 
 class Point {
-   has $x;
-   has $y;
+   has x;
+   has y;
    
    method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
 }
@@ -23,33 +23,11 @@ class Point {
    is_oneref( $p, '$p has refcount 1 after method' );
 }
 
-# anon methods
-{
-   class Point3 {
-     has $x;
-     has $y;
-     has $z;
-
-     our $clearer = method {
-       
-         $self->{x} = 0;
-         $self->{y} = 0;
-         $self->{z} = 0;
-      };
-   }
-
-   my $p = Point3->new(x => 1, y => 2, z => 3 );
-   $p->$Point3::clearer();
-
-   is_deeply( [ $p->{x}, $p->{y}, $p->{z} ], [ 0, 0, 0 ],
-      'anon method' );
-}
-
 # nested anon method (RT132321)
 SKIP: {
    skip "This causes SEGV on perl 5.16 (RT132321)", 1 if $] lt "5.018";
    class RT132321 {
-      has $_genvalue;
+      has _genvalue;
 
      method new : common {
        my $self = $class->SUPER::new(@_);
@@ -87,5 +65,30 @@ EOPERL
       }
    }
 }
+
+=pod TODO
+
+# anon methods
+{
+   class Point3 {
+     has x;
+     has y;
+     has z;
+
+     our $clearer = method {
+         $self->{x} = 0;
+         $self->{y} = 0;
+         $self->{z} = 0;
+      };
+   }
+
+   my $p = Point3->new(x => 1, y => 2, z => 3 );
+   $p->$Point3::clearer();
+
+   is_deeply( [ $p->{x}, $p->{y}, $p->{z} ], [ 0, 0, 0 ],
+      'anon method' );
+}
+
+=cut
 
 done_testing;

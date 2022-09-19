@@ -8,7 +8,7 @@ use Test::More;
 use Object::Pad;
 
 class BaseClass {
-   has $data;
+   has data;
 
    method new : common {
      my $self = $class->SUPER::new(@_);
