@@ -7,6 +7,8 @@ use Test::More;
 
 use Object::Pad ':experimental(mop)';
 
+=pod
+
 {
    package AClass {
       BEGIN {
@@ -23,6 +25,8 @@ use Object::Pad ':experimental(mop)';
    is( AClass->new->message, "Hello",
       '->begin_class can create a class' );
 }
+
+=cut
 
 {
 

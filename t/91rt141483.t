@@ -10,7 +10,14 @@ use Object::Pad;
 use lib "t/lib";
 BEGIN { require "91rt141483Role.pm" }
 
-class C :does(R) { }
+class C :does(R) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
+  
+}
 
 is( C->new->name, "Gantenbein", 'Value preserved from role-scoped lexical' );
 

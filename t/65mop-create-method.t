@@ -44,6 +44,13 @@ class AClass {
          return "Classy result";
       } );
    }
+
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
+
 }
 
 {

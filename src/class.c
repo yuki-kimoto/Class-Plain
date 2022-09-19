@@ -1015,7 +1015,7 @@ XS_INTERNAL(injected_constructor)
   SV *self = sv_2mortal(newRV_noinc((SV *)newHV()));
   sv_bless(self, stash);
 
-  ST(0) = self;
+  ST(0) = &PL_sv_undef;
   
   XSRETURN(1);
 }

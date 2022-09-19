@@ -14,6 +14,11 @@ role TheRole
 
 {
    class AClass {
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
       BEGIN {
          Object::Pad::MOP::Class->for_caller->compose_role( "TheRole" );
       }
@@ -28,6 +33,11 @@ role TheRole
 
 {
    class BClass {
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
       BEGIN {
          Object::Pad::MOP::Class->for_caller->compose_role(
             Object::Pad::MOP::Class->for_class( "TheRole" )

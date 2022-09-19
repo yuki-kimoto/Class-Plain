@@ -12,13 +12,24 @@ role ARole {
 }
 
 class AClass {
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     return $self;
+   }
    method classm { "AClass" }
 }
 
 my $warnings = "";
 BEGIN { $SIG{__WARN__} = sub { $warnings .= $_[0] }; }
 
-class BClass extends AClass implements ARole {}
+class BClass extends AClass implements ARole {
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     return $self;
+   }
+}
 
 {
    my $obj = BClass->new;
@@ -37,7 +48,15 @@ BEGIN {
    undef $warnings;
 }
 
-class CClass isa AClass does ARole {}
+class CClass isa AClass does ARole {
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     $self->{other} //= "child";
+     
+     return $self;
+   }
+}
 
 {
    my $obj = CClass->new;
