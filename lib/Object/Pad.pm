@@ -405,17 +405,6 @@ returned.
       return $x;
    }
 
-=head3 :weak
-
-I<Since version 0.44.>
-
-Generated code which sets the value of this field will weaken it if it
-contains a reference. This applies to a C<:writer> accessor method. Note that this I<only> applies to
-automatically generated code; not normal code written in regular method
-bodies. If you assign into the field variable you must remember to call
-C<Scalar::Util::weaken> (or C<builtin::weaken> on Perl 5.36 or above)
-yourself.
-
 =head2 has
 
    has Name;

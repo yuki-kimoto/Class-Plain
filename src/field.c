@@ -221,43 +221,6 @@ void ObjectPad_mop_field_seal(pTHX_ FieldMeta *fieldmeta)
  * Attribute hooks *
  *******************/
 
-/* :weak */
-
-static void fieldhook_weak_post_construct(pTHX_ FieldMeta *fieldmeta, SV *_hookdata, void *_funcdata, SV *field)
-{
-  sv_rvweaken(field);
-}
-
-#ifndef HAVE_OP_WEAKEN
-static XOP xop_weaken;
-static OP *pp_weaken(pTHX)
-{
-  dSP;
-  sv_rvweaken(POPs);
-  return NORMAL;
-}
-#endif
-
-static void fieldhook_weak_gen_accessor(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata, enum AccessorType type, struct AccessorGenerationCtx *ctx)
-{
-  if(type != ACCESSOR_WRITER)
-    return;
-
-  ctx->post_bodyops = op_append_list(OP_LINESEQ, ctx->post_bodyops,
-#ifdef HAVE_OP_WEAKEN
-    newUNOP(OP_WEAKEN, 0,
-#else
-    newUNOP_CUSTOM(&pp_weaken, 0,
-#endif
-      newPADxVOP(OP_PADSV, 0, ctx->padix)));
-}
-
-static struct FieldHookFuncs fieldhooks_weak = {
-  .flags            = OBJECTPAD_FLAG_ATTR_NO_VALUE,
-  .post_construct   = &fieldhook_weak_post_construct,
-  .gen_accessor_ops = &fieldhook_weak_gen_accessor,
-};
-
 /* :reader */
 
 static SV *make_accessor_mnamesv(pTHX_ FieldMeta *fieldmeta, SV *mname, const char *fmt)
@@ -479,14 +442,6 @@ void ObjectPad_register_field_attribute(pTHX_ const char *name, const struct Fie
 
 void ObjectPad__boot_fields(pTHX)
 {
-#ifndef HAVE_OP_WEAKEN
-  XopENTRY_set(&xop_weaken, xop_name, "weaken");
-  XopENTRY_set(&xop_weaken, xop_desc, "weaken an RV");
-  XopENTRY_set(&xop_weaken, xop_class, OA_UNOP);
-  Perl_custom_op_register(aTHX_ &pp_weaken, &xop_weaken);
-#endif
-
-  register_field_attribute("weak",     &fieldhooks_weak,     NULL);
   register_field_attribute("reader",   &fieldhooks_reader,   NULL);
   register_field_attribute("writer",   &fieldhooks_writer,   NULL);
   register_field_attribute("accessor", &fieldhooks_accessor, NULL);
