@@ -146,8 +146,13 @@ On perl version 5.26 onwards:
    use Object::Pad;
 
    class Point {
-      has $x :param = 0;
-      has $y :param = 0;
+      has $x :param;
+      has $y :param;
+      
+      ADJUST {
+        $x = 0 unless length $x;
+        $y = 0 unless length $y;
+      }
 
       method move ($dX, $dY) {
          $x += $dX;
@@ -166,8 +171,13 @@ Or, for older perls that lack signatures:
    use Object::Pad;
 
    class Point {
-      has $x :param = 0;
-      has $y :param = 0;
+      has $x :param;
+      has $y :param;
+
+      ADJUST {
+        $x = 0 unless length $x;
+        $y = 0 unless length $y;
+      }
 
       method move {
          my ($dX, $dY) = @_;
@@ -566,7 +576,7 @@ exception. In order to make a parameter optional, make sure to give it a
 default expression - even if that expression is C<undef>:
 
    has $x :param;          # this is required
-   has $z :param = undef;  # this is optional
+   has $z :param;  # this is optional
 
 Any field that has a C<:param> and an initialisation block will only run the
 code in the block if required by the constructor. If a named parameter is
