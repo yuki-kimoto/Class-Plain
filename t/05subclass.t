@@ -53,7 +53,18 @@ EOPERL
    class BaseClass {
       field $_afield;
 
+       method new : common {
+         my $self = $class->SUPER::new(@_);
+         
+         return $self;
+       }
+
       class SubClass :isa(BaseClass) {
+         method new : common {
+           my $self = $class->SUPER::new(@_);
+           
+           return $self;
+         }
          method one { 1 }
       }
    }

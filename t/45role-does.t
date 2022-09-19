@@ -11,6 +11,11 @@ role ARole {
 }
 
 class AClass :does(ARole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -24,6 +29,11 @@ role BRole {
 }
 
 class BClass :does(ARole) :does(BRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -36,6 +46,11 @@ role CRole {
 }
 
 class CClass :does(CRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -92,6 +107,11 @@ role DRole :does(ARole) {
 }
 
 class DClass :does(DRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {

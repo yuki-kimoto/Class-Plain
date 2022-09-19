@@ -1012,7 +1012,7 @@ XS_INTERNAL(injected_constructor)
     croak("Unable to find stash for class %" SVf, class);
 
   DEBUG_SET_CURCOP_LINE(__LINE__);
-  SV *self = sv_2mortal(newRV_noinc((SV *)newAV()));
+  SV *self = sv_2mortal(newRV_noinc((SV *)newHV()));
   sv_bless(self, stash);
 
   ST(0) = self;

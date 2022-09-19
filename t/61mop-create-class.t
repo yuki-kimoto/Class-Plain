@@ -32,9 +32,9 @@ use Object::Pad ':experimental(mop)';
   class Parent {
     has $thing;
      method new : common {
-       my $self = bless [], $class;
+       my $self = $class->SUPER::new(@_);
        
-       $self->[$field_ids{thing}] = "parent";
+       $self->{thing} = "parent";
        
        return $self;
      }
@@ -54,11 +54,12 @@ use Object::Pad ':experimental(mop)';
        method new : common {
          my $self = $class->SUPER::new(@_);
          
-         $self->[$field_ids{other}] = "child";
+         $self->{other} //= "child";
          
          return $self;
        }
-        method other { return $other }
+       
+        method other { return $self->{other} }
      }
 
      is( Child->new->other, "child",

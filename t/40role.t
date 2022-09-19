@@ -16,6 +16,11 @@ role ARole {
 }
 
 class AClass :does(ARole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -31,6 +36,11 @@ role BRole {
 }
 
 class BClass :does(ARole) :does(BRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -61,7 +71,13 @@ pass( 'CClass compiled OK' );
       }
    }
 
-   class RecurseClass :does(RecurseRole) {}
+   class RecurseClass :does(RecurseRole) {
+      method new : common {
+        my $self = $class->SUPER::new(@_);
+        
+        return $self;
+      }
+  }
 
    is( RecurseClass->new->recurse( 5 ), 5, 'role methods can be reëntrant' );
 }
@@ -71,6 +87,11 @@ role DRole :does(BRole) {
 }
 
 class DClass :does(DRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -84,6 +105,11 @@ role ERole :does(ARole) :does(BRole) {
 }
 
 class EClass :does(ERole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -98,6 +124,11 @@ role FRole {
 }
 
 class FClass :does(FRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
 }
 
 {
@@ -111,7 +142,14 @@ role GRole {
    method a { pack "C", 65 }
 }
 
-class GClass :does(GRole) {}
+class GClass :does(GRole) {
+  method new : common {
+    my $self = $class->SUPER::new(@_);
+    
+    return $self;
+  }
+
+}
 
 {
    is( GClass->new->a, "A", 'GClass ->a method has constant' );

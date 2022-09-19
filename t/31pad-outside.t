@@ -37,6 +37,11 @@ use Object::Pad;
 # anon methods can capture lexicals (RT132178)
 {
    class Generated {
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
       foreach my $letter (qw( x y z )) {
          my $code = method {
             return uc $letter;
