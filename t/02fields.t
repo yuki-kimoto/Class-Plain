@@ -14,12 +14,11 @@ class Counter {
    has $count;
    
    method new : common {
-     
-     my $self = {@_};
+     my $self = $class->SUPER::new(@_);
      
      $self->{count} //= 0;
      
-     return bless $self, ref $class || $class;
+     return $self;
    }
 
    method inc { $self->{count}++ }
@@ -49,12 +48,11 @@ class Counter {
       has $scalar;
 
      method new : common {
-     
-       my $self = {@_};
+       my $self = $class->SUPER::new(@_);
        
        $self->{scalar} //= 123;
        
-       return bless $self, ref $class || $class;
+       return $self;
      }
 
       method test {

@@ -11,11 +11,11 @@ class BaseClass {
    has $data;
 
    method new : common {
-     my $self = {@_};
+     my $self = $class->SUPER::new(@_);
      
      $self->{data} //= 123;
      
-     return bless $self, ref $class || $class;
+     return $self;
    }
 }
 

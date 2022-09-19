@@ -14,12 +14,12 @@ class Point {
    has $y;
 
    method new : common {
-     my $self = {x => $_[0], y => $_[1]};
+     my $self = $class->SUPER::new(x => $_[0], y => $_[1]);
      
      $self->{x} //= 0;
      $self->{y} //= 0;
      
-     return bless $self, ref $class || $class;
+     return $self;
    }
 
    method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }

@@ -12,13 +12,6 @@ class Point {
    has $x;
    has $y;
    
-   method new : common {
-     
-     my $self = {@_};
-     
-     return bless $self, ref $class || $class;
-   }
-   
    method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
 }
 
@@ -37,13 +30,6 @@ class Point {
      has $y;
      has $z;
 
-     method new : common {
-       
-       my $self = {@_};
-       
-       return bless $self, ref $class || $class;
-     }
-     
      our $clearer = method {
        
          $self->{x} = 0;
@@ -66,11 +52,11 @@ SKIP: {
       has $_genvalue;
 
      method new : common {
-       my $self = {@_};
+       my $self = $class->SUPER::new(@_);
 
        $self->{_genvalue} //= method { 123 };
        
-       return bless $self, ref $class || $class;
+       return $self;
      }
 
       method value { $self->{_genvalue}->($self) }
