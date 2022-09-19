@@ -18,7 +18,7 @@ class AClass {
 
       my $fieldmeta = $classmeta->add_field( '$field',
          default => 100,
-         param   => "field",
+         param   => 1,
       );
 
       is( $fieldmeta->name, "\$field", '$fieldmeta->name' );

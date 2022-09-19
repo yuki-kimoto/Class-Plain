@@ -9,7 +9,7 @@ use Test::Fatal;
 use Object::Pad ':experimental(mop)';
 
 class Example {
-   has $field :accessor :param(initial_field);
+   has $field :accessor :param;
    ADJUST { $field = undef }
 }
 
@@ -24,9 +24,6 @@ is( $fieldmeta->class->name, "Example", '$fieldmeta->class gives class' );
 ok( $fieldmeta->has_attribute( "accessor" ), '$fieldmeta has "accessor" attribute' );
 is( $fieldmeta->get_attribute_value( "accessor" ), "field",
    'value of $fieldmeta "accessor" attribute' );
-
-is( $fieldmeta->get_attribute_value( "param" ), "initial_field",
-   'value of $fieldmeta "param" attribute' );
 
 is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
    '$classmeta->fields' );

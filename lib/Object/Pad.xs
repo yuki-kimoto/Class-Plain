@@ -1689,3 +1689,5 @@ BOOT:
 
   ObjectPad__boot_classes(aTHX);
   ObjectPad__boot_fields(aTHX);
+  
+  

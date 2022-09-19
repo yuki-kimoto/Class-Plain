@@ -561,7 +561,7 @@ bodies. If you assign into the field variable you must remember to call
 C<Scalar::Util::weaken> (or C<builtin::weaken> on Perl 5.36 or above)
 yourself.
 
-=head3 :param, :param(NAME)
+=head3 :param
 
 I<Since version 0.41.>
 

@@ -315,23 +315,15 @@ static bool fieldhook_param_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **ho
   if(SvPVX(fieldmeta->name)[0] != '$')
     croak("Can only add a named constructor parameter for scalar fields");
 
-  char *paramname = value ? SvPVX(value) : NULL;
-
   U32 flags = 0;
-  if(value && SvUTF8(value))
+  char *paramname = SvPVX(fieldmeta->name) + 1;
+  if(SvUTF8(fieldmeta->name))
     flags |= SVf_UTF8;
-
-  if(!paramname) {
-    paramname = SvPVX(fieldmeta->name) + 1;
-    if(SvUTF8(fieldmeta->name))
-      flags |= SVf_UTF8;
-  }
 
   SV *namesv = newSVpvn_flags(paramname, strlen(paramname), flags);
 
   mop_field_set_param(fieldmeta, namesv);
 
-  *hookdata_ptr = namesv;
   return TRUE;
 }
 
