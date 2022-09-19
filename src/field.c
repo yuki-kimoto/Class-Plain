@@ -18,10 +18,6 @@
 #include "make_argcheck_ops.c.inc"
 #include "newOP_CUSTOM.c.inc"
 
-#if HAVE_PERL_VERSION(5,36,0)
-#  define HAVE_OP_WEAKEN
-#endif
-
 #define need_PLparser()  ClassPlain__need_PLparser(aTHX)
 void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
 
