@@ -28,6 +28,8 @@ require mro;
 
 require Object::Pad::MOP::Class;
 
+use base 'Object::Pad::Base';
+
 sub import
 {
    my $class = shift;
