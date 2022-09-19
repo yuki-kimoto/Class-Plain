@@ -13,11 +13,12 @@ class Counter {
    has $count;
    
    method new : common {
-     my $self = {@_};
+     my $self = $class->SUPER::new(@_);
+
      
      $self->{count} //= 0;
      
-     return bless $self, ref $class || $class;
+     return $self;
    }
    method count {
      if (@_) { $self->{count} = $_[0]; return $self; } else { $self->{count} }

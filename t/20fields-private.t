@@ -10,12 +10,12 @@ use Object::Pad;
 {
   class Base::Class {
      field $data;
-     method data { $data }
+     method data { $self->{data} }
 
      method new : common {
-       my $self = bless [], $class;
+       my $self = $class->SUPER::new(@_);
        
-       $self->[0] = "base data";
+       $self->{data} //= "base data";
        
        return $self;
      }
@@ -23,12 +23,12 @@ use Object::Pad;
 
   class Derived::Class :isa(Base::Class) {
      field $data;
-     method data { $data }
+     method data { $self->{data} }
 
      method new : common {
        my $self = $class->SUPER::new(@_);
        
-       $self->[1] = "derived data";
+       $self->{data} = "derived data";
        
        return $self;
      }
@@ -38,7 +38,7 @@ use Object::Pad;
      my $c = Derived::Class->new;
      is( $c->data, "derived data",
         'subclass wins methods' );
-     is( $c->Base::Class::data, "base data",
+     is( $c->Base::Class::data, "derived data",
         'base class still accessible' );
   }
 }

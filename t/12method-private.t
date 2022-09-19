@@ -11,9 +11,9 @@ class AClass {
    field $data;
 
    method new : common {
-     my $self = {@_};
+     my $self = $class->SUPER::new(@_);
      
-     return bless $self, ref $class || $class;
+     return $self;
    }
 
    my $priv = method {
