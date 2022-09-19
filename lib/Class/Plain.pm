@@ -101,8 +101,6 @@ sub import_into
    my $class = shift;
    my $caller = shift;
 
-   $class->_import_experimental( \@_, qw( init_expr mop custom_field_attr ) );
-
    $class->_import_configuration( \@_ );
 
    my %syms = map { $_ => 1 } @_;
@@ -553,22 +551,5 @@ See also
 L<https://github.com/Perl-Toolchain-Gang/Module-Metadata/issues/33>
 
 =back
-
-=head2 Experimental Features
-
-I<Since version 0.63.>
-
-Some of the features of this module are currently marked as experimental. They
-will provoke warnings in the C<experimental> category, unless silenced.
-
-You can silence this with C<no warnings 'experimental'> but then that will
-silence every experimental warning, which may hide others unintentionally. For
-a more fine-grained approach you can instead use the import line for this
-module to only silence the module's warnings selectively:
-
-   use Class::Plain ':experimental(mop)';
-
-   use Class::Plain ':experimental';  # all of the above
-
 
 1;
