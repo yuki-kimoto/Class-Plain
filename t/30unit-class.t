@@ -9,9 +9,17 @@ use Object::Pad;
 
 class Counter;
 has $count;
-ADJUST {
-  $count = 0
-}
+
+ method new : common {
+   my $self = bless [], $class;
+   
+   my @field_names = qw(count);
+   my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+   $self->[$field_ids{count}] = 0;
+   
+   return $self;
+ }
+
 method count :lvalue { $count }
 method inc { $count++ }
 

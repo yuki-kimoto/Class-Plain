@@ -48,9 +48,15 @@ SKIP: {
    class RT132321 {
       has $_genvalue;
 
-      ADJUST {
-         $_genvalue = method { 123 };
-      }
+     method new : common {
+       my $self = bless [], $class;
+       
+       my @field_names = qw(_genvalue);
+       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+       $self->[$field_ids{_genvalue}] = method { 123 };
+       
+       return $self;
+     }
 
       method value { $self->$_genvalue() }
    }
