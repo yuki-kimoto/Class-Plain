@@ -5,14 +5,14 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 {
    package ARole {
       BEGIN {
-         Object::Pad->import_into( "ARole" );
+         Class::Plain->import_into( "ARole" );
 
-         my $rolemeta = Object::Pad::MOP::Class->begin_role( "ARole" );
+         my $rolemeta = Class::Plain::MOP::Class->begin_role( "ARole" );
 
          $rolemeta->add_field( '$field',
             reader => "get_role_field",

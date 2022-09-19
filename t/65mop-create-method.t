@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 class AClass {
    use Test::More;
@@ -14,7 +14,7 @@ class AClass {
    BEGIN {
       # Most of this test has to happen at BEGIN time before AClass gets
       # sealed
-      my $classmeta = Object::Pad::MOP::Class->for_caller;
+      my $classmeta = Class::Plain::MOP::Class->for_caller;
 
       my $methodmeta = $classmeta->add_method( 'method', sub {
          return "result";

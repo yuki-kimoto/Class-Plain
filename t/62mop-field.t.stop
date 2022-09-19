@@ -6,14 +6,14 @@ use warnings;
 use Test::More;
 use Test::Fatal;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 class Example {
    has $field :accessor :param;
    ADJUST { $field = undef }
 }
 
-my $classmeta = Object::Pad::MOP::Class->for_class( "Example" );
+my $classmeta = Class::Plain::MOP::Class->for_class( "Example" );
 
 my $fieldmeta = $classmeta->get_field( '$field' );
 
@@ -54,7 +54,7 @@ is_deeply( [ $classmeta->fields ], [ $fieldmeta ],
       ADJUST { $data = 42 }
    }
 
-   my $fieldmeta = Object::Pad::MOP::Class->for_class( 'ARole' )->get_field( '$data' );
+   my $fieldmeta = Class::Plain::MOP::Class->for_class( 'ARole' )->get_field( '$data' );
    is( $fieldmeta->name, '$data', '$fieldmeta->name for field of role' );
 
    class AClass :does(ARole) {

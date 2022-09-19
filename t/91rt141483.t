@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad;
+use Class::Plain;
 
 use lib "t/lib";
 BEGIN { require "91rt141483Role.pm" }

@@ -1,4 +1,4 @@
-package Object::Pad::Base;
+package Class::Plain::Base;
 
 use strict;
 use warnings;

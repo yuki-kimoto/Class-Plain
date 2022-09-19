@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 class Example {
  method new : common {
@@ -15,7 +15,7 @@ class Example {
  }
 }
 
-my $meta = Object::Pad::MOP::Class->for_class( "Example" );
+my $meta = Class::Plain::MOP::Class->for_class( "Example" );
 
 is( $meta->name, "Example", '$meta->name' );
 ok(  $meta->is_class, '$meta->is_class true' );
@@ -34,7 +34,7 @@ class Example2 :isa(Example) {
  }
 }
 
-is_deeply( [ Object::Pad::MOP::Class->for_class( "Example2" )->superclasses ],
+is_deeply( [ Class::Plain::MOP::Class->for_class( "Example2" )->superclasses ],
    [ $meta ],
    '$meta->superclasses on subclass' );
 

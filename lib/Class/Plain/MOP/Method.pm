@@ -3,27 +3,27 @@
 #
 #  (C) Paul Evans, 2020 -- leonerd@leonerd.org.uk
 
-package Object::Pad::MOP::Method 0.68;
+package Class::Plain::MOP::Method 0.68;
 
 use v5.14;
 use warnings;
 
-# This is an XS-implemented object type provided by Object::Pad itself
-require Object::Pad;
+# This is an XS-implemented object type provided by Class::Plain itself
+require Class::Plain;
 
 =head1 NAME
 
-C<Object::Pad::MOP::Method> - meta-object representation of a method of a C<Object::Pad> class
+C<Class::Plain::MOP::Method> - meta-object representation of a method of a C<Class::Plain> class
 
 =head1 DESCRIPTION
 
 Instances of this class represent a method of a class implemented by
-L<Object::Pad>. Accessors provide information about the method.
+L<Class::Plain>. Accessors provide information about the method.
 
 This API should be considered B<experimental>, and will emit warnings to that
 effect. They can be silenced with
 
-   use Object::Pad qw( :experimental(mop) );
+   use Class::Plain qw( :experimental(mop) );
 
 =cut
 
@@ -37,7 +37,7 @@ Returns the name of the method, as a plain string.
 
 =head2 class
 
-Returns the L<Object::Pad::MOP::Class> instance representing the class of
+Returns the L<Class::Plain::MOP::Class> instance representing the class of
 which this method is a member.
 
 =head2 is_common

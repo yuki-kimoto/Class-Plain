@@ -1,3 +1,18 @@
+package Class::Plain::ExtensionBuilder_data 0.68;
+
+use v5.14;
+use warnings;
+
+# The contents of the "object_pad.h" file
+my $object_pad_h = do {
+   local $/;
+   readline DATA;
+};
+sub OBJECT_PAD_H() { $object_pad_h }
+
+0x55AA;
+
+__DATA__
 #ifndef __OBJECT_PAD__TYPES_H__
 #define __OBJECT_PAD__TYPES_H__
 
@@ -117,7 +132,7 @@ OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
 
 /* op_private flags on FIELDPAD ops */
 enum {
-  OPpFIELDPAD_SV,  /* has $x */
+  OPpFIELDPAD_SV,  /* has x */
   OPpFIELDPAD_AV,  /* has @y */
   OPpFIELDPAD_HV,  /* has %z */
 };

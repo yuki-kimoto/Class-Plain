@@ -3,7 +3,7 @@
 #
 #  (C) Paul Evans, 2019-2022 -- leonerd@leonerd.org.uk
 
-package Object::Pad 0.68;
+package Class::Plain 0.68;
 
 use v5.14;
 use warnings;
@@ -26,9 +26,9 @@ if( $] >= 5.020 ) {
 
 require mro;
 
-require Object::Pad::MOP::Class;
+require Class::Plain::MOP::Class;
 
-use base 'Object::Pad::Base';
+use base 'Class::Plain::Base';
 
 sub import
 {
@@ -65,7 +65,7 @@ sub _import_experimental
    }
 
    foreach ( @experiments ) {
-      $^H{"Object::Pad/experimental($_)"}++ if delete $enabled{$_};
+      $^H{"Class::Plain/experimental($_)"}++ if delete $enabled{$_};
    }
 
    croak "Unrecognised :experimental features @{[ keys %enabled ]}" if keys %enabled;
@@ -85,7 +85,7 @@ sub _import_configuration
 
       if( $sym =~ m/^:config\((.*)\)$/ ) {
          my $opts = $1 =~ s/^\s+|\s+$//gr; # trim
-         $^H{"Object::Pad/configure($_)"}++ for split m/\s+/, $opts;
+         $^H{"Class::Plain/configure($_)"}++ for split m/\s+/, $opts;
       }
       else {
          $i++;
@@ -112,25 +112,25 @@ sub import_into
       $syms{$_}++ for qw( class role method field has);
    }
 
-   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has);
+   delete $syms{$_} and $^H{"Class::Plain/$_"}++ for qw( class role method field has);
 
    croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
 }
 
 # The universal base-class methods
 
-sub Object::Pad::UNIVERSAL::_BUILDARGS
+sub Class::Plain::UNIVERSAL::_BUILDARGS
 {
    shift; # $class
    return @_;
 }
 
 # Back-compat wrapper
-sub Object::Pad::MOP::SlotAttr::register
+sub Class::Plain::MOP::SlotAttr::register
 {
    shift; # $class
-   carp "Object::Pad::MOP::SlotAttr->register is now deprecated; use Object::Pad::MOP::FieldAttr->register instead";
-   return Object::Pad::MOP::FieldAttr->register( @_ );
+   carp "Class::Plain::MOP::SlotAttr->register is now deprecated; use Class::Plain::MOP::FieldAttr->register instead";
+   return Class::Plain::MOP::FieldAttr->register( @_ );
 }
 
 
@@ -138,14 +138,14 @@ sub Object::Pad::MOP::SlotAttr::register
 
 =head1 NAME
 
-C<Object::Pad> - a simple syntax for lexical field-based objects
+C<Class::Plain> - a simple syntax for lexical field-based objects
 
 =head1 SYNOPSIS
 
 On perl version 5.26 onwards:
 
    use v5.26;
-   use Object::Pad;
+   use Class::Plain;
 
    class Point {
       has x;
@@ -178,7 +178,7 @@ This module provides a class syntax for hash-based Perl OO.
 
 =head2 Inheritance
 
-The class that has not the parent class inherits L<Object::Pad::Base>.
+The class that has not the parent class inherits L<Class::Plain::Base>.
 
 =head1 KEYWORDS
 
@@ -268,7 +268,7 @@ load it by code equivalent to
 and thus it must either already exist, or be locatable via the usual C<@INC>
 mechanisms.
 
-The superclass may or may not itself be implemented by C<Object::Pad>, but if
+The superclass may or may not itself be implemented by C<Class::Plain>, but if
 it is not then see L<SUBCLASSING CLASSIC PERL CLASSES> for further detail on
 the semantics of how this operates.
 
@@ -468,7 +468,7 @@ Every method automatically gets the C<:method> attribute applied, which
 suppresses warnings about ambiguous calls resolved to core functions if the
 name of a method matches a core function.
 
-The following additional attributes are recognised by C<Object::Pad> directly:
+The following additional attributes are recognised by C<Class::Plain> directly:
 
 =head3 :override
 
@@ -566,9 +566,9 @@ silence every experimental warning, which may hide others unintentionally. For
 a more fine-grained approach you can instead use the import line for this
 module to only silence the module's warnings selectively:
 
-   use Object::Pad ':experimental(mop)';
+   use Class::Plain ':experimental(mop)';
 
-   use Object::Pad ':experimental';  # all of the above
+   use Class::Plain ':experimental';  # all of the above
 
 
 1;

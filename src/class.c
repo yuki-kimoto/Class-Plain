@@ -33,8 +33,8 @@
 #  define DEBUG_SET_CURCOP_LINE(line)
 #endif
 
-#define need_PLparser()  ObjectPad__need_PLparser(aTHX)
-void ObjectPad__need_PLparser(pTHX); /* in Object/Pad.xs */
+#define need_PLparser()  ClassPlain__need_PLparser(aTHX)
+void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
 
 typedef struct ClassAttributeRegistration ClassAttributeRegistration;
 
@@ -68,7 +68,7 @@ static void register_class_attribute(const char *name, const struct ClassHookFun
   classattrs = reg;
 }
 
-void ObjectPad_register_class_attribute(pTHX_ const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
+void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
 {
   if(funcs->ver < 57)
     croak("Mismatch in third-party class attribute ABI version field: module wants %d, we require >= 57\n",
@@ -86,7 +86,7 @@ void ObjectPad_register_class_attribute(pTHX_ const char *name, const struct Cla
   register_class_attribute(name, funcs, funcdata);
 }
 
-void ObjectPad_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value)
+void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value)
 {
   HV *hints = GvHV(PL_hintgv);
 
@@ -137,7 +137,7 @@ void ObjectPad_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char 
 
 /* TODO: get attribute */
 
-ClassMeta *ObjectPad_mop_get_class_for_stash(pTHX_ HV *stash)
+ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
 {
   GV **gvp = (GV **)hv_fetchs(stash, "META", 0);
   if(!gvp)
@@ -186,7 +186,7 @@ static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backing
   }
 }
 
-SV *ObjectPad_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create)
+SV *ClassPlain_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create)
 {
   SV *rv = SvRV(self);
 
@@ -213,7 +213,7 @@ static CV *S_embed_cv(pTHX_ CV *cv, RoleEmbedding *embedding)
   return embedded_cv;
 }
 
-RoleEmbedding **ObjectPad_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
+RoleEmbedding **ClassPlain_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
 {
   assert(meta->type == METATYPE_CLASS);
   AV *roles = meta->cls.direct_roles;
@@ -221,7 +221,7 @@ RoleEmbedding **ObjectPad_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta
   return (RoleEmbedding **)AvARRAY(roles);
 }
 
-RoleEmbedding **ObjectPad_mop_class_get_all_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
+RoleEmbedding **ClassPlain_mop_class_get_all_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
 {
   assert(meta->type == METATYPE_CLASS);
   AV *roles = meta->cls.embedded_roles;
@@ -229,7 +229,7 @@ RoleEmbedding **ObjectPad_mop_class_get_all_roles(pTHX_ const ClassMeta *meta, U
   return (RoleEmbedding **)AvARRAY(roles);
 }
 
-MethodMeta *ObjectPad_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
+MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   AV *methods = meta->direct_methods;
 
@@ -263,7 +263,7 @@ MethodMeta *ObjectPad_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname
   return methodmeta;
 }
 
-FieldMeta *ObjectPad_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
+FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 {
   AV *fields = meta->direct_fields;
 
@@ -295,7 +295,7 @@ FieldMeta *ObjectPad_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-void ObjectPad_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname)
+void ClassPlain_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   if(meta->type != METATYPE_ROLE)
     croak("Can only add a required method to a role");
@@ -399,7 +399,7 @@ static RoleEmbedding *S_embed_role(pTHX_ ClassMeta *classmeta, ClassMeta *roleme
   return embedding;
 }
 
-void ObjectPad_mop_class_add_role(pTHX_ ClassMeta *dstmeta, ClassMeta *rolemeta)
+void ClassPlain_mop_class_add_role(pTHX_ ClassMeta *dstmeta, ClassMeta *rolemeta)
 {
   if(dstmeta->sealed)
     croak("Cannot add a role to an already-sealed class");
@@ -432,7 +432,7 @@ void ObjectPad_mop_class_add_role(pTHX_ ClassMeta *dstmeta, ClassMeta *rolemeta)
   }
 }
 
-void ObjectPad_mop_class_load_and_add_role(pTHX_ ClassMeta *meta, SV *rolename, SV *rolever)
+void ClassPlain_mop_class_load_and_add_role(pTHX_ ClassMeta *meta, SV *rolename, SV *rolever)
 {
   HV *rolestash = gv_stashsv(rolename, 0);
   if(!rolestash || !hv_fetchs(rolestash, "META", 0)) {
@@ -539,7 +539,7 @@ static OP *pp_croak_from_constructor(pTHX)
   croak_sv(POPs);
 }
 
-void ObjectPad_mop_class_seal(pTHX_ ClassMeta *meta)
+void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
 {
   if(meta->sealed) /* idempotent */
     return;
@@ -707,7 +707,7 @@ XS_INTERNAL(injected_DOES)
       XSRETURN_YES;
   }
   else {
-    /* We need to also respond to Object::Pad::Base and UNIVERSAL */
+    /* We need to also respond to Class::Plain::Base and UNIVERSAL */
     if(sv_derived_from_sv(self, wantrole, 0))
       XSRETURN_YES;
   }
@@ -715,7 +715,7 @@ XS_INTERNAL(injected_DOES)
   XSRETURN_NO;
 }
 
-ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
+ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 {
   assert(type == METATYPE_CLASS || type == METATYPE_ROLE);
 
@@ -789,7 +789,7 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
     GvMULTI_on(gv);
 
     SV *sv;
-    sv_setref_uv(sv = GvSVn(gv), "Object::Pad::MOP::Class", PTR2UV(meta));
+    sv_setref_uv(sv = GvSVn(gv), "Class::Plain::MOP::Class", PTR2UV(meta));
 
     newCONSTSUB(meta->stash, "META", sv);
   }
@@ -797,7 +797,7 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
   return meta;
 }
 
-void ObjectPad_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassname)
+void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassname)
 {
   assert(meta->type == METATYPE_CLASS);
 
@@ -822,7 +822,7 @@ void ObjectPad_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassnam
     supermeta = NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*metagvp))));
 
   if(supermeta) {
-    /* A subclass of an Object::Pad class */
+    /* A subclass of an Class::Plain class */
     if(supermeta->type != METATYPE_CLASS)
       croak("%" SVf " is not a class", SVfARG(superclassname));
 
@@ -862,14 +862,14 @@ void ObjectPad_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassnam
   meta->cls.supermeta = supermeta;
 }
 
-void ObjectPad_mop_class_begin(pTHX_ ClassMeta *meta)
+void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
 {
   SV *isaname = newSVpvf("%" SVf "::ISA", meta->name);
   SAVEFREESV(isaname);
 
   AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
   if(!av_count(isa))
-    av_push(isa, newSVpvs("Object::Pad::Base"));
+    av_push(isa, newSVpvs("Class::Plain::Base"));
 
   if(meta->type == METATYPE_CLASS &&
       meta->repr == REPR_AUTOSELECT && !meta->cls.foreign_new)
@@ -989,12 +989,12 @@ static const struct ClassHookFuncs classhooks_does = {
   .apply = &classhook_does_apply,
 };
 
-void ObjectPad__boot_classes(pTHX)
+void ClassPlain__boot_classes(pTHX)
 {
   register_class_attribute("isa",    &classhooks_isa,    NULL);
   register_class_attribute("does",   &classhooks_does,   NULL);
 
 #ifdef HAVE_DMD_HELPER
-  DMD_ADD_ROOT((SV *)&vtbl_backingav, "the Object::Pad backing AV VTBL");
+  DMD_ADD_ROOT((SV *)&vtbl_backingav, "the Class::Plain backing AV VTBL");
 #endif
 }

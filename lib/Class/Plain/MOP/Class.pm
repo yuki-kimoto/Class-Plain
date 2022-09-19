@@ -3,23 +3,23 @@
 #
 #  (C) Paul Evans, 2020-2022 -- leonerd@leonerd.org.uk
 
-package Object::Pad::MOP::Class 0.68;
+package Class::Plain::MOP::Class 0.68;
 
 use v5.14;
 use warnings;
 use Carp;
 
-# This is an XS-implemented object type provided by Object::Pad itself
-require Object::Pad;
+# This is an XS-implemented object type provided by Class::Plain itself
+require Class::Plain;
 
 =head1 NAME
 
-C<Object::Pad::MOP::Class> - meta-object representation of a C<Object::Pad> class
+C<Class::Plain::MOP::Class> - meta-object representation of a C<Class::Plain> class
 
 =head1 DESCRIPTION
 
 Instances of this class represent a class or role implemented by
-L<Object::Pad>. Accessors provide information about the class or role, and
+L<Class::Plain>. Accessors provide information about the class or role, and
 methods that can alter the class, typically by adding new elements to it, 
 allow a program to extend existing classes.
 
@@ -28,11 +28,11 @@ Where possible, this API is designed to be compatible with L<MOP::Class>.
 This API should be considered B<experimental>, and will emit warnings to that
 effect. They can be silenced with
 
-   use Object::Pad qw( :experimental(mop) );
+   use Class::Plain qw( :experimental(mop) );
 
 or
 
-   use Object::Pad::MOP::Class qw( :experimental(mop) );
+   use Class::Plain::MOP::Class qw( :experimental(mop) );
 
 =cut
 
@@ -49,7 +49,7 @@ sub import_into
    my $class = shift;
    my $caller = shift;
 
-   Object::Pad->_import_experimental( \@_, qw( mop ) );
+   Class::Plain->_import_experimental( \@_, qw( mop ) );
 
    croak "Unrecognised import symbols @_" if @_;
 }
@@ -58,7 +58,7 @@ sub import_into
 
 =head2 for_class
 
-   $metaclass = Object::Pad::MOP::Class->for_class( $class )
+   $metaclass = Class::Plain::MOP::Class->for_class( $class )
 
 I<Since version 0.38.>
 
@@ -75,9 +75,9 @@ sub for_class
    $level++ while (caller $level)[0] eq __PACKAGE__;
 
    my $callerhints = (caller $level)[10];
-   if( !$callerhints or !$callerhints->{"Object::Pad/experimental(mop)"} ) {
+   if( !$callerhints or !$callerhints->{"Class::Plain/experimental(mop)"} ) {
       warnings::warnif experimental =>
-        "Object::Pad::MOP is experimental and may be changed or removed without notice";
+        "Class::Plain::MOP is experimental and may be changed or removed without notice";
    }
 
    return $targetclass->META;
@@ -85,7 +85,7 @@ sub for_class
 
 =head2 for_caller
 
-   $metaclass = Object::Pad::MOP::Class->for_caller;
+   $metaclass = Class::Plain::MOP::Class->for_caller;
 
 I<Since version 0.38.>
 
@@ -95,7 +95,7 @@ perform adjustments or additions.
 
    class Some::Class::Here 1.234 {
       BEGIN {
-         my $meta = Object::Pad::MOP::Class->for_caller;
+         my $meta = Class::Plain::MOP::Class->for_caller;
          ...
       }
    }
@@ -109,7 +109,7 @@ sub for_caller
 
 =head2 create_class
 
-   my $metaclass = Object::Pad::MOP::Class->create_class( $name, %args )
+   my $metaclass = Class::Plain::MOP::Class->create_class( $name, %args )
 
 I<Since version 0.61.>
 
@@ -134,7 +134,7 @@ it can be used to actually construct object instances.
 
 =head2 create_role
 
-   my $metaclass = Object::Pad::MOP::Class->create_role( $name, %args )
+   my $metaclass = Class::Plain::MOP::Class->create_role( $name, %args )
 
 I<Since version 0.61.>
 
@@ -148,7 +148,7 @@ sub create_role  { shift->_create_role ( shift, @_ ); }
 =head2 begin_class
 
    BEGIN {
-      my $metaclass = Object::Pad::MOP::Class->begin_class( $name, %args )
+      my $metaclass = Class::Plain::MOP::Class->begin_class( $name, %args )
       ...
    }
 
@@ -156,7 +156,7 @@ I<Since version 0.46.>
 
 A variant of L</create_class> which sets the newly-created class as the
 current complication scope of the surrounding code, allowing it to accept
-C<Object::Pad> syntax forms such as C<has> and C<method>.
+C<Class::Plain> syntax forms such as C<has> and C<method>.
 
 This must be done during C<BEGIN> time because of this compiletime effect.
 It additionally creates a deferred code block at C<UNITCHECK> time of its
@@ -197,9 +197,9 @@ Returns the name of the class, as a plain string.
 
    @classes = $metaclass->superclasses
 
-Returns a list of superclasses, as L<Object::Pad::MOP::Class> instances.
+Returns a list of superclasses, as L<Class::Plain::MOP::Class> instances.
 
-Because C<Object::Pad> does not support multiple superclasses, this list will
+Because C<Class::Plain> does not support multiple superclasses, this list will
 contain at most one item.
 
 =head2 direct_roles
@@ -208,7 +208,7 @@ contain at most one item.
 
 Returns a list of the roles introduced by this class (i.e. added by `does`
 declarations but not inherited from the superclass), as
-L<Object::Pad::MOP::Class> instances.
+L<Class::Plain::MOP::Class> instances.
 
 This method is also aliased as C<roles>.
 
@@ -219,7 +219,7 @@ This method is also aliased as C<roles>.
 I<Since version 0.56.>
 
 Returns a list of all the roles implemented by this class (i.e. including
-those inherited from the superclass), as L<Object::Pad::MOP::Class> instances.
+those inherited from the superclass), as L<Class::Plain::MOP::Class> instances.
 
 =head2 add_role
 
@@ -231,7 +231,7 @@ I<Since version 0.56.>
 Adds a new role to the list of those implemented by the class.
 
 The new role can be specified either as a plain string giving its name, or as
-an C<Object::Pad::MOP::Class> meta instance directly.
+an C<Class::Plain::MOP::Class> meta instance directly.
 
 Before version 0.56 this was called C<compose_role>.
 
@@ -247,7 +247,7 @@ Adds a new C<BUILD> block to the class, as a CODE reference.
 
 Adds a new named method to the class under the given name, as CODE reference.
 
-Returns an instance of L<Object::Pad::MOP::Method> to represent it.
+Returns an instance of L<Class::Plain::MOP::Method> to represent it.
 
 Recognises the following additional named arguments:
 
@@ -265,7 +265,7 @@ If true, the method is a class-common method.
 
    $metamethod = $metaclass->get_direct_method( $name )
 
-Returns an instance of L<Object::Pad::MOP::Method> to represent the method of
+Returns an instance of L<Class::Plain::MOP::Method> to represent the method of
 the given name, if one exists. If not an exception is thrown.
 
 This can only see directly-applied methods; that is, methods created by the
@@ -282,7 +282,7 @@ L<MOP::Class> interface.
 
 I<Since version 0.57.>
 
-Returns an instance of L<Object::Pad::MOP::Method> to represent the method of
+Returns an instance of L<Class::Plain::MOP::Method> to represent the method of
 the given name, if one exists. If not an exception is thrown.
 
 This will additionally search superclasses, and may return a method belonging
@@ -294,7 +294,7 @@ to a parent class.
 
 I<Since version 0.57.>
 
-Returns a list of L<Object::Pad::MOP::Method> instances to represent all the
+Returns a list of L<Class::Plain::MOP::Method> instances to represent all the
 direct methods of the class. This list may be empty.
 
 =head2 all_methods
@@ -303,7 +303,7 @@ direct methods of the class. This list may be empty.
 
 I<Since version 0.57.>
 
-Returns a list of L<Object::Pad::MOP::Method> instances to represent all the
+Returns a list of L<Class::Plain::MOP::Method> instances to represent all the
 methods of the class, including those inherited from superclasses. This list
 may be empty.
 
@@ -362,7 +362,7 @@ accessor methods will be weakened, similar to setting the C<:weak> attribute.
 
 =back
 
-Returns an instance of L<Object::Pad::MOP::Field> to represent it.
+Returns an instance of L<Class::Plain::MOP::Field> to represent it.
 
 =head2 add_slot
 
@@ -387,7 +387,7 @@ sub add_slot
 
 I<Since version 0.60.>
 
-Returns an instance of L<Object::Pad::MOP::Field> to represent the field of
+Returns an instance of L<Class::Plain::MOP::Field> to represent the field of
 the given name, if one exists. If not an exception is thrown.
 
 =head2 get_slot
@@ -413,7 +413,7 @@ sub get_slot
 
 I<Since version 0.60.>
 
-Returns a list of L<Object::Pad::MOP::Field> instances to represent all the
+Returns a list of L<Class::Plain::MOP::Field> instances to represent all the
 fields of the class. This list may be empty.
 
 =head2 slots

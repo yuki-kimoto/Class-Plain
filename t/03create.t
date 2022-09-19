@@ -7,7 +7,7 @@ use Test::More;
 
 use Scalar::Util qw( reftype );
 
-use Object::Pad;
+use Class::Plain;
 
 class Point {
    has x;

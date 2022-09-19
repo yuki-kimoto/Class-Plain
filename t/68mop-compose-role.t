@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 role TheRole
 {
@@ -20,11 +20,11 @@ role TheRole
        return $self;
      }
       BEGIN {
-         Object::Pad::MOP::Class->for_caller->compose_role( "TheRole" );
+         Class::Plain::MOP::Class->for_caller->compose_role( "TheRole" );
       }
    }
 
-   my $ameta = Object::Pad::MOP::Class->for_class( "AClass" );
+   my $ameta = Class::Plain::MOP::Class->for_class( "AClass" );
 
    is_deeply( [ map { $_->name } $ameta->direct_roles ], [qw( TheRole )],
       'AClass meta ->direct_roles' );
@@ -39,13 +39,13 @@ role TheRole
        return $self;
      }
       BEGIN {
-         Object::Pad::MOP::Class->for_caller->compose_role(
-            Object::Pad::MOP::Class->for_class( "TheRole" )
+         Class::Plain::MOP::Class->for_caller->compose_role(
+            Class::Plain::MOP::Class->for_class( "TheRole" )
          );
       }
    }
 
-   my $bmeta = Object::Pad::MOP::Class->for_class( "BClass" );
+   my $bmeta = Class::Plain::MOP::Class->for_class( "BClass" );
 
    is_deeply( [ map { $_->name } $bmeta->direct_roles ], [qw( TheRole )],
       'BClass meta ->direct_roles' );

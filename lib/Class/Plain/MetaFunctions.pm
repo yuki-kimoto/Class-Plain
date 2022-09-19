@@ -3,7 +3,7 @@
 #
 #  (C) Paul Evans, 2022 -- leonerd@leonerd.org.uk
 
-package Object::Pad::MetaFunctions 0.68;
+package Class::Plain::MetaFunctions 0.68;
 
 use v5.14;
 use warnings;
@@ -29,12 +29,12 @@ BEGIN {
 
 =head1 NAME
 
-C<Object::Pad::MetaFunctions> - utility functions for C<Object::Pad> classes
+C<Class::Plain::MetaFunctions> - utility functions for C<Class::Plain> classes
 
 =head1 SYNOPSIS
 
    use v5.36;
-   use Object::Pad::MetaFunctions qw( deconstruct_object );
+   use Class::Plain::MetaFunctions qw( deconstruct_object );
 
    sub debug_print_object ( $obj )
    {
@@ -50,7 +50,7 @@ C<Object::Pad::MetaFunctions> - utility functions for C<Object::Pad> classes
 =head1 DESCRIPTION
 
 This module contains a number of miscellaneous utility functions for working
-with L<Object::Pad>-based classes or instances thereof.
+with L<Class::Plain>-based classes or instances thereof.
 
 These functions all involve a certain amount of encapsulation-breaking into
 the object instances being operated on. This sort of thing shouldn't be
@@ -74,7 +74,7 @@ interface encapsulation, is really the best technique to achieve your goal.
 
 I<Since version 0.67.>
 
-Returns the L<Object::Pad::MOP::Class> metaclass associated with the class
+Returns the L<Class::Plain::MOP::Class> metaclass associated with the class
 that the object is an instance of.
 
 =head2 deconstruct_object

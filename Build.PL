@@ -16,7 +16,7 @@ if( $Config{ccname} eq "gcc" ) {
 }
 
 my $build = Module::Build->new(
-   module_name => 'Object::Pad',
+   module_name => 'Class::Plain',
    requires => {
       # On perl 5.31.9 onwards we use core's no feature 'indirect',
       ( $] >= 5.031009 ?

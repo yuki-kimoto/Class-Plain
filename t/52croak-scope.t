@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad;
+use Class::Plain;
 
 {
    ok( !eval <<'EOPERL',

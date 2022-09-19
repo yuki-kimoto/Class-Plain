@@ -5,10 +5,10 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental( mop custom_field_attr )';
+use Class::Plain ':experimental( mop custom_field_attr )';
 
 my $n;
-Object::Pad::MOP::FieldAttr->register( SomeAttr =>
+Class::Plain::MOP::FieldAttr->register( SomeAttr =>
    permit_hintkey => "t/SomeAttr",
    apply => sub {
       my ( $fieldmeta, $value ) = @_;
@@ -34,7 +34,7 @@ EOPERL
    # SomeAttr needs to be lexically in scope for lookups to find it
    BEGIN { $^H{"t/SomeAttr"}++ }
 
-   my $classmeta = Object::Pad::MOP::Class->for_class( "MyClass" );
+   my $classmeta = Class::Plain::MOP::Class->for_class( "MyClass" );
    my $fieldmeta = $classmeta->get_field( 'y' );
 
    ok( $fieldmeta->has_attribute( "SomeAttr" ), '$y field has :SomeAttr' );

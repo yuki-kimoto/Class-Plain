@@ -3,29 +3,29 @@
 #
 #  (C) Paul Evans, 2020-2022 -- leonerd@leonerd.org.uk
 
-package Object::Pad::MOP::Field 0.68;
+package Class::Plain::MOP::Field 0.68;
 
 use v5.14;
 use warnings;
 
-# This is an XS-implemented object type provided by Object::Pad itself
-require Object::Pad;
+# This is an XS-implemented object type provided by Class::Plain itself
+require Class::Plain;
 
 =head1 NAME
 
-C<Object::Pad::MOP::Field> - meta-object representation of data field of a C<Object::Pad> class
+C<Class::Plain::MOP::Field> - meta-object representation of data field of a C<Class::Plain> class
 
 =head1 DESCRIPTION
 
 Instances of this class represent a data field of a class implemented by
-L<Object::Pad>. Accessors provide information about the field. The special
+L<Class::Plain>. Accessors provide information about the field. The special
 C<value> method allows access to the value of the given field on instances of
 its class, letting the meta-object be used as a proxy to it.
 
 This API should be considered B<experimental>, and will emit warnings to that
 effect. They can be silenced with
 
-   use Object::Pad qw( :experimental(mop) );
+   use Class::Plain qw( :experimental(mop) );
 
 =cut
 
@@ -50,7 +50,7 @@ Returns the first character of the field name, giving just its leading sigil.
 
    $metaclass = $metafield->class
 
-Returns the L<Object::Pad::MOP::Class> instance representing the class of
+Returns the L<Class::Plain::MOP::Class> instance representing the class of
 which this field is a member.
 
 =head2 value

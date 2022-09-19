@@ -5,11 +5,11 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad::MOP::Class ':experimental(mop)';
+use Class::Plain::MOP::Class ':experimental(mop)';
 
 # An attempt to programmatically generate everything
 {
-   my $classmeta = Object::Pad::MOP::Class->create_class( "Point" );
+   my $classmeta = Class::Plain::MOP::Class->create_class( "Point" );
 
    my $xfieldmeta = $classmeta->add_field( '$x', param => 1, reader => 'x' );
    my $yfieldmeta = $classmeta->add_field( '$y', param => 1, reader => 'y' );

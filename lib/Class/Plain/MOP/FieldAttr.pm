@@ -3,17 +3,17 @@
 #
 #  (C) Paul Evans, 2021-2022 -- leonerd@leonerd.org.uk
 
-package Object::Pad::MOP::FieldAttr 0.68;
+package Class::Plain::MOP::FieldAttr 0.68;
 
 use v5.14;
 use warnings;
 
-# This is an XS-implemented object type provided by Object::Pad itself
-require Object::Pad;
+# This is an XS-implemented object type provided by Class::Plain itself
+require Class::Plain;
 
 =head1 NAME
 
-C<Object::Pad::MOP::FieldAttr> - meta-object representation of a field attribute for C<Object::Pad>
+C<Class::Plain::MOP::FieldAttr> - meta-object representation of a field attribute for C<Class::Plain>
 
 =head1 DESCRIPTION
 
@@ -22,13 +22,13 @@ provided. Pure-perl attributes cannot currently add new I<behaviour> to the
 way that fields work, but they do provide a means for class authors to annotate
 extra metadata onto fields, that can be queried by other code.
 
-Primilarily this is done by using the L<Object::Pad::MOP::Field/get_attribute_value>
+Primilarily this is done by using the L<Class::Plain::MOP::Field/get_attribute_value>
 accessor method on a field metadata instance.
 
 This API should be considered B<experimental>, and will emit warnings to that
 effect. They can be silenced with
 
-   use Object::Pad qw( :experimental(custom_field_attr) );
+   use Class::Plain qw( :experimental(custom_field_attr) );
 
 =cut
 
@@ -38,7 +38,7 @@ effect. They can be silenced with
 
 =head2 register
 
-   Object::Pad::MOP::FieldAttr->register( $name, %args )
+   Class::Plain::MOP::FieldAttr->register( $name, %args )
 
 I<Since version 0.60.>
 
@@ -66,7 +66,7 @@ for this attribute name to be visible.
 
 An optional code reference for a callback function to invoke when the
 attribute is applied to a field. If present, it is passed the field metadata
-instance as a L<Object::Pad::MOP::Field> reference, and a string containing
+instance as a L<Class::Plain::MOP::Field> reference, and a string containing
 the contents of the attribute's parenthesized value. The return value of the
 callback will be stored as the attribute's value and can be accessed by the
 C<get_attribute_value> method on the field metadata.

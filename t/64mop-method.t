@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Test::Fatal;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 class Example {
      method new : common {
@@ -18,7 +18,7 @@ class Example {
    method m { }
 }
 
-my $classmeta = Object::Pad::MOP::Class->for_class( "Example" );
+my $classmeta = Class::Plain::MOP::Class->for_class( "Example" );
 
 my $methodmeta_new = $classmeta->get_direct_method( 'new' );
 my $methodmeta = $classmeta->get_direct_method( 'm' );
@@ -37,7 +37,7 @@ is_deeply( [ $classmeta->all_methods ], [ $methodmeta_new, $methodmeta ],
 
 class SubClass :isa(Example) {}
 
-ok( defined Object::Pad::MOP::Class->for_class( "SubClass" )->get_method( 'm' ),
+ok( defined Class::Plain::MOP::Class->for_class( "SubClass" )->get_method( 'm' ),
    'Subclass can ->get_method' );
 
 # subclass with overridden method
@@ -51,7 +51,7 @@ ok( defined Object::Pad::MOP::Class->for_class( "SubClass" )->get_method( 'm' ),
       method m { "different" }
    }
 
-   my @methodmetas = Object::Pad::MOP::Class->for_class( "WithOverride" )->all_methods;
+   my @methodmetas = Class::Plain::MOP::Class->for_class( "WithOverride" )->all_methods;
 
    is( scalar @methodmetas, 2, 'overridden method is not duplicated' );
 }
@@ -67,7 +67,7 @@ ok( defined Object::Pad::MOP::Class->for_class( "SubClass" )->get_method( 'm' ),
       method cm :common { }
    }
 
-   my $classmeta = Object::Pad::MOP::Class->for_class( "BClass" );
+   my $classmeta = Class::Plain::MOP::Class->for_class( "BClass" );
 
    my $methodmeta = $classmeta->get_direct_method( 'cm' );
 

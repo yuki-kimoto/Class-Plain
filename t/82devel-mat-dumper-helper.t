@@ -13,7 +13,7 @@ BEGIN {
 
 use List::Util qw( first );
 
-use Object::Pad;
+use Class::Plain;
 
 class AClass
 {
@@ -32,14 +32,14 @@ my $df = $pmat->dumpfile;
 # class/field/method representation
 {
    # TODO: Do we want an `$sv->find_outref` method?
-   my $classmeta = ( first { $_->name eq "the Object::Pad class" }
+   my $classmeta = ( first { $_->name eq "the Class::Plain class" }
       $pmat->find_symbol( "&AClass::META" )->constval->rv->outrefs
    )->sv;
 
    ok( $classmeta, 'AClass has a classmeta' );
    isa_ok( $classmeta, "Devel::MAT::SV::C_STRUCT", '$classmeta' );
 
-   is( $classmeta->desc, "C_STRUCT(Object::Pad/ClassMeta.class)", '$classmeta->desc' );
+   is( $classmeta->desc, "C_STRUCT(Class::Plain/ClassMeta.class)", '$classmeta->desc' );
 
    is( $classmeta->field_named( "the name SV" )->pv, 'AClass', '$classmeta name SV' );
 
@@ -50,7 +50,7 @@ my $df = $pmat->dumpfile;
    my $fieldmeta = $fieldmetas[0];
    isa_ok( $fieldmeta, "Devel::MAT::SV::C_STRUCT", '$fieldmeta' );
 
-   is( $fieldmeta->desc, "C_STRUCT(Object::Pad/FieldMeta)", '$fieldmeta->desc' );
+   is( $fieldmeta->desc, "C_STRUCT(Class::Plain/FieldMeta)", '$fieldmeta->desc' );
 
    is( $fieldmeta->field_named( "the name SV" )->pv, '$afield', '$fieldmeta name SV' );
    is( $fieldmeta->field_named( "the class" ), $classmeta,      '$fieldmeta class' );
@@ -62,7 +62,7 @@ my $df = $pmat->dumpfile;
    my $methodmeta = $methodmetas[0];
    isa_ok( $methodmeta, "Devel::MAT::SV::C_STRUCT", '$methodmeta' );
 
-   is( $methodmeta->desc, "C_STRUCT(Object::Pad/MethodMeta)", '$methodmeta->desc' );
+   is( $methodmeta->desc, "C_STRUCT(Class::Plain/MethodMeta)", '$methodmeta->desc' );
 
    is( $methodmeta->field_named( "the name SV" )->pv, 'afield', '$methodmeta name SV' );
    is( $methodmeta->field_named( "the class" ), $classmeta,     '$methodmeta class' );

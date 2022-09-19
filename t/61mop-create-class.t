@@ -5,16 +5,16 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 =pod
 
 {
    package AClass {
       BEGIN {
-         Object::Pad->import_into( "AClass" );
+         Class::Plain->import_into( "AClass" );
 
-         my $classmeta = Object::Pad::MOP::Class->begin_class( "AClass" );
+         my $classmeta = Class::Plain::MOP::Class->begin_class( "AClass" );
 
          ::is( $classmeta->name, "AClass", '$classmeta->name' );
       }
@@ -47,9 +47,9 @@ use Object::Pad ':experimental(mop)';
   {
      package Child {
         BEGIN {
-           Object::Pad->import_into( "Child" );
+           Class::Plain->import_into( "Child" );
 
-           my $classmeta = Object::Pad::MOP::Class->begin_class( "Child", isa => "Parent" );
+           my $classmeta = Class::Plain::MOP::Class->begin_class( "Child", isa => "Parent" );
 
            ::is( $classmeta->name, "Child", '$classmeta->name for Child' );
         }

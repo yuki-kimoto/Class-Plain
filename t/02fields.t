@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Test::Refcount;
 
-use Object::Pad ':experimental(init_expr)';
+use Class::Plain ':experimental(init_expr)';
 
 use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
 

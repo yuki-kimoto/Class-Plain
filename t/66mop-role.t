@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 role Example {
    no warnings 'deprecated';
@@ -14,7 +14,7 @@ role Example {
    method b_method;
 }
 
-my $meta = Object::Pad::MOP::Class->for_class( "Example" );
+my $meta = Class::Plain::MOP::Class->for_class( "Example" );
 
 is( $meta->name, "Example", '$meta->name' );
 ok(  $meta->is_role, '$meta->is_role true' );
@@ -33,11 +33,11 @@ class Implementor :does(Example) {
    method b_method {}
 }
 
-is_deeply( [ Object::Pad::MOP::Class->for_class( "Implementor" )->direct_roles ],
+is_deeply( [ Class::Plain::MOP::Class->for_class( "Implementor" )->direct_roles ],
    [ $meta ],
    '$meta->direct_roles on implementing class' );
 
-is_deeply( [ Object::Pad::MOP::Class->for_class( "Implementor" )->all_roles ],
+is_deeply( [ Class::Plain::MOP::Class->for_class( "Implementor" )->all_roles ],
    [ $meta ],
    '$meta->all_roles on implementing class' );
 
@@ -51,11 +51,11 @@ class Inheritor :isa(Implementor) {
 
 # Roles via subclass
 {
-   is_deeply( [ Object::Pad::MOP::Class->for_class( "Inheritor" )->direct_roles ],
+   is_deeply( [ Class::Plain::MOP::Class->for_class( "Inheritor" )->direct_roles ],
       [],
       '$meta->direct_roles on inheriting class' );
 
-   is_deeply( [ Object::Pad::MOP::Class->for_class( "Inheritor" )->all_roles ],
+   is_deeply( [ Class::Plain::MOP::Class->for_class( "Inheritor" )->all_roles ],
       [ $meta ],
       '$meta->all_roles on inheriting class' );
 }

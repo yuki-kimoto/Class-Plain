@@ -68,7 +68,7 @@ struct MethodAttributeDefinition {
 /* Empty role embedding that is applied to all invokable role methods */
 static RoleEmbedding embedding_standalone = {};
 
-void ObjectPad_extend_pad_vars(pTHX_ const ClassMeta *meta)
+void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
 {
   PADOFFSET padix;
 
@@ -77,7 +77,7 @@ void ObjectPad_extend_pad_vars(pTHX_ const ClassMeta *meta)
     croak("ARGH: Expected that padix[$self] = 1");
 
   /* Give it a name that isn't valid as a Perl variable so it can't collide */
-  padix = pad_add_name_pvs("@(Object::Pad/slots)", 0, NULL, NULL);
+  padix = pad_add_name_pvs("@(Class::Plain/slots)", 0, NULL, NULL);
   if(padix != PADIX_SLOTS)
     croak("ARGH: Expected that padix[@slots] = 2");
 
@@ -266,7 +266,7 @@ static OP *pp_methstart(pTHX)
   return PL_op->op_next;
 }
 
-OP *ObjectPad_newMETHSTARTOP(pTHX_ U32 flags)
+OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags)
 {
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
   /* We know we're on 5.22 or above, so no worries about assert failures */
@@ -294,7 +294,7 @@ static OP *pp_commonmethstart(pTHX)
   return PL_op->op_next;
 }
 
-OP *ObjectPad_newCOMMONMETHSTARTOP(pTHX_ U32 flags)
+OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags)
 {
   OP *op = newOP_CUSTOM(&pp_commonmethstart, flags);
   op->op_private = (U8)(flags >> 8);
@@ -325,7 +325,7 @@ static OP *pp_fieldpad(pTHX)
   return PL_op->op_next;
 }
 
-OP *ObjectPad_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix)
+OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix)
 {
 #ifdef HAVE_UNOP_AUX
   OP *op = newUNOP_AUX(OP_CUSTOM, flags, NULL, NUM2PTR(UNOP_AUX_item *, fieldix));
@@ -343,7 +343,7 @@ OP *ObjectPad_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldi
 #define compclassmeta       S_compclassmeta(aTHX)
 static ClassMeta *S_compclassmeta(pTHX)
 {
-  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Object::Pad/compclassmeta", 0);
+  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", 0);
   if(!svp || !*svp || !SvOK(*svp))
     return NULL;
   return (ClassMeta *)SvIV(*svp);
@@ -352,7 +352,7 @@ static ClassMeta *S_compclassmeta(pTHX)
 #define have_compclassmeta  S_have_compclassmeta(aTHX)
 static bool S_have_compclassmeta(pTHX)
 {
-  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Object::Pad/compclassmeta", 0);
+  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", 0);
   if(!svp || !*svp)
     return false;
 
@@ -365,7 +365,7 @@ static bool S_have_compclassmeta(pTHX)
 #define compclassmeta_set(meta)  S_compclassmeta_set(aTHX_ meta)
 static void S_compclassmeta_set(pTHX_ ClassMeta *meta)
 {
-  SV *sv = *hv_fetchs(GvHV(PL_hintgv), "Object::Pad/compclassmeta", GV_ADD);
+  SV *sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", GV_ADD);
   sv_setiv(sv, (IV)meta);
 }
 
@@ -538,7 +538,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Object::Pad/configure(no_class_attrs)", 0))
+    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
       croak("Class/role attributes are not permitted");
 
     int i;
@@ -554,7 +554,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     }
   }
 
-  if(hv_fetchs(GvHV(PL_hintgv), "Object::Pad/configure(always_strict)", 0)) {
+  if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
     mop_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
@@ -632,7 +632,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     return KEYWORD_PLUGIN_STMT;
   }
   else {
-    SAVEDESTRUCTOR_X(&ObjectPad_mop_class_seal, meta);
+    SAVEDESTRUCTOR_X(&ClassPlain_mop_class_seal, meta);
 
     SAVEHINTS();
     compclassmeta_set(meta);
@@ -659,12 +659,12 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
 };
 
 static const struct XSParseKeywordHooks kwhooks_class = {
-  .permit_hintkey = "Object::Pad/class",
+  .permit_hintkey = "Class::Plain/class",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
 static const struct XSParseKeywordHooks kwhooks_role = {
-  .permit_hintkey = "Object::Pad/role",
+  .permit_hintkey = "Class::Plain/role",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
@@ -695,11 +695,11 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Object::Pad/configure(no_field_attrs)", 0))
+    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_field_attrs)", 0))
       croak("Field attributes are not permitted");
 
     SV *fieldmetasv = newSV(0);
-    sv_setref_uv(fieldmetasv, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+    sv_setref_uv(fieldmetasv, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
     SAVEFREESV(fieldmetasv);
 
     while(argi < (nattrs+2)) {
@@ -727,7 +727,7 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
   CV *was_compcv = PL_compcv;
   HV *hints = GvHV(PL_hintgv);
 
-  if(!hints || !hv_fetchs(hints, "Object::Pad/experimental(init_expr)", 0))
+  if(!hints || !hv_fetchs(hints, "Class::Plain/experimental(init_expr)", 0))
     Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
       "field initialiser expression is experimental and may be changed or removed without notice");
 
@@ -744,7 +744,7 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
 
 static const struct XSParseKeywordHooks kwhooks_field = {
   .flags = XPK_FLAG_STMT,
-  .permit_hintkey = "Object::Pad/field",
+  .permit_hintkey = "Class::Plain/field",
 
   .check = &check_field,
 
@@ -834,14 +834,14 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   compmethodmeta->role  = NULL;
   compmethodmeta->is_common = false;
 
-  hv_stores(ctx->moddata, "Object::Pad/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
+  hv_stores(ctx->moddata, "Class::Plain/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
 
   LEAVE;
 }
 
 static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext *ctx, SV *attr, SV *val, void *hookdata)
 {
-  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0)));
+  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   struct MethodAttributeDefinition *def;
   for(def = method_attributes; def->attrname; def++) {
@@ -861,7 +861,7 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext *ctx, SV
 
 static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0)));
+  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* Splice in the field scope CV in */
   CV *methodscope = compclassmeta->methodscope;
@@ -911,7 +911,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   PADNAME **snames = PadnamelistARRAY(fieldnames);
   PADNAME **padnames = PadnamelistARRAY(PadlistNAMES(CvPADLIST(PL_compcv)));
 
-  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0)));
+  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
    * declaration; a required method for a role
@@ -1085,7 +1085,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
 
   MethodMeta *compmethodmeta;
   {
-    SV *tmpsv = *hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0);
+    SV *tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0);
     compmethodmeta = NUM2PTR(MethodMeta *, SvUV(tmpsv));
     sv_setuv(tmpsv, 0);
   }
@@ -1115,7 +1115,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
   }
 
   SV **varnamep;
-  if((varnamep = hv_fetchs(ctx->moddata, "Object::Pad/method_varname", 0))) {
+  if((varnamep = hv_fetchs(ctx->moddata, "Class::Plain/method_varname", 0))) {
     PADOFFSET padix = pad_add_name_sv(*varnamep, 0, NULL, NULL);
     intro_my();
 
@@ -1140,7 +1140,7 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .flags           = XS_PARSE_SUBLIKE_FLAG_FILTERATTRS |
                      XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS |
                      XS_PARSE_SUBLIKE_FLAG_BODY_OPTIONAL,
-  .permit_hintkey  = "Object::Pad/method",
+  .permit_hintkey  = "Class::Plain/method",
   .permit          = parse_method_permit,
   .pre_subparse    = parse_method_pre_subparse,
   .filter_attr     = parse_method_filter_attr,
@@ -1172,7 +1172,7 @@ static int parse_phaser(pTHX_ OP **out, void *hookdata)
 #ifdef HAVE_DMD_HELPER
 static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/FieldMeta", fieldmeta, sizeof(FieldMeta),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/FieldMeta", fieldmeta, sizeof(FieldMeta),
     6, ((const DMDNamedField []){
       {"the name SV",          DMD_FIELD_PTR,  .ptr = fieldmeta->name},
       {"the class",            DMD_FIELD_PTR,  .ptr = fieldmeta->class},
@@ -1187,7 +1187,7 @@ static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
 
 static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/MethodMeta", methodmeta, sizeof(MethodMeta),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/MethodMeta", methodmeta, sizeof(MethodMeta),
     4, ((const DMDNamedField []){
       {"the name SV",     DMD_FIELD_PTR,  .ptr = methodmeta->name},
       {"the class",       DMD_FIELD_PTR,  .ptr = methodmeta->class},
@@ -1199,7 +1199,7 @@ static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
 
 static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/AdjustBlock", adjustblock, sizeof(AdjustBlock),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/AdjustBlock", adjustblock, sizeof(AdjustBlock),
     2, ((const DMDNamedField []){
       {"the CV",          DMD_FIELD_PTR,  .ptr = adjustblock->cv},
     })
@@ -1208,7 +1208,7 @@ static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
 
 static void dump_roleembedding(pTHX_ DMDContext *ctx, RoleEmbedding *embedding)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/RoleEmbedding", embedding, sizeof(RoleEmbedding),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/RoleEmbedding", embedding, sizeof(RoleEmbedding),
     4, ((const DMDNamedField []){
       {"the embedding SV", DMD_FIELD_PTR,  .ptr = embedding->embeddingsv},
       {"the role",         DMD_FIELD_PTR,  .ptr = embedding->rolemeta},
@@ -1244,7 +1244,7 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
 
   switch(classmeta->type) {
     case METATYPE_CLASS:
-      DMD_DUMP_STRUCT(ctx, "Object::Pad/ClassMeta.class", classmeta, sizeof(ClassMeta),
+      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.class", classmeta, sizeof(ClassMeta),
         N_COMMON_FIELDS+5, ((const DMDNamedField []){
           COMMON_FIELDS,
           {"the supermeta",                         DMD_FIELD_PTR, .ptr = classmeta->cls.supermeta},
@@ -1257,7 +1257,7 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
       break;
 
     case METATYPE_ROLE:
-      DMD_DUMP_STRUCT(ctx, "Object::Pad/ClassMeta.role", classmeta, sizeof(ClassMeta),
+      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.role", classmeta, sizeof(ClassMeta),
         N_COMMON_FIELDS+2, ((const DMDNamedField []){
           COMMON_FIELDS,
           {"the superroles AV",           DMD_FIELD_PTR, .ptr = classmeta->role.superroles},
@@ -1313,7 +1313,7 @@ static int dumppackage_class(pTHX_ DMDContext *ctx, const SV *sv)
 
   dump_classmeta(aTHX_ ctx, meta);
 
-  ret += DMD_ANNOTATE_SV(sv, (SV *)meta, "the Object::Pad class");
+  ret += DMD_ANNOTATE_SV(sv, (SV *)meta, "the Class::Plain class");
 
   return ret;
 }
@@ -1339,7 +1339,7 @@ static bool fieldhook_custom_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **h
     SAVETMPS;
 
     SV *fieldmetasv = sv_newmortal();
-    sv_setref_uv(fieldmetasv, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+    sv_setref_uv(fieldmetasv, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
 
     PUSHMARK(SP);
     EXTEND(SP, 2);
@@ -1361,7 +1361,7 @@ static bool fieldhook_custom_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **h
 }
 
 /* internal function shared by various *.c files */
-void ObjectPad__need_PLparser(pTHX)
+void ClassPlain__need_PLparser(pTHX)
 {
   if(!PL_parser) {
     /* We need to generate just enough of a PL_parser to keep newSTATEOP()
@@ -1431,19 +1431,19 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
   return NULL;
 }
 
-MODULE = Object::Pad    PACKAGE = Object::Pad::MOP::Class
+MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Class
 
 INCLUDE: mop-class.xsi
 
-MODULE = Object::Pad    PACKAGE = Object::Pad::MOP::Method
+MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Method
 
 INCLUDE: mop-method.xsi
 
-MODULE = Object::Pad    PACKAGE = Object::Pad::MOP::Field
+MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Field
 
 INCLUDE: mop-field.xsi
 
-MODULE = Object::Pad    PACKAGE = Object::Pad::MOP::FieldAttr
+MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::FieldAttr
 
 void
 register(class, name, ...)
@@ -1455,9 +1455,9 @@ register(class, name, ...)
     dKWARG(2);
 
     {
-      if(!cophh_exists_pvs(CopHINTHASH_get(PL_curcop), "Object::Pad/experimental(custom_field_attr)", 0))
+      if(!cophh_exists_pvs(CopHINTHASH_get(PL_curcop), "Class::Plain/experimental(custom_field_attr)", 0))
         Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-          "Object::Pad::MOP::FieldAttr is experimental and may be changed or removed without notice");
+          "Class::Plain::MOP::FieldAttr is experimental and may be changed or removed without notice");
     }
 
     struct FieldHookFuncs *funcs;
@@ -1490,7 +1490,7 @@ register(class, name, ...)
     register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
   }
 
-MODULE = Object::Pad    PACKAGE = Object::Pad::MetaFunctions
+MODULE = Class::Plain    PACKAGE = Class::Plain::MetaFunctions
 
 SV *
 metaclass(SV *obj)
@@ -1633,9 +1633,9 @@ BOOT:
 #endif
   Perl_custom_op_register(aTHX_ &pp_fieldpad, &xop_fieldpad);
 
-  CvLVALUE_on(get_cv("Object::Pad::MOP::Field::value", 0));
+  CvLVALUE_on(get_cv("Class::Plain::MOP::Field::value", 0));
 #ifdef HAVE_DMD_HELPER
-  DMD_SET_PACKAGE_HELPER("Object::Pad::MOP::Class", &dumppackage_class);
+  DMD_SET_PACKAGE_HELPER("Class::Plain::MOP::Class", &dumppackage_class);
 #endif
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
@@ -1650,7 +1650,7 @@ BOOT:
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)PHASER_NONE);
 
-  ObjectPad__boot_classes(aTHX);
-  ObjectPad__boot_fields(aTHX);
+  ClassPlain__boot_classes(aTHX);
+  ClassPlain__boot_fields(aTHX);
   
   

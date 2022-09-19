@@ -6,7 +6,7 @@
  *
  */
 
-#line 1 "lib/Object/Pad.xs"
+#line 1 "lib/Class/Plain.xs"
 /*  You may distribute under the terms of either the GNU General Public License
  *  or the Artistic License (the same terms as Perl itself)
  *
@@ -77,7 +77,7 @@ struct MethodAttributeDefinition {
 /* Empty role embedding that is applied to all invokable role methods */
 static RoleEmbedding embedding_standalone = {};
 
-void ObjectPad_extend_pad_vars(pTHX_ const ClassMeta *meta)
+void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
 {
   PADOFFSET padix;
 
@@ -86,7 +86,7 @@ void ObjectPad_extend_pad_vars(pTHX_ const ClassMeta *meta)
     croak("ARGH: Expected that padix[$self] = 1");
 
   /* Give it a name that isn't valid as a Perl variable so it can't collide */
-  padix = pad_add_name_pvs("@(Object::Pad/slots)", 0, NULL, NULL);
+  padix = pad_add_name_pvs("@(Class::Plain/slots)", 0, NULL, NULL);
   if(padix != PADIX_SLOTS)
     croak("ARGH: Expected that padix[@slots] = 2");
 
@@ -275,7 +275,7 @@ static OP *pp_methstart(pTHX)
   return PL_op->op_next;
 }
 
-OP *ObjectPad_newMETHSTARTOP(pTHX_ U32 flags)
+OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags)
 {
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
   /* We know we're on 5.22 or above, so no worries about assert failures */
@@ -303,7 +303,7 @@ static OP *pp_commonmethstart(pTHX)
   return PL_op->op_next;
 }
 
-OP *ObjectPad_newCOMMONMETHSTARTOP(pTHX_ U32 flags)
+OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags)
 {
   OP *op = newOP_CUSTOM(&pp_commonmethstart, flags);
   op->op_private = (U8)(flags >> 8);
@@ -334,7 +334,7 @@ static OP *pp_fieldpad(pTHX)
   return PL_op->op_next;
 }
 
-OP *ObjectPad_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix)
+OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix)
 {
 #ifdef HAVE_UNOP_AUX
   OP *op = newUNOP_AUX(OP_CUSTOM, flags, NULL, NUM2PTR(UNOP_AUX_item *, fieldix));
@@ -352,7 +352,7 @@ OP *ObjectPad_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldi
 #define compclassmeta       S_compclassmeta(aTHX)
 static ClassMeta *S_compclassmeta(pTHX)
 {
-  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Object::Pad/compclassmeta", 0);
+  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", 0);
   if(!svp || !*svp || !SvOK(*svp))
     return NULL;
   return (ClassMeta *)SvIV(*svp);
@@ -361,7 +361,7 @@ static ClassMeta *S_compclassmeta(pTHX)
 #define have_compclassmeta  S_have_compclassmeta(aTHX)
 static bool S_have_compclassmeta(pTHX)
 {
-  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Object::Pad/compclassmeta", 0);
+  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", 0);
   if(!svp || !*svp)
     return false;
 
@@ -374,7 +374,7 @@ static bool S_have_compclassmeta(pTHX)
 #define compclassmeta_set(meta)  S_compclassmeta_set(aTHX_ meta)
 static void S_compclassmeta_set(pTHX_ ClassMeta *meta)
 {
-  SV *sv = *hv_fetchs(GvHV(PL_hintgv), "Object::Pad/compclassmeta", GV_ADD);
+  SV *sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", GV_ADD);
   sv_setiv(sv, (IV)meta);
 }
 
@@ -547,7 +547,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Object::Pad/configure(no_class_attrs)", 0))
+    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
       croak("Class/role attributes are not permitted");
 
     int i;
@@ -563,7 +563,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     }
   }
 
-  if(hv_fetchs(GvHV(PL_hintgv), "Object::Pad/configure(always_strict)", 0)) {
+  if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
     mop_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
@@ -641,7 +641,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     return KEYWORD_PLUGIN_STMT;
   }
   else {
-    SAVEDESTRUCTOR_X(&ObjectPad_mop_class_seal, meta);
+    SAVEDESTRUCTOR_X(&ClassPlain_mop_class_seal, meta);
 
     SAVEHINTS();
     compclassmeta_set(meta);
@@ -668,12 +668,12 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
 };
 
 static const struct XSParseKeywordHooks kwhooks_class = {
-  .permit_hintkey = "Object::Pad/class",
+  .permit_hintkey = "Class::Plain/class",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
 static const struct XSParseKeywordHooks kwhooks_role = {
-  .permit_hintkey = "Object::Pad/role",
+  .permit_hintkey = "Class::Plain/role",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
@@ -704,11 +704,11 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Object::Pad/configure(no_field_attrs)", 0))
+    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_field_attrs)", 0))
       croak("Field attributes are not permitted");
 
     SV *fieldmetasv = newSV(0);
-    sv_setref_uv(fieldmetasv, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+    sv_setref_uv(fieldmetasv, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
     SAVEFREESV(fieldmetasv);
 
     while(argi < (nattrs+2)) {
@@ -736,7 +736,7 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
   CV *was_compcv = PL_compcv;
   HV *hints = GvHV(PL_hintgv);
 
-  if(!hints || !hv_fetchs(hints, "Object::Pad/experimental(init_expr)", 0))
+  if(!hints || !hv_fetchs(hints, "Class::Plain/experimental(init_expr)", 0))
     Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
       "field initialiser expression is experimental and may be changed or removed without notice");
 
@@ -753,7 +753,7 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
 
 static const struct XSParseKeywordHooks kwhooks_field = {
   .flags = XPK_FLAG_STMT,
-  .permit_hintkey = "Object::Pad/field",
+  .permit_hintkey = "Class::Plain/field",
 
   .check = &check_field,
 
@@ -843,14 +843,14 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   compmethodmeta->role  = NULL;
   compmethodmeta->is_common = false;
 
-  hv_stores(ctx->moddata, "Object::Pad/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
+  hv_stores(ctx->moddata, "Class::Plain/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
 
   LEAVE;
 }
 
 static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext *ctx, SV *attr, SV *val, void *hookdata)
 {
-  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0)));
+  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   struct MethodAttributeDefinition *def;
   for(def = method_attributes; def->attrname; def++) {
@@ -870,7 +870,7 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext *ctx, SV
 
 static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0)));
+  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* Splice in the field scope CV in */
   CV *methodscope = compclassmeta->methodscope;
@@ -920,7 +920,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   PADNAME **snames = PadnamelistARRAY(fieldnames);
   PADNAME **padnames = PadnamelistARRAY(PadlistNAMES(CvPADLIST(PL_compcv)));
 
-  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0)));
+  MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
    * declaration; a required method for a role
@@ -1094,7 +1094,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
 
   MethodMeta *compmethodmeta;
   {
-    SV *tmpsv = *hv_fetchs(ctx->moddata, "Object::Pad/compmethodmeta", 0);
+    SV *tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0);
     compmethodmeta = NUM2PTR(MethodMeta *, SvUV(tmpsv));
     sv_setuv(tmpsv, 0);
   }
@@ -1124,7 +1124,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
   }
 
   SV **varnamep;
-  if((varnamep = hv_fetchs(ctx->moddata, "Object::Pad/method_varname", 0))) {
+  if((varnamep = hv_fetchs(ctx->moddata, "Class::Plain/method_varname", 0))) {
     PADOFFSET padix = pad_add_name_sv(*varnamep, 0, NULL, NULL);
     intro_my();
 
@@ -1149,7 +1149,7 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .flags           = XS_PARSE_SUBLIKE_FLAG_FILTERATTRS |
                      XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS |
                      XS_PARSE_SUBLIKE_FLAG_BODY_OPTIONAL,
-  .permit_hintkey  = "Object::Pad/method",
+  .permit_hintkey  = "Class::Plain/method",
   .permit          = parse_method_permit,
   .pre_subparse    = parse_method_pre_subparse,
   .filter_attr     = parse_method_filter_attr,
@@ -1181,7 +1181,7 @@ static int parse_phaser(pTHX_ OP **out, void *hookdata)
 #ifdef HAVE_DMD_HELPER
 static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/FieldMeta", fieldmeta, sizeof(FieldMeta),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/FieldMeta", fieldmeta, sizeof(FieldMeta),
     6, ((const DMDNamedField []){
       {"the name SV",          DMD_FIELD_PTR,  .ptr = fieldmeta->name},
       {"the class",            DMD_FIELD_PTR,  .ptr = fieldmeta->class},
@@ -1196,7 +1196,7 @@ static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
 
 static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/MethodMeta", methodmeta, sizeof(MethodMeta),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/MethodMeta", methodmeta, sizeof(MethodMeta),
     4, ((const DMDNamedField []){
       {"the name SV",     DMD_FIELD_PTR,  .ptr = methodmeta->name},
       {"the class",       DMD_FIELD_PTR,  .ptr = methodmeta->class},
@@ -1208,7 +1208,7 @@ static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
 
 static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/AdjustBlock", adjustblock, sizeof(AdjustBlock),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/AdjustBlock", adjustblock, sizeof(AdjustBlock),
     2, ((const DMDNamedField []){
       {"the CV",          DMD_FIELD_PTR,  .ptr = adjustblock->cv},
     })
@@ -1217,7 +1217,7 @@ static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
 
 static void dump_roleembedding(pTHX_ DMDContext *ctx, RoleEmbedding *embedding)
 {
-  DMD_DUMP_STRUCT(ctx, "Object::Pad/RoleEmbedding", embedding, sizeof(RoleEmbedding),
+  DMD_DUMP_STRUCT(ctx, "Class::Plain/RoleEmbedding", embedding, sizeof(RoleEmbedding),
     4, ((const DMDNamedField []){
       {"the embedding SV", DMD_FIELD_PTR,  .ptr = embedding->embeddingsv},
       {"the role",         DMD_FIELD_PTR,  .ptr = embedding->rolemeta},
@@ -1253,7 +1253,7 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
 
   switch(classmeta->type) {
     case METATYPE_CLASS:
-      DMD_DUMP_STRUCT(ctx, "Object::Pad/ClassMeta.class", classmeta, sizeof(ClassMeta),
+      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.class", classmeta, sizeof(ClassMeta),
         N_COMMON_FIELDS+5, ((const DMDNamedField []){
           COMMON_FIELDS,
           {"the supermeta",                         DMD_FIELD_PTR, .ptr = classmeta->cls.supermeta},
@@ -1266,7 +1266,7 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
       break;
 
     case METATYPE_ROLE:
-      DMD_DUMP_STRUCT(ctx, "Object::Pad/ClassMeta.role", classmeta, sizeof(ClassMeta),
+      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.role", classmeta, sizeof(ClassMeta),
         N_COMMON_FIELDS+2, ((const DMDNamedField []){
           COMMON_FIELDS,
           {"the superroles AV",           DMD_FIELD_PTR, .ptr = classmeta->role.superroles},
@@ -1322,7 +1322,7 @@ static int dumppackage_class(pTHX_ DMDContext *ctx, const SV *sv)
 
   dump_classmeta(aTHX_ ctx, meta);
 
-  ret += DMD_ANNOTATE_SV(sv, (SV *)meta, "the Object::Pad class");
+  ret += DMD_ANNOTATE_SV(sv, (SV *)meta, "the Class::Plain class");
 
   return ret;
 }
@@ -1348,7 +1348,7 @@ static bool fieldhook_custom_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **h
     SAVETMPS;
 
     SV *fieldmetasv = sv_newmortal();
-    sv_setref_uv(fieldmetasv, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+    sv_setref_uv(fieldmetasv, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
 
     PUSHMARK(SP);
     EXTEND(SP, 2);
@@ -1370,7 +1370,7 @@ static bool fieldhook_custom_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **h
 }
 
 /* internal function shared by various *.c files */
-void ObjectPad__need_PLparser(pTHX)
+void ClassPlain__need_PLparser(pTHX)
 {
   if(!PL_parser) {
     /* We need to generate just enough of a PL_parser to keep newSTATEOP()
@@ -1440,7 +1440,7 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
   return NULL;
 }
 
-#line 1444 "lib/Object/Pad.c"
+#line 1444 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1584,13 +1584,13 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1588 "lib/Object/Pad.c"
+#line 1588 "lib/Class/Plain.c"
 
 /* INCLUDE:  Including 'mop-class.xsi' from 'Pad.xs' */
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class__create_class); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class__create_class)
+XS_EUPXS(XS_Class__Plain__MOP__Class__create_class); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class__create_class)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -1627,9 +1627,9 @@ XS_EUPXS(XS_Object__Pad__MOP__Class__create_class)
         cop = NULL;
       }
 
-      if(cop && !cophh_exists_pvs(CopHINTHASH_get(cop), "Object::Pad/experimental(mop)", 0))
+      if(cop && !cophh_exists_pvs(CopHINTHASH_get(cop), "Class::Plain/experimental(mop)", 0))
         Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-          "The Object::Pad MOP API is experimental and may be changed or removed without notice");
+          "The Class::Plain MOP API is experimental and may be changed or removed without notice");
     }
 
     static const char *args[] = {
@@ -1661,7 +1661,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class__create_class)
     mop_class_begin(meta);
 
     RETVAL = newSV(0);
-    sv_setref_uv(RETVAL, "Object::Pad::MOP::Class", PTR2UV(meta));
+    sv_setref_uv(RETVAL, "Class::Plain::MOP::Class", PTR2UV(meta));
 
     if(set_compclassmeta) {
       compclassmeta_set(meta);
@@ -1674,7 +1674,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class__create_class)
       av_push(PL_unitcheckav, (SV *)cv);
     }
   }
-#line 1678 "lib/Object/Pad.c"
+#line 1678 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1682,8 +1682,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Class__create_class)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_is_class); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_is_class)
+XS_EUPXS(XS_Class__Plain__MOP__Class_is_class); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_is_class)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -1698,15 +1698,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_is_class)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = (meta->type == ix);
   }
-#line 1702 "lib/Object/Pad.c"
+#line 1702 "lib/Class/Plain.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_name); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_name)
+XS_EUPXS(XS_Class__Plain__MOP__Class_name); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_name)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -1720,7 +1720,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_name)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = SvREFCNT_inc(meta->name);
   }
-#line 1724 "lib/Object/Pad.c"
+#line 1724 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1728,8 +1728,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_name)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_superclasses); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_superclasses)
+XS_EUPXS(XS_Class__Plain__MOP__Class_superclasses); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_superclasses)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -1745,21 +1745,21 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_superclasses)
 
     if(meta->type == METATYPE_CLASS && meta->cls.supermeta) {
       PUSHs(sv_newmortal());
-      sv_setref_uv(ST(0), "Object::Pad::MOP::Class", PTR2UV(meta->cls.supermeta));
+      sv_setref_uv(ST(0), "Class::Plain::MOP::Class", PTR2UV(meta->cls.supermeta));
       XSRETURN(1);
     }
 
     XSRETURN(0);
   }
-#line 1755 "lib/Object/Pad.c"
+#line 1755 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_direct_roles); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_direct_roles)
+XS_EUPXS(XS_Class__Plain__MOP__Class_direct_roles); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_direct_roles)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -1788,7 +1788,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_direct_roles)
 
         for(i = 0; i < nroles; i++) {
           SV *sv = sv_newmortal();
-          sv_setref_uv(sv, "Object::Pad::MOP::Class", PTR2UV(embeddings[i]->rolemeta));
+          sv_setref_uv(sv, "Class::Plain::MOP::Class", PTR2UV(embeddings[i]->rolemeta));
           XPUSHs(sv);
           count++;
         }
@@ -1801,15 +1801,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_direct_roles)
 
     XSRETURN(count);
   }
-#line 1805 "lib/Object/Pad.c"
+#line 1805 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_role); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_role)
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_role); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_role)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -1828,8 +1828,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_role)
     PERL_UNUSED_VAR(ix);
 
     if(SvROK(role)) {
-      if(!sv_derived_from(role, "Object::Pad::MOP::Class"))
-        croak("Expected a role name string or Object::Pad::MOP::Class; got %" SVf, SVfARG(role));
+      if(!sv_derived_from(role, "Class::Plain::MOP::Class"))
+        croak("Expected a role name string or Class::Plain::MOP::Class; got %" SVf, SVfARG(role));
 
       rolemeta = NUM2PTR(ClassMeta *, SvUV(SvRV(role)));
     }
@@ -1849,14 +1849,14 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_role)
 
     mop_class_add_role(meta, rolemeta);
   }
-#line 1853 "lib/Object/Pad.c"
+#line 1853 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_method); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_method)
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_method); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_method)
 {
     dVAR; dXSARGS;
     if (items < 2)
@@ -1906,9 +1906,9 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_method)
     GvCV_set(*gvp, (CV *)SvREFCNT_inc(code));
 
     RETVAL = newSV(0);
-    sv_setref_uv(RETVAL, "Object::Pad::MOP::Method", PTR2UV(methodmeta));
+    sv_setref_uv(RETVAL, "Class::Plain::MOP::Method", PTR2UV(methodmeta));
   }
-#line 1912 "lib/Object/Pad.c"
+#line 1912 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1916,8 +1916,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_method)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_get_direct_method); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_get_direct_method)
+XS_EUPXS(XS_Class__Plain__MOP__Class_get_direct_method); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_get_direct_method)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -1947,7 +1947,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_get_direct_method)
           continue;
 
         ST(0) = sv_newmortal();
-        sv_setref_iv(ST(0), "Object::Pad::MOP::Method", PTR2UV(methodmeta));
+        sv_setref_iv(ST(0), "Class::Plain::MOP::Method", PTR2UV(methodmeta));
         XSRETURN(1);
       }
 
@@ -1960,15 +1960,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_get_direct_method)
     croak("Class %" SVf " does not have a method called '%" SVf "'",
       meta->name, methodname);
   }
-#line 1964 "lib/Object/Pad.c"
+#line 1964 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_direct_methods); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_direct_methods)
+XS_EUPXS(XS_Class__Plain__MOP__Class_direct_methods); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_direct_methods)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -2005,7 +2005,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_direct_methods)
           continue;
 
         ST(retcount) = sv_newmortal();
-        sv_setref_iv(ST(retcount), "Object::Pad::MOP::Method", PTR2UV(methodmeta));
+        sv_setref_iv(ST(retcount), "Class::Plain::MOP::Method", PTR2UV(methodmeta));
         retcount++;
 
         hv_store_ent(mnames, methodmeta->name, &PL_sv_yes, 0);
@@ -2018,15 +2018,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_direct_methods)
     } while(recurse && meta);
 
     XSRETURN(retcount);
-#line 2022 "lib/Object/Pad.c"
+#line 2022 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_required_method); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_required_method)
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_required_method); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_required_method)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2042,14 +2042,14 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_required_method)
 
     mop_class_add_required_method(meta, mname);
   }
-#line 2046 "lib/Object/Pad.c"
+#line 2046 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_field); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_add_field)
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_field); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_add_field)
 {
     dVAR; dXSARGS;
     if (items < 2)
@@ -2110,9 +2110,9 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_field)
     mop_field_seal(fieldmeta);
 
     RETVAL = newSV(0);
-    sv_setref_uv(RETVAL, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+    sv_setref_uv(RETVAL, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
   }
-#line 2116 "lib/Object/Pad.c"
+#line 2116 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2120,8 +2120,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_add_field)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_get_field); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_get_field)
+XS_EUPXS(XS_Class__Plain__MOP__Class_get_field); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_get_field)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2148,22 +2148,22 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_get_field)
         continue;
 
       ST(0) = sv_newmortal();
-      sv_setref_iv(ST(0), "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+      sv_setref_iv(ST(0), "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
       XSRETURN(1);
     }
 
     croak("Class %" SVf " does not have a field called '%" SVf "'",
       meta->name, fieldname);
   }
-#line 2159 "lib/Object/Pad.c"
+#line 2159 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_fields); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_fields)
+XS_EUPXS(XS_Class__Plain__MOP__Class_fields); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_fields)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -2186,18 +2186,18 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_fields)
       FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
 
       ST(i) = sv_newmortal();
-      sv_setref_iv(ST(i), "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+      sv_setref_iv(ST(i), "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
     }
     XSRETURN(nfields);
-#line 2193 "lib/Object/Pad.c"
+#line 2193 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_required_method_names); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_required_method_names)
+XS_EUPXS(XS_Class__Plain__MOP__Class_required_method_names); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_required_method_names)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -2223,15 +2223,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_required_method_names)
       ST(i) = sv_2mortal(newSVsv(AvARRAY(required_methods)[i]));
     }
     XSRETURN(nmethods);
-#line 2227 "lib/Object/Pad.c"
+#line 2227 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Class_seal); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Class_seal)
+XS_EUPXS(XS_Class__Plain__MOP__Class_seal); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Class_seal)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -2243,7 +2243,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_seal)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
 
     mop_class_seal(meta);
-#line 2247 "lib/Object/Pad.c"
+#line 2247 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2255,8 +2255,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Class_seal)
 /* INCLUDE:  Including 'mop-method.xsi' from 'Pad.xs' */
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Method_name); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Method_name)
+XS_EUPXS(XS_Class__Plain__MOP__Method_name); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Method_name)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -2273,14 +2273,14 @@ XS_EUPXS(XS_Object__Pad__MOP__Method_name)
       case 0: RETVAL = SvREFCNT_inc(meta->name); break;
       case 1:
         RETVAL = newSV(0);
-        sv_setref_uv(RETVAL, "Object::Pad::MOP::Class", PTR2UV(meta->class));
+        sv_setref_uv(RETVAL, "Class::Plain::MOP::Class", PTR2UV(meta->class));
         break;
       case 2: RETVAL = boolSV(meta->is_common); break;
 
       default: RETVAL = NULL;
     }
   }
-#line 2284 "lib/Object/Pad.c"
+#line 2284 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2294,8 +2294,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Method_name)
 /* INCLUDE:  Including 'mop-field.xsi' from 'Pad.xs' */
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Field_name); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Field_name)
+XS_EUPXS(XS_Class__Plain__MOP__Field_name); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Field_name)
 {
     dVAR; dXSARGS;
     dXSI32;
@@ -2317,13 +2317,13 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_name)
         break;
       case 2:
         RETVAL = newSV(0);
-        sv_setref_uv(RETVAL, "Object::Pad::MOP::Class", PTR2UV(meta->class));
+        sv_setref_uv(RETVAL, "Class::Plain::MOP::Class", PTR2UV(meta->class));
         break;
 
       default: RETVAL = NULL;
     }
   }
-#line 2327 "lib/Object/Pad.c"
+#line 2327 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2331,8 +2331,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_name)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Field_value); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Field_value)
+XS_EUPXS(XS_Class__Plain__MOP__Field_value); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Field_value)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2400,15 +2400,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_value)
     ST(0) = value;
     XSRETURN(1);
   }
-#line 2404 "lib/Object/Pad.c"
+#line 2404 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Field_has_attribute); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Field_has_attribute)
+XS_EUPXS(XS_Class__Plain__MOP__Field_has_attribute); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Field_has_attribute)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2426,15 +2426,15 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_has_attribute)
     const struct FieldHook *hook = mop_field_get_attribute(meta, SvPV_nolen(name));
     RETVAL = !!hook;
   }
-#line 2430 "lib/Object/Pad.c"
+#line 2430 "lib/Class/Plain.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_value); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_value)
+XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_value); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_value)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2455,7 +2455,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_value)
 
     RETVAL = newSVsv(hook->hookdata);
   }
-#line 2459 "lib/Object/Pad.c"
+#line 2459 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2463,8 +2463,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_value)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_values); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_values)
+XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_values); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_values)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2494,7 +2494,7 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_values)
 
     XSRETURN(count);
   }
-#line 2498 "lib/Object/Pad.c"
+#line 2498 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2504,8 +2504,8 @@ XS_EUPXS(XS_Object__Pad__MOP__Field_get_attribute_values)
 /* INCLUDE: Returning to 'Pad.xs' from 'mop-field.xsi' */
 
 
-XS_EUPXS(XS_Object__Pad__MOP__FieldAttr_register); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MOP__FieldAttr_register)
+XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register)
 {
     dVAR; dXSARGS;
     if (items < 2)
@@ -2515,15 +2515,15 @@ XS_EUPXS(XS_Object__Pad__MOP__FieldAttr_register)
 ;
 	SV *	name = ST(1)
 ;
-#line 1453 "lib/Object/Pad.xs"
+#line 1453 "lib/Class/Plain.xs"
   {
     PERL_UNUSED_VAR(class);
     dKWARG(2);
 
     {
-      if(!cophh_exists_pvs(CopHINTHASH_get(PL_curcop), "Object::Pad/experimental(custom_field_attr)", 0))
+      if(!cophh_exists_pvs(CopHINTHASH_get(PL_curcop), "Class::Plain/experimental(custom_field_attr)", 0))
         Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-          "Object::Pad::MOP::FieldAttr is experimental and may be changed or removed without notice");
+          "Class::Plain::MOP::FieldAttr is experimental and may be changed or removed without notice");
     }
 
     struct FieldHookFuncs *funcs;
@@ -2555,14 +2555,14 @@ XS_EUPXS(XS_Object__Pad__MOP__FieldAttr_register)
 
     register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
   }
-#line 2559 "lib/Object/Pad.c"
+#line 2559 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
 
 
-XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass)
+XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -2571,7 +2571,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass)
 	SV *	RETVAL;
 	SV *	obj = ST(0)
 ;
-#line 1498 "lib/Object/Pad.xs"
+#line 1498 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to metaclass");
@@ -2584,7 +2584,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass)
 
     RETVAL = newSVsv(GvSV(*gvp));
   }
-#line 2588 "lib/Object/Pad.c"
+#line 2588 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2592,8 +2592,8 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_metaclass)
 }
 
 
-XS_EUPXS(XS_Object__Pad__MetaFunctions_deconstruct_object); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MetaFunctions_deconstruct_object)
+XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
 {
     dVAR; dXSARGS;
     if (items != 1)
@@ -2603,7 +2603,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_deconstruct_object)
     {
 	SV *	obj = ST(0)
 ;
-#line 1516 "lib/Object/Pad.xs"
+#line 1516 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to deconstruct_object");
@@ -2636,15 +2636,15 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_deconstruct_object)
     SPAGAIN;
     XSRETURN(retcount);
   }
-#line 2640 "lib/Object/Pad.c"
+#line 2640 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
 }
 
 
-XS_EUPXS(XS_Object__Pad__MetaFunctions_ref_field); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Object__Pad__MetaFunctions_ref_field)
+XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field); /* prototype to pass -Wmissing-prototypes */
+XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 {
     dVAR; dXSARGS;
     if (items != 2)
@@ -2655,7 +2655,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_ref_field)
 ;
 	SV *	obj = ST(1)
 ;
-#line 1552 "lib/Object/Pad.xs"
+#line 1552 "lib/Class/Plain.xs"
   {
     SV *want_classname = NULL, *want_fieldname;
 
@@ -2713,7 +2713,7 @@ XS_EUPXS(XS_Object__Pad__MetaFunctions_ref_field)
 done:
     ;
   }
-#line 2717 "lib/Object/Pad.c"
+#line 2717 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2723,8 +2723,8 @@ done:
 #ifdef __cplusplus
 extern "C"
 #endif
-XS_EXTERNAL(boot_Object__Pad); /* prototype to pass -Wmissing-prototypes */
-XS_EXTERNAL(boot_Object__Pad)
+XS_EXTERNAL(boot_Class__Plain); /* prototype to pass -Wmissing-prototypes */
+XS_EXTERNAL(boot_Class__Plain)
 {
 #if PERL_VERSION_LE(5, 21, 5)
     dVAR; dXSARGS;
@@ -2748,63 +2748,63 @@ XS_EXTERNAL(boot_Object__Pad)
 #  endif
 #endif
 
-        cv = newXS_deffile("Object::Pad::MOP::Class::_create_class", XS_Object__Pad__MOP__Class__create_class);
+        cv = newXS_deffile("Class::Plain::MOP::Class::_create_class", XS_Class__Plain__MOP__Class__create_class);
         XSANY.any_i32 = METATYPE_CLASS;
-        cv = newXS_deffile("Object::Pad::MOP::Class::_create_role", XS_Object__Pad__MOP__Class__create_class);
+        cv = newXS_deffile("Class::Plain::MOP::Class::_create_role", XS_Class__Plain__MOP__Class__create_class);
         XSANY.any_i32 = METATYPE_ROLE;
-        cv = newXS_deffile("Object::Pad::MOP::Class::is_class", XS_Object__Pad__MOP__Class_is_class);
+        cv = newXS_deffile("Class::Plain::MOP::Class::is_class", XS_Class__Plain__MOP__Class_is_class);
         XSANY.any_i32 = METATYPE_CLASS;
-        cv = newXS_deffile("Object::Pad::MOP::Class::is_role", XS_Object__Pad__MOP__Class_is_class);
+        cv = newXS_deffile("Class::Plain::MOP::Class::is_role", XS_Class__Plain__MOP__Class_is_class);
         XSANY.any_i32 = METATYPE_ROLE;
-        newXS_deffile("Object::Pad::MOP::Class::name", XS_Object__Pad__MOP__Class_name);
-        newXS_deffile("Object::Pad::MOP::Class::superclasses", XS_Object__Pad__MOP__Class_superclasses);
-        cv = newXS_deffile("Object::Pad::MOP::Class::all_roles", XS_Object__Pad__MOP__Class_direct_roles);
+        newXS_deffile("Class::Plain::MOP::Class::name", XS_Class__Plain__MOP__Class_name);
+        newXS_deffile("Class::Plain::MOP::Class::superclasses", XS_Class__Plain__MOP__Class_superclasses);
+        cv = newXS_deffile("Class::Plain::MOP::Class::all_roles", XS_Class__Plain__MOP__Class_direct_roles);
         XSANY.any_i32 = 1;
-        cv = newXS_deffile("Object::Pad::MOP::Class::direct_roles", XS_Object__Pad__MOP__Class_direct_roles);
+        cv = newXS_deffile("Class::Plain::MOP::Class::direct_roles", XS_Class__Plain__MOP__Class_direct_roles);
         XSANY.any_i32 = 0;
-        cv = newXS_deffile("Object::Pad::MOP::Class::add_role", XS_Object__Pad__MOP__Class_add_role);
+        cv = newXS_deffile("Class::Plain::MOP::Class::add_role", XS_Class__Plain__MOP__Class_add_role);
         XSANY.any_i32 = 0;
-        cv = newXS_deffile("Object::Pad::MOP::Class::compose_role", XS_Object__Pad__MOP__Class_add_role);
+        cv = newXS_deffile("Class::Plain::MOP::Class::compose_role", XS_Class__Plain__MOP__Class_add_role);
         XSANY.any_i32 = 0;
-        newXS_deffile("Object::Pad::MOP::Class::add_method", XS_Object__Pad__MOP__Class_add_method);
-        cv = newXS_deffile("Object::Pad::MOP::Class::get_direct_method", XS_Object__Pad__MOP__Class_get_direct_method);
+        newXS_deffile("Class::Plain::MOP::Class::add_method", XS_Class__Plain__MOP__Class_add_method);
+        cv = newXS_deffile("Class::Plain::MOP::Class::get_direct_method", XS_Class__Plain__MOP__Class_get_direct_method);
         XSANY.any_i32 = 0;
-        cv = newXS_deffile("Object::Pad::MOP::Class::get_method", XS_Object__Pad__MOP__Class_get_direct_method);
+        cv = newXS_deffile("Class::Plain::MOP::Class::get_method", XS_Class__Plain__MOP__Class_get_direct_method);
         XSANY.any_i32 = 1;
-        cv = newXS_deffile("Object::Pad::MOP::Class::all_methods", XS_Object__Pad__MOP__Class_direct_methods);
+        cv = newXS_deffile("Class::Plain::MOP::Class::all_methods", XS_Class__Plain__MOP__Class_direct_methods);
         XSANY.any_i32 = 1;
-        cv = newXS_deffile("Object::Pad::MOP::Class::direct_methods", XS_Object__Pad__MOP__Class_direct_methods);
+        cv = newXS_deffile("Class::Plain::MOP::Class::direct_methods", XS_Class__Plain__MOP__Class_direct_methods);
         XSANY.any_i32 = 0;
-        newXS_deffile("Object::Pad::MOP::Class::add_required_method", XS_Object__Pad__MOP__Class_add_required_method);
-        newXS_deffile("Object::Pad::MOP::Class::add_field", XS_Object__Pad__MOP__Class_add_field);
-        newXS_deffile("Object::Pad::MOP::Class::get_field", XS_Object__Pad__MOP__Class_get_field);
-        newXS_deffile("Object::Pad::MOP::Class::fields", XS_Object__Pad__MOP__Class_fields);
-        newXS_deffile("Object::Pad::MOP::Class::required_method_names", XS_Object__Pad__MOP__Class_required_method_names);
-        newXS_deffile("Object::Pad::MOP::Class::seal", XS_Object__Pad__MOP__Class_seal);
-        cv = newXS_deffile("Object::Pad::MOP::Method::class", XS_Object__Pad__MOP__Method_name);
+        newXS_deffile("Class::Plain::MOP::Class::add_required_method", XS_Class__Plain__MOP__Class_add_required_method);
+        newXS_deffile("Class::Plain::MOP::Class::add_field", XS_Class__Plain__MOP__Class_add_field);
+        newXS_deffile("Class::Plain::MOP::Class::get_field", XS_Class__Plain__MOP__Class_get_field);
+        newXS_deffile("Class::Plain::MOP::Class::fields", XS_Class__Plain__MOP__Class_fields);
+        newXS_deffile("Class::Plain::MOP::Class::required_method_names", XS_Class__Plain__MOP__Class_required_method_names);
+        newXS_deffile("Class::Plain::MOP::Class::seal", XS_Class__Plain__MOP__Class_seal);
+        cv = newXS_deffile("Class::Plain::MOP::Method::class", XS_Class__Plain__MOP__Method_name);
         XSANY.any_i32 = 1;
-        cv = newXS_deffile("Object::Pad::MOP::Method::is_common", XS_Object__Pad__MOP__Method_name);
+        cv = newXS_deffile("Class::Plain::MOP::Method::is_common", XS_Class__Plain__MOP__Method_name);
         XSANY.any_i32 = 2;
-        cv = newXS_deffile("Object::Pad::MOP::Method::name", XS_Object__Pad__MOP__Method_name);
+        cv = newXS_deffile("Class::Plain::MOP::Method::name", XS_Class__Plain__MOP__Method_name);
         XSANY.any_i32 = 0;
-        cv = newXS_deffile("Object::Pad::MOP::Field::class", XS_Object__Pad__MOP__Field_name);
+        cv = newXS_deffile("Class::Plain::MOP::Field::class", XS_Class__Plain__MOP__Field_name);
         XSANY.any_i32 = 2;
-        cv = newXS_deffile("Object::Pad::MOP::Field::name", XS_Object__Pad__MOP__Field_name);
+        cv = newXS_deffile("Class::Plain::MOP::Field::name", XS_Class__Plain__MOP__Field_name);
         XSANY.any_i32 = 0;
-        cv = newXS_deffile("Object::Pad::MOP::Field::sigil", XS_Object__Pad__MOP__Field_name);
+        cv = newXS_deffile("Class::Plain::MOP::Field::sigil", XS_Class__Plain__MOP__Field_name);
         XSANY.any_i32 = 1;
-        newXS_deffile("Object::Pad::MOP::Field::value", XS_Object__Pad__MOP__Field_value);
-        newXS_deffile("Object::Pad::MOP::Field::has_attribute", XS_Object__Pad__MOP__Field_has_attribute);
-        newXS_deffile("Object::Pad::MOP::Field::get_attribute_value", XS_Object__Pad__MOP__Field_get_attribute_value);
-        newXS_deffile("Object::Pad::MOP::Field::get_attribute_values", XS_Object__Pad__MOP__Field_get_attribute_values);
-        newXS_deffile("Object::Pad::MOP::FieldAttr::register", XS_Object__Pad__MOP__FieldAttr_register);
-        newXS_deffile("Object::Pad::MetaFunctions::metaclass", XS_Object__Pad__MetaFunctions_metaclass);
-        newXS_deffile("Object::Pad::MetaFunctions::deconstruct_object", XS_Object__Pad__MetaFunctions_deconstruct_object);
-        newXS_deffile("Object::Pad::MetaFunctions::ref_field", XS_Object__Pad__MetaFunctions_ref_field);
+        newXS_deffile("Class::Plain::MOP::Field::value", XS_Class__Plain__MOP__Field_value);
+        newXS_deffile("Class::Plain::MOP::Field::has_attribute", XS_Class__Plain__MOP__Field_has_attribute);
+        newXS_deffile("Class::Plain::MOP::Field::get_attribute_value", XS_Class__Plain__MOP__Field_get_attribute_value);
+        newXS_deffile("Class::Plain::MOP::Field::get_attribute_values", XS_Class__Plain__MOP__Field_get_attribute_values);
+        newXS_deffile("Class::Plain::MOP::FieldAttr::register", XS_Class__Plain__MOP__FieldAttr_register);
+        newXS_deffile("Class::Plain::MetaFunctions::metaclass", XS_Class__Plain__MetaFunctions_metaclass);
+        newXS_deffile("Class::Plain::MetaFunctions::deconstruct_object", XS_Class__Plain__MetaFunctions_deconstruct_object);
+        newXS_deffile("Class::Plain::MetaFunctions::ref_field", XS_Class__Plain__MetaFunctions_ref_field);
 
     /* Initialisation Section */
 
-#line 1613 "lib/Object/Pad.xs"
+#line 1613 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -2828,9 +2828,9 @@ XS_EXTERNAL(boot_Object__Pad)
 #endif
   Perl_custom_op_register(aTHX_ &pp_fieldpad, &xop_fieldpad);
 
-  CvLVALUE_on(get_cv("Object::Pad::MOP::Field::value", 0));
+  CvLVALUE_on(get_cv("Class::Plain::MOP::Field::value", 0));
 #ifdef HAVE_DMD_HELPER
-  DMD_SET_PACKAGE_HELPER("Object::Pad::MOP::Class", &dumppackage_class);
+  DMD_SET_PACKAGE_HELPER("Class::Plain::MOP::Class", &dumppackage_class);
 #endif
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
@@ -2845,10 +2845,10 @@ XS_EXTERNAL(boot_Object__Pad)
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)PHASER_NONE);
 
-  ObjectPad__boot_classes(aTHX);
-  ObjectPad__boot_fields(aTHX);
+  ClassPlain__boot_classes(aTHX);
+  ClassPlain__boot_fields(aTHX);
 
-#line 2852 "lib/Object/Pad.c"
+#line 2852 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

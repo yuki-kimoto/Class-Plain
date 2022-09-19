@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use_ok( "Object::Pad" );
-use_ok( "Object::Pad::ExtensionBuilder" );
+use_ok( "Class::Plain" );
+use_ok( "Class::Plain::ExtensionBuilder" );
 
 done_testing;

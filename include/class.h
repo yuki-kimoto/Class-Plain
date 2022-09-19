@@ -50,8 +50,8 @@ struct ClassMeta {
     /* Things that only true classes have */
     struct {
       ClassMeta *supermeta; /* superclass */
-      CV *foreign_new;      /* superclass is not Object::Pad, here is the constructor */
-      CV *foreign_does;     /* superclass is not Object::Pad, here is SUPER::DOES (which could be UNIVERSAL::DOES) */
+      CV *foreign_new;      /* superclass is not Class::Plain, here is the constructor */
+      CV *foreign_does;     /* superclass is not Class::Plain, here is SUPER::DOES (which could be UNIVERSAL::DOES) */
       AV *direct_roles;     /* each elem is a raw pointer directly to a RoleEmbedding for roles directly applied to this class */
       AV *embedded_roles;   /* each elem is a raw pointer directly to a RoleEmbedding for all roles embedded (MERGED) */
     } cls; /* not 'class' or C++ compilers get upset */
@@ -96,12 +96,12 @@ typedef struct ParamMeta {
     }                                                                                     \
   }
 
-#define mop_class_get_direct_roles(class, embeddings)  ObjectPad_mop_class_get_direct_roles(aTHX_ class, embeddings)
-RoleEmbedding **ObjectPad_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles);
+#define mop_class_get_direct_roles(class, embeddings)  ClassPlain_mop_class_get_direct_roles(aTHX_ class, embeddings)
+RoleEmbedding **ClassPlain_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles);
 
-#define mop_class_get_all_roles(class, embeddings)  ObjectPad_mop_class_get_all_roles(aTHX_ class, embeddings)
-RoleEmbedding **ObjectPad_mop_class_get_all_roles(pTHX_ const ClassMeta *meta, U32 *nroles);
+#define mop_class_get_all_roles(class, embeddings)  ClassPlain_mop_class_get_all_roles(aTHX_ class, embeddings)
+RoleEmbedding **ClassPlain_mop_class_get_all_roles(pTHX_ const ClassMeta *meta, U32 *nroles);
 
-void ObjectPad__boot_classes(pTHX);
+void ClassPlain__boot_classes(pTHX);
 
 #endif

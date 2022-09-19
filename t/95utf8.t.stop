@@ -8,7 +8,7 @@ BEGIN { binmode STDOUT, ":encoding(UTF-8)" }
 
 use Test::More;
 
-use Object::Pad ':experimental(mop)';
+use Class::Plain ':experimental(mop)';
 
 # A bunch of test cases with non-ASCII, non-Latin1. Esperanto is good for that
 # as the accented characters are not in Latin1.
@@ -24,7 +24,7 @@ class Sandviĉon {
 my $s = Sandviĉon->new;
 isa_ok( $s, "Sandviĉon", '$s' );
 
-my $classmeta = Object::Pad::MOP::Class->for_class( "Sandviĉon" );
+my $classmeta = Class::Plain::MOP::Class->for_class( "Sandviĉon" );
 ok( $classmeta, 'Can obtain classmeta for UTF-8 class name' );
 is( $classmeta->name, "Sandviĉon", '$classmeta->name' );
 

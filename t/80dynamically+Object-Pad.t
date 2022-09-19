@@ -8,11 +8,11 @@ use Test::More;
 BEGIN {
    plan skip_all => "Syntax::Keyword::Dynamically is not available"
       unless eval { require Syntax::Keyword::Dynamically };
-   plan skip_all => "Object::Pad is not available"
-      unless eval { require Object::Pad };
+   plan skip_all => "Class::Plain is not available"
+      unless eval { require Class::Plain };
 
    Syntax::Keyword::Dynamically->import;
-   Object::Pad->import;
+   Class::Plain->import;
 }
 
 class Datum {

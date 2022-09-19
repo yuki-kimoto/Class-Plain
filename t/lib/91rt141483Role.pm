@@ -1,7 +1,7 @@
 use v5.14;
 use warnings;
 
-use Object::Pad;
+use Class::Plain;
 
 role R {
     my $name = "Gantenbein";

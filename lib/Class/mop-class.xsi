@@ -31,9 +31,9 @@ _create_class(pkg, name, ...)
         cop = NULL;
       }
 
-      if(cop && !cophh_exists_pvs(CopHINTHASH_get(cop), "Object::Pad/experimental(mop)", 0))
+      if(cop && !cophh_exists_pvs(CopHINTHASH_get(cop), "Class::Plain/experimental(mop)", 0))
         Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-          "The Object::Pad MOP API is experimental and may be changed or removed without notice");
+          "The Class::Plain MOP API is experimental and may be changed or removed without notice");
     }
 
     static const char *args[] = {
@@ -65,7 +65,7 @@ _create_class(pkg, name, ...)
     mop_class_begin(meta);
 
     RETVAL = newSV(0);
-    sv_setref_uv(RETVAL, "Object::Pad::MOP::Class", PTR2UV(meta));
+    sv_setref_uv(RETVAL, "Class::Plain::MOP::Class", PTR2UV(meta));
 
     if(set_compclassmeta) {
       compclassmeta_set(meta);
@@ -115,7 +115,7 @@ superclasses(self)
 
     if(meta->type == METATYPE_CLASS && meta->cls.supermeta) {
       PUSHs(sv_newmortal());
-      sv_setref_uv(ST(0), "Object::Pad::MOP::Class", PTR2UV(meta->cls.supermeta));
+      sv_setref_uv(ST(0), "Class::Plain::MOP::Class", PTR2UV(meta->cls.supermeta));
       XSRETURN(1);
     }
 
@@ -146,7 +146,7 @@ direct_roles(self)
 
         for(i = 0; i < nroles; i++) {
           SV *sv = sv_newmortal();
-          sv_setref_uv(sv, "Object::Pad::MOP::Class", PTR2UV(embeddings[i]->rolemeta));
+          sv_setref_uv(sv, "Class::Plain::MOP::Class", PTR2UV(embeddings[i]->rolemeta));
           XPUSHs(sv);
           count++;
         }
@@ -174,8 +174,8 @@ add_role(self, role)
     PERL_UNUSED_VAR(ix);
 
     if(SvROK(role)) {
-      if(!sv_derived_from(role, "Object::Pad::MOP::Class"))
-        croak("Expected a role name string or Object::Pad::MOP::Class; got %" SVf, SVfARG(role));
+      if(!sv_derived_from(role, "Class::Plain::MOP::Class"))
+        croak("Expected a role name string or Class::Plain::MOP::Class; got %" SVf, SVfARG(role));
 
       rolemeta = NUM2PTR(ClassMeta *, SvUV(SvRV(role)));
     }
@@ -239,7 +239,7 @@ add_method(self, mname, ...)
     GvCV_set(*gvp, (CV *)SvREFCNT_inc(code));
 
     RETVAL = newSV(0);
-    sv_setref_uv(RETVAL, "Object::Pad::MOP::Method", PTR2UV(methodmeta));
+    sv_setref_uv(RETVAL, "Class::Plain::MOP::Method", PTR2UV(methodmeta));
   }
   OUTPUT:
     RETVAL
@@ -267,7 +267,7 @@ get_direct_method(self, methodname)
           continue;
 
         ST(0) = sv_newmortal();
-        sv_setref_iv(ST(0), "Object::Pad::MOP::Method", PTR2UV(methodmeta));
+        sv_setref_iv(ST(0), "Class::Plain::MOP::Method", PTR2UV(methodmeta));
         XSRETURN(1);
       }
 
@@ -312,7 +312,7 @@ direct_methods(self)
           continue;
 
         ST(retcount) = sv_newmortal();
-        sv_setref_iv(ST(retcount), "Object::Pad::MOP::Method", PTR2UV(methodmeta));
+        sv_setref_iv(ST(retcount), "Class::Plain::MOP::Method", PTR2UV(methodmeta));
         retcount++;
 
         hv_store_ent(mnames, methodmeta->name, &PL_sv_yes, 0);
@@ -391,7 +391,7 @@ add_field(self, fieldname, ...)
     mop_field_seal(fieldmeta);
 
     RETVAL = newSV(0);
-    sv_setref_uv(RETVAL, "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+    sv_setref_uv(RETVAL, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
   }
   OUTPUT:
     RETVAL
@@ -415,7 +415,7 @@ get_field(self, fieldname)
         continue;
 
       ST(0) = sv_newmortal();
-      sv_setref_iv(ST(0), "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+      sv_setref_iv(ST(0), "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
       XSRETURN(1);
     }
 
@@ -439,7 +439,7 @@ fields(self)
       FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
 
       ST(i) = sv_newmortal();
-      sv_setref_iv(ST(i), "Object::Pad::MOP::Field", PTR2UV(fieldmeta));
+      sv_setref_iv(ST(i), "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
     }
     XSRETURN(nfields);
 

@@ -12,15 +12,15 @@ BEGIN {
    plan skip_all => "Future::AsyncAwait >= 0.45 is not available"
       unless eval { require Future::AsyncAwait;
                     Future::AsyncAwait->VERSION( '0.45' ) };
-   plan skip_all => "Object::Pad >= 0.41 is not available"
-      unless eval { require Object::Pad;
-                    Object::Pad->VERSION( '0.41' ) };
+   plan skip_all => "Class::Plain >= 0.41 is not available"
+      unless eval { require Class::Plain;
+                    Class::Plain->VERSION( '0.41' ) };
 
    Future::AsyncAwait->import;
-   Object::Pad->import;
+   Class::Plain->import;
 
    diag( "Future::AsyncAwait $Future::AsyncAwait::VERSION, " .
-         "Object::Pad $Object::Pad::VERSION" );
+         "Class::Plain $Class::Plain::VERSION" );
 }
 
 # async method
@@ -44,7 +44,7 @@ BEGIN {
    my $f1 = Future->new;
    my $fret = $thunker->thunk( $f1 );
    is_refcount( $thunker, 3, 'during async sub' );
-      # +1 because $self, +1 because of @(Object::Pad/slots) pseudolexical
+      # +1 because $self, +1 because of @(Class::Plain/slots) pseudolexical
 
    is( $thunker->count, 0, 'count is 0 before $f1->done' );
 

@@ -22,10 +22,10 @@
 #  define HAVE_OP_WEAKEN
 #endif
 
-#define need_PLparser()  ObjectPad__need_PLparser(aTHX)
-void ObjectPad__need_PLparser(pTHX); /* in Object/Pad.xs */
+#define need_PLparser()  ClassPlain__need_PLparser(aTHX)
+void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
 
-FieldMeta *ObjectPad_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta)
+FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta)
 {
   FieldMeta *fieldmeta;
   Newx(fieldmeta, 1, FieldMeta);
@@ -44,7 +44,7 @@ FieldMeta *ObjectPad_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta)
   return fieldmeta;
 }
 
-SV *ObjectPad_mop_field_get_name(pTHX_ FieldMeta *fieldmeta)
+SV *ClassPlain_mop_field_get_name(pTHX_ FieldMeta *fieldmeta)
 {
   return fieldmeta->name;
 }
@@ -81,7 +81,7 @@ static void register_field_attribute(const char *name, const struct FieldHookFun
   fieldattrs = reg;
 }
 
-void ObjectPad_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value)
+void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value)
 {
   HV *hints = GvHV(PL_hintgv);
 
@@ -131,7 +131,7 @@ void ObjectPad_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char 
   av_push(fieldmeta->hooks, (SV *)hook);
 }
 
-struct FieldHook *ObjectPad_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name)
+struct FieldHook *ClassPlain_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name)
 {
   COPHH *cophh = CopHINTHASH_get(PL_curcop);
 
@@ -168,7 +168,7 @@ struct FieldHook *ObjectPad_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, 
   return NULL;
 }
 
-AV *ObjectPad_mop_field_get_attribute_values(pTHX_ FieldMeta *fieldmeta, const char *name)
+AV *ClassPlain_mop_field_get_attribute_values(pTHX_ FieldMeta *fieldmeta, const char *name)
 {
   COPHH *cophh = CopHINTHASH_get(PL_curcop);
 
@@ -212,7 +212,7 @@ AV *ObjectPad_mop_field_get_attribute_values(pTHX_ FieldMeta *fieldmeta, const c
   return ret;
 }
 
-void ObjectPad_mop_field_seal(pTHX_ FieldMeta *fieldmeta)
+void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta)
 {
   MOP_FIELD_RUN_HOOKS_NOARGS(fieldmeta, seal);
 }
@@ -422,7 +422,7 @@ static struct FieldHookFuncs fieldhooks_accessor = {
   .gen_accessor_ops = &fieldhook_gen_accessor_ops,
 };
 
-void ObjectPad_register_field_attribute(pTHX_ const char *name, const struct FieldHookFuncs *funcs, void *funcdata)
+void ClassPlain_register_field_attribute(pTHX_ const char *name, const struct FieldHookFuncs *funcs, void *funcdata)
 {
   if(funcs->ver < 57)
     croak("Mismatch in third-party field attribute ABI version field: module wants %d, we require >= 57\n",
@@ -440,7 +440,7 @@ void ObjectPad_register_field_attribute(pTHX_ const char *name, const struct Fie
   register_field_attribute(name, funcs, funcdata);
 }
 
-void ObjectPad__boot_fields(pTHX)
+void ClassPlain__boot_fields(pTHX)
 {
   register_field_attribute("reader",   &fieldhooks_reader,   NULL);
   register_field_attribute("writer",   &fieldhooks_writer,   NULL);

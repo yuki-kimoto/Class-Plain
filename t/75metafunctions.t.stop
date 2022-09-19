@@ -5,8 +5,8 @@ use warnings;
 
 use Test::More;
 
-use Object::Pad ':experimental( mop )';
-use Object::Pad::MetaFunctions qw(
+use Class::Plain ':experimental( mop )';
+use Class::Plain::MetaFunctions qw(
    metaclass
    deconstruct_object
    ref_field
@@ -29,7 +29,7 @@ class Point {
    }
 }
 
-is( metaclass( Point->new ), Object::Pad::MOP::Class->for_class( "Point" ),
+is( metaclass( Point->new ), Class::Plain::MOP::Class->for_class( "Point" ),
    'metaclass() returns Point metaclass' );
 
 class AllFieldTypes {

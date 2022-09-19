@@ -31,6 +31,6 @@ struct FieldMeta {
     }                                                                                     \
   }
 
-void ObjectPad__boot_fields(pTHX);
+void ClassPlain__boot_fields(pTHX);
 
 #endif
