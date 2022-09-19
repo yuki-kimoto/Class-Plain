@@ -1005,39 +1005,18 @@ XS_INTERNAL(injected_constructor)
   
   (void)items;
   
-  const ClassMeta *meta = XSANY.any_ptr;
   SV *class = ST(0);
-  SV *self = NULL;
-
-  assert(meta->type == METATYPE_CLASS);
-  if(!meta->sealed)
-    croak("Cannot yet invoke '%" SVf "' constructor before the class is complete", SVfARG(class));
-
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-  COP *prevcop = PL_curcop;
-  PL_curcop = meta->tmpcop;
-  CopLINE_set(PL_curcop, __LINE__);
-#endif
-
-  /* An AV storing the @_ args to pass to foreign constructor and all the
-   * build blocks
-   * This does not include $self
-   */
-  AV *args = newAV();
-  SAVEFREESV(args);
 
   HV *stash = gv_stashsv(class, 0);
   if(!stash)
     croak("Unable to find stash for class %" SVf, class);
 
   DEBUG_SET_CURCOP_LINE(__LINE__);
-  self = sv_2mortal(newRV_noinc((SV *)newAV()));
+  SV *self = sv_2mortal(newRV_noinc((SV *)newAV()));
   sv_bless(self, stash);
 
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-  PL_curcop = prevcop;
-#endif
   ST(0) = self;
+  
   XSRETURN(1);
 }
 
