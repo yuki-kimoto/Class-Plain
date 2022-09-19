@@ -1187,26 +1187,6 @@ XS_INTERNAL(injected_constructor)
     PAD_SVl(PADIX_SLOTS) = (SV *)backingav;
   }
 
-  HV *paramhv = NULL;
-  if(meta->parammap) {
-    paramhv = newHV();
-    SAVEFREESV((SV *)paramhv);
-
-    if(av_count(args) % 2)
-      warn("Odd-length list passed to %" SVf " constructor", class);
-
-    /* TODO: I'm sure there's an newHV_from_AV() around somewhere */
-    SV **argsv = AvARRAY(args);
-
-    IV idx;
-    for(idx = 0; idx < av_count(args); idx += 2) {
-      SV *name  = argsv[idx];
-      SV *value = idx < av_count(args)-1 ? argsv[idx+1] : &PL_sv_undef;
-
-      hv_store_ent(paramhv, name, SvREFCNT_inc(value), 0);
-    }
-  }
-
 #ifdef DEBUG_OVERRIDE_PLCURCOP
   PL_curcop = prevcop;
 #endif
