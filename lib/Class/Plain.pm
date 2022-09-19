@@ -196,12 +196,9 @@ that block define the new class and the preceding package continues
 afterwards. If not, it sets the class as the package context of following
 keywords and definitions.
 
-As with C<package>, an optional version declaration may be given. If so, this
-sets the value of the package's C<$VERSION> variable.
+   class Name { ... }
 
-   class Name VERSION { ... }
-
-   class Name VERSION;
+   class Name;
 
 A single superclass is supported by the keyword C<isa>
 
@@ -270,10 +267,6 @@ The superclass may or may not itself be implemented by C<Class::Plain>, but if
 it is not then see L<SUBCLASSING CLASSIC PERL CLASSES> for further detail on
 the semantics of how this operates.
 
-An optional version check can also be supplied; it performs the equivalent of
-
-   BaseClass->VERSION( $ver )
-
 =head3 :does
 
    :does(ROLE)
@@ -307,7 +300,7 @@ acts similar to a class in some respects, and differently in others.
 
 Like a class, a role can have a version, and named methods.
 
-   role Name VERSION {
+   role Name {
       method a { ... }
       method b { ... }
    }
@@ -512,44 +505,5 @@ within the body. As long as you write code that is in a clean, modern style
 find any new restrictions to be majorly problematic. Either the code will
 continue to run unaffected, or you may have to make some small alterations to
 bring it into a conforming style.
-
-=head2 Yield True
-
-A C<class> statement or block will yield a true boolean value. This means that
-it can be used directly inside a F<.pm> file, avoiding the need to explicitly
-yield a true value from the end of it.
-
-=head1 STYLE SUGGESTIONS
-
-While in no way required, the following suggestions of code style should be
-noted in order to establish a set of best practices, and encourage consistency
-of code which uses this module.
-
-=head2 $VERSION declaration
-
-While it would be nice for CPAN and other toolchain modules to parse the
-embedded version declarations in C<class> statements, the current state at
-time of writing (June 2020) is that none of them actually do. As such, it will
-still be necessary to make a once-per-file C<$VERSION> declaration in syntax
-those modules can parse.
-
-Further note that these modules will also not parse the C<class> declaration,
-so you will have to duplicate this with a C<package> declaration as well as a
-C<class> keyword. This does involve repeating the package name, so is slightly
-undesirable.
-
-It is hoped that eventually upstream toolchain modules will be adapted to
-accept the C<class> syntax as being sufficient to declare a package and set
-its version.
-
-See also
-
-=over 2
-
-=item *
-
-L<https://github.com/Perl-Toolchain-Gang/Module-Metadata/issues/33>
-
-=back
 
 1;
