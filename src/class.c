@@ -1389,7 +1389,7 @@ XS_INTERNAL(injected_DOES)
       XSRETURN_YES;
   }
   else {
-    /* We need to also respond to Object::Pad::UNIVERSAL and UNIVERSAL */
+    /* We need to also respond to Object::Pad::Base and UNIVERSAL */
     if(sv_derived_from_sv(self, wantrole, 0))
       XSRETURN_YES;
   }
@@ -1627,7 +1627,7 @@ void ObjectPad_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassnam
 
     meta->cls.foreign_does = fetch_superclass_method_pv(meta->stash, "DOES", 4, -1);
 
-    av_push(isa, newSVpvs("Object::Pad::UNIVERSAL"));
+    av_push(isa, newSVpvs("Object::Pad::Base"));
   }
 
   meta->has_superclass = true;
@@ -1641,7 +1641,7 @@ void ObjectPad_mop_class_begin(pTHX_ ClassMeta *meta)
 
   AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
   if(!av_count(isa))
-    av_push(isa, newSVpvs("Object::Pad::UNIVERSAL"));
+    av_push(isa, newSVpvs("Object::Pad::Base"));
 
   if(meta->type == METATYPE_CLASS &&
       meta->repr == REPR_AUTOSELECT && !meta->cls.foreign_new)

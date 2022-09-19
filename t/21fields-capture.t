@@ -9,13 +9,21 @@ use Object::Pad;
 
 class Counter {
    field $count;
-
-   method inc { $count++ };
-   method make_incrsub {
-      return sub { $count++ };
+   
+   method new : common {
+     warn $class;
+     
+     my $self = $class->SUPER::new(@_);
+     
+     return $self;
    }
 
-   method count { $count }
+   method inc { $self->{count}++ };
+   method make_incrsub {
+      return sub { $self->{count}++ };
+   }
+
+   method count { $self->{count} }
 }
 
 {
