@@ -176,14 +176,6 @@ static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backing
         av_push(backingav, newSV(0));
         break;
 
-      case '@':
-        av_push(backingav, newRV_noinc((SV *)newAV()));
-        break;
-
-      case '%':
-        av_push(backingav, newRV_noinc((SV *)newHV()));
-        break;
-
       default:
         croak("ARGH: not sure how to handle a slot sigil %c\n", sigil);
     }
@@ -297,8 +289,6 @@ FieldMeta *ObjectPad_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 
   switch(SvPV_nolen(fieldname)[0]) {
     case '$':
-    case '@':
-    case '%':
       break;
 
     default:
