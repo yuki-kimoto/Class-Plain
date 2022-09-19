@@ -19,9 +19,8 @@ class Animal 1.23 {
 is( $Animal::VERSION, 1.23, 'Versioned class has $VERSION' );
 
 class Spider 4.56 :isa(Animal) {
-   sub BUILDARGS {
-      my $self = shift;
-      return $self->SUPER::BUILDARGS( 8 );
+   method new8 : common {
+     return $class->new(8);
    }
 
    method describe {
@@ -32,7 +31,7 @@ class Spider 4.56 :isa(Animal) {
 is( $Spider::VERSION, 4.56, 'Versioned subclass has $VERSION' );
 
 {
-   my $spider = Spider->new;
+   my $spider = Spider->new8;
    is( $spider->describe, "An animal with 8 legs",
       'Subclassed instances work' );
 }

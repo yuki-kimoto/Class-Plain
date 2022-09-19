@@ -117,7 +117,7 @@ sub import_into
 
 # The universal base-class methods
 
-sub Object::Pad::UNIVERSAL::BUILDARGS
+sub Object::Pad::UNIVERSAL::_BUILDARGS
 {
    shift; # $class
    return @_;
@@ -232,15 +232,6 @@ Classes are automatically provided with a constructor method, called C<new>,
 which helps create the object instances. This may respond to passed arguments,
 automatically assigning values of fields, and invoking other blocks of code
 provided by the class. It proceeds in the following stages:
-
-=head3 The BUILDARGS phase
-
-If the class provides a C<BUILDARGS> class method, that is used to mangle the
-list of arguments before the C<BUILD> blocks are called. Note this must be a
-class method not an instance method (and so implemented using C<sub>). It
-should perform any C<SUPER> chaining as may be required.
-
-   @args = $class->BUILDARGS( @_ )
 
 =head3 Field assignment
 

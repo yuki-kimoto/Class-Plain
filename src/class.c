@@ -1102,7 +1102,7 @@ XS_INTERNAL(injected_constructor)
     SP++;
     PUTBACK;
 
-    I32 nargs = call_method("BUILDARGS", G_ARRAY);
+    I32 nargs = call_method("_BUILDARGS", G_ARRAY);
 
     SPAGAIN;
 
