@@ -327,11 +327,6 @@ static bool fieldhook_param_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **ho
   return TRUE;
 }
 
-static struct FieldHookFuncs fieldhooks_param = {
-  .ver   = OBJECTPAD_ABIVERSION,
-  .apply = &fieldhook_param_apply,
-};
-
 /* :reader */
 
 static SV *make_accessor_mnamesv(pTHX_ FieldMeta *fieldmeta, SV *mname, const char *fmt)
@@ -600,7 +595,6 @@ void ObjectPad__boot_fields(pTHX)
 #endif
 
   register_field_attribute("weak",     &fieldhooks_weak,     NULL);
-  register_field_attribute("param",    &fieldhooks_param,    NULL);
   register_field_attribute("reader",   &fieldhooks_reader,   NULL);
   register_field_attribute("writer",   &fieldhooks_writer,   NULL);
   register_field_attribute("accessor", &fieldhooks_accessor, NULL);

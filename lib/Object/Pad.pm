@@ -148,59 +148,25 @@ On perl version 5.26 onwards:
    use Object::Pad;
 
    class Point {
-      has $x :param;
-      has $y :param;
+      has $x;
+      has $y;
 
      method new : common {
-       my $self = bless [@_], $class;
+       my $self = $class->SUPER::new(@_);
        
-       my @field_names = qw(x y);
-       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-       $self->[$field_ids{x}] = 0 unless defined $self->[$field_ids{x}];
-       $self->[$field_ids{y}] = 0 unless defined $self->[$field_ids{y}];
+       $self->{x} //= 0;
+       $self->{y} //= 0;
        
        return $self;
      }
 
-      method move ($dX, $dY) {
-         $x += $dX;
-         $y += $dY;
+      method move ($x, $y) {
+         $self->{x} += $x;
+         $self->{y} += $y;
       }
 
       method describe () {
-         print "A point at ($x, $y)\n";
-      }
-   }
-
-   Point->new(x => 5, y => 10)->describe;
-
-Or, for older perls that lack signatures:
-
-   use Object::Pad;
-
-   class Point {
-      has $x :param;
-      has $y :param;
-
-     method new : common {
-       my $self = bless [@_], $class;
-       
-       my @field_names = qw(x y);
-       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-       $self->[$field_ids{x}] = 0 unless defined $self->[$field_ids{x}];
-       $self->[$field_ids{y}] = 0 unless defined $self->[$field_ids{y}];
-       
-       return $self;
-     }
-
-      method move {
-         my ($dX, $dY) = @_;
-         $x += $dX;
-         $y += $dY;
-      }
-
-      method describe {
-         print "A point at ($x, $y)\n";
+         print "A point at ($self->{x}, $self->{y})\n";
       }
    }
 
@@ -256,18 +222,6 @@ Classes are automatically provided with a constructor method, called C<new>,
 which helps create the object instances. This may respond to passed arguments,
 automatically assigning values of fields, and invoking other blocks of code
 provided by the class. It proceeds in the following stages:
-
-=head3 Field assignment
-
-If any field in the class has the C<:param> attribute, then the constructor
-will expect to receive its argmuents in an even-sized list of name/value
-pairs. This applies even to fields inherited from the parent class or applied
-roles. It is therefore a good idea to shape the parameters to the constructor
-in this way in roles, and in classes if you intend your class to be extended.
-
-The constructor will also check for required parameters (these are all the
-parameters for fields that do not have default initialisation expressions). If
-any of these are missing an exception is thrown.
 
 =head1 KEYWORDS
 
@@ -501,34 +455,11 @@ returned.
 I<Since version 0.44.>
 
 Generated code which sets the value of this field will weaken it if it
-contains a reference. This applies to within the constructor if C<:param> is
-given, and to a C<:writer> accessor method. Note that this I<only> applies to
+contains a reference. This applies to a C<:writer> accessor method. Note that this I<only> applies to
 automatically generated code; not normal code written in regular method
 bodies. If you assign into the field variable you must remember to call
 C<Scalar::Util::weaken> (or C<builtin::weaken> on Perl 5.36 or above)
 yourself.
-
-=head3 :param
-
-I<Since version 0.41.>
-
-Sets this field to be initialised automatically in the generated constructor.
-This is only permitted on scalar fields. If no name is given, the name of the
-field is used. A single prefix character C<_> will be removed if present.
-
-Any field that has C<:param> but does not have a default initialisation
-expression or block becomes a required argument to the constructor. Attempting
-to invoke the constructor without a named argument for this will throw an
-exception. In order to make a parameter optional, make sure to give it a
-default expression - even if that expression is C<undef>:
-
-   has $x :param;          # this is required
-   has $z :param;  # this is optional
-
-Any field that has a C<:param> and an initialisation block will only run the
-code in the block if required by the constructor. If a named parameter is
-passed to the constructor for this field, then its code block will not be
-executed.
 
 =head2 has
 
@@ -645,16 +576,6 @@ A C<class> statement or block will yield a true boolean value. This means that
 it can be used directly inside a F<.pm> file, avoiding the need to explicitly
 yield a true value from the end of it.
 
-=head1 SUBCLASSING CLASSIC PERL CLASSES
-
-There are a number of details specific to the case of deriving an
-C<Object::Pad> class from an existing classic Perl class that is not
-implemented using C<Object::Pad>.
-
-=head2 Storage of Instance Data
-
-Instances will pick either the C<:repr(HASH)> or C<:repr(magic)> storage type.
-
 =head1 STYLE SUGGESTIONS
 
 While in no way required, the following suggestions of code style should be
@@ -706,17 +627,6 @@ be implied by the C<class> keyword.
    # other use statements
 
    # has, methods, etc.. can go here
-
-=head2 Field Names
-
-Field names should follow similar rules to regular lexical variables in code -
-lowercase, name components separated by underscores. For tiny examples such as
-"dumb record" structures this may be sufficient.
-
-   class Tag {
-      field $name  :accessor;
-      field $value :accessor;
-   }
 
 =cut
 

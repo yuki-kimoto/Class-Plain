@@ -8,7 +8,7 @@ use Test::More;
 use Object::Pad;
 
 class AClass {
-   field $data :param;
+   field $data;
 
    method new : common {
      my $self = {@_};
