@@ -9,11 +9,18 @@ use Test::Fatal;
 use Object::Pad ':experimental(mop)';
 
 class Example {
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
+
    method m { }
 }
 
 my $classmeta = Object::Pad::MOP::Class->for_class( "Example" );
 
+my $methodmeta_new = $classmeta->get_direct_method( 'new' );
 my $methodmeta = $classmeta->get_direct_method( 'm' );
 
 is( $methodmeta->name, "m", '$methodmeta->name' );
@@ -22,10 +29,10 @@ ok( !$methodmeta->is_common, '$methodmeta->is_common' );
 
 is( $classmeta->get_method( 'm' )->name, "m", '$classmeta->get_method' );
 
-is_deeply( [ $classmeta->direct_methods ], [ $methodmeta ],
+is_deeply( [ $classmeta->direct_methods ], [ $methodmeta_new, $methodmeta ],
    '$classmeta->direct_methods' );
 
-is_deeply( [ $classmeta->all_methods ], [ $methodmeta ],
+is_deeply( [ $classmeta->all_methods ], [ $methodmeta_new, $methodmeta ],
    '$classmeta->all_methods' );
 
 class SubClass :isa(Example) {}
@@ -36,17 +43,27 @@ ok( defined Object::Pad::MOP::Class->for_class( "SubClass" )->get_method( 'm' ),
 # subclass with overridden method
 {
    class WithOverride :isa(Example) {
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
       method m { "different" }
    }
 
    my @methodmetas = Object::Pad::MOP::Class->for_class( "WithOverride" )->all_methods;
 
-   is( scalar @methodmetas, 1, 'overridden method is not duplicated' );
+   is( scalar @methodmetas, 2, 'overridden method is not duplicated' );
 }
 
 # :common methods
 {
    class BClass {
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
       method cm :common { }
    }
 

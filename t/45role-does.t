@@ -61,9 +61,19 @@ class CClass :does(CRole) {
 }
 
 class ABase :does(ARole) {
+ method new : common {
+   my $self = $class->SUPER::new(@_);
+   
+   return $self;
+ }
 }
 
 class ADerived :isa(ABase) {
+ method new : common {
+   my $self = $class->SUPER::new(@_);
+   
+   return $self;
+ }
 }
 
 {

@@ -24,6 +24,11 @@ is_deeply( [ $meta->required_method_names ], [qw( a_method b_method )],
    '$meta->required_method_names' );
 
 class Implementor :does(Example) {
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     return $self;
+   }
    method a_method {}
    method b_method {}
 }
@@ -36,7 +41,13 @@ is_deeply( [ Object::Pad::MOP::Class->for_class( "Implementor" )->all_roles ],
    [ $meta ],
    '$meta->all_roles on implementing class' );
 
-class Inheritor :isa(Implementor) {}
+class Inheritor :isa(Implementor) {
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     return $self;
+   }
+}
 
 # Roles via subclass
 {

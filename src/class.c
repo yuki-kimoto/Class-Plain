@@ -1174,9 +1174,6 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
     HV *stash = gv_stashsv(name, 0);
     if(!stash)
       croak("Unable to find stash for class %" SVf, name);
-
-    CV *newcv = newXS_flags(SvPV_nolen(newname), injected_constructor, __FILE__, NULL, SvFLAGS(newname) & SVf_UTF8);
-    CvXSUBANY(newcv).any_ptr = meta;
   }
 
   {
