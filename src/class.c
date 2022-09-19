@@ -1175,8 +1175,6 @@ XS_INTERNAL(injected_constructor)
     backingav = (AV *)get_obj_backingav(self, meta->repr, FALSE);
   }
 
-  SV **fieldsvs = AvARRAY(backingav);
-
   if(meta->fieldhooks_initfield || meta->fieldhooks_construct) {
     /* We need to set up a fake pad so these hooks can still get PADIX_SELF / PADIX_SLOTS */
 
@@ -1189,22 +1187,8 @@ XS_INTERNAL(injected_constructor)
     PAD_SVl(PADIX_SLOTS) = (SV *)backingav;
   }
 
-  if(meta->fieldhooks_initfield) {
-    DEBUG_SET_CURCOP_LINE(__LINE__);
-
-    AV *fieldhooks = meta->fieldhooks_initfield;
-
-    U32 i;
-    for(i = 0; i < av_count(fieldhooks); i++) {
-      struct FieldHook *h = (struct FieldHook *)AvARRAY(fieldhooks)[i];
-      FIELDOFFSET fieldix = h->fieldix;
-
-      (*h->funcs->post_initfield)(aTHX_ h->fieldmeta, h->hookdata, h->funcdata, fieldsvs[fieldix]);
-    }
-  }
-
   HV *paramhv = NULL;
-  if(meta->parammap || meta->has_adjust) {
+  if(meta->parammap) {
     paramhv = newHV();
     SAVEFREESV((SV *)paramhv);
 

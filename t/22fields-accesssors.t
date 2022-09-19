@@ -12,13 +12,28 @@ my $MATCH_ARGCOUNT =
    $] >= 5.033006 ? qr/ \(got \d+; expected \d+\)/ : "";
 
 class Colour {
-   field $red   :param :reader            :writer;
-   field $green :param :reader(get_green) :writer;
-   field $blue  :param :accessor;
-   field $white :param :accessor;
+   field $red   ; # :reader            :writer; # Remove reader writer
+   field $green ; # :reader(get_green) :writer; # Remove reader writer
+   field $blue  ; # :accessor; # Remove accessor
+   field $white ; # :accessor; # Remove accessor
+   
+   method red () { $self->{red} }
+   method set_red ($red) { $self->{red} = $red; return $self; }
+
+   method get_green () { $self->{green} }
+   method set_green ($green) { $self->{green} = $green; return $self;  }
+
+   method blue { if (@_) { $self->{blue} = $_[0]; return $self; } else { $self->{blue} } }
+   method white { if (@_) { $self->{white} = $_[0]; return $self;  } else { $self->{white} } }
+
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     return $self;
+   }
 
    method rgbw {
-      ( $red, $green, $blue, $white );
+      ( $self->{red}, $self->{green}, $self->{blue}, $self->{white} );
    }
 }
 
@@ -30,6 +45,7 @@ class Colour {
    is( $col->get_green, 60, '$col->get_green' );
    is( $col->blue,      70, '$col->blue' );
    is( $col->white,     80, '$col->white' );
+
 
    # Reader complains if given any arguments
    my $LINE = __LINE__+1;
