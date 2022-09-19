@@ -390,55 +390,6 @@ role.
 The package will be loaded in a similar way to how the L</:isa> attribute is
 handled.
 
-=head3 :repr(TYPE)
-
-Sets the representation type for instances of this class. Must be one of the
-following values:
-
-   :repr(native)
-
-The native representation. This is an opaque representation type whose
-contents are not specified. It only works for classes whose entire inheritance
-hierarchy is built only from classes based on C<Object::Pad>.
-
-   :repr(HASH)
-
-The representation will be a blessed hash reference. The instance data will
-be stored in an array referenced by a key called C<Object::Pad/slots>, which
-is fairly unlikely to clash with existing storage on the instance. No other
-keys will be used; they are available for implementions and subclasses to use.
-The exact format of the value stored here is not specified and may change
-between module versions, though it can be relied on to be well-behaved as some
-kind of perl data structure for purposes of modules like L<Data::Dumper> or
-serialisation into things like C<YAML> or C<JSON>.
-
-This representation type may be useful when converting existing classes into
-using C<Object::Pad> where there may be existing subclasses of it that presume
-a blessed hash for their own use.
-
-   :repr(magic)
-
-The representation will use MAGIC to apply the instance data in a way that is
-invisible at the Perl level, and shouldn't get in the way of other things the
-instance is doing even in XS modules.
-
-This representation type is the only one that will work for subclassing
-existing classes that do not use blessed hashes.
-
-   :repr(autoselect), :repr(default)
-
-I<Since version 0.23.>
-
-This representation will select one of the representations above depending on
-what is best for the situation. Classes not derived from a non-C<Object::Pad>
-base class will pick C<native>, and classes derived from non-C<Object::Pad>
-bases will pick either the C<HASH> or C<magic> forms depending on whether the
-instance is a blessed hash reference or some other kind.
-
-This achieves the best combination of DWIM while still allowing the common
-forms of hash reference to be inspected by C<Data::Dumper>, etc. This is the
-default representation type, and does not have to be specifically requested.
-
 =head2 role
 
    role Name :ATTRS... {

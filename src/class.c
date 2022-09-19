@@ -1760,43 +1760,10 @@ static const struct ClassHookFuncs classhooks_does = {
   .apply = &classhook_does_apply,
 };
 
-/* :repr */
-
-static bool classhook_repr_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  char *val = SvPV_nolen(value); /* all comparisons are ASCII */
-
-  if(strEQ(val, "native")) {
-    if(classmeta->type == METATYPE_CLASS && classmeta->cls.foreign_new)
-      croak("Cannot switch a subclass of a foreign superclass type to :repr(native)");
-    classmeta->repr = REPR_NATIVE;
-  }
-  else if(strEQ(val, "HASH"))
-    classmeta->repr = REPR_HASH;
-  else if(strEQ(val, "magic")) {
-    if(classmeta->type != METATYPE_CLASS || !classmeta->cls.foreign_new)
-      croak("Cannot switch to :repr(magic) without a foreign superclass");
-    classmeta->repr = REPR_MAGIC;
-  }
-  else if(strEQ(val, "default") || strEQ(val, "autoselect"))
-    classmeta->repr = REPR_AUTOSELECT;
-  else
-    croak("Unrecognised class representation type %" SVf, SVfARG(value));
-
-  return FALSE;
-}
-
-static const struct ClassHookFuncs classhooks_repr = {
-  .ver   = OBJECTPAD_ABIVERSION,
-  .flags = OBJECTPAD_FLAG_ATTR_MUST_VALUE,
-  .apply = &classhook_repr_apply,
-};
-
 void ObjectPad__boot_classes(pTHX)
 {
   register_class_attribute("isa",    &classhooks_isa,    NULL);
   register_class_attribute("does",   &classhooks_does,   NULL);
-  register_class_attribute("repr",   &classhooks_repr,   NULL);
 
 #ifdef HAVE_DMD_HELPER
   DMD_ADD_ROOT((SV *)&vtbl_backingav, "the Object::Pad backing AV VTBL");
