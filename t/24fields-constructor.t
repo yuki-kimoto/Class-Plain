@@ -8,13 +8,20 @@ use Test::More;
 use Object::Pad;
 
 class Point {
-   has $x :param;
-   has $y :param;
-   
-   ADJUST {
-     $y = 0 unless length $y;
-   }
+   has $x;
+   has $y;
 
+   method new : common {
+     my $self = bless [$_[1], $_[3]], $class;
+     
+     my @field_names = qw(x y);
+     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+     $self->[$field_ids{x}] = 0 unless defined $self->[$field_ids{x}];
+     $self->[$field_ids{y}] = 0 unless defined $self->[$field_ids{y}];
+     
+     return $self;
+   }
+   
    method pos { return ( $x, $y ); }
 }
 
@@ -31,9 +38,16 @@ class Point {
 }
 
 class Point3D :isa(Point) {
-   has $z :param;
-   ADJUST {
-     $z = 0 unless length $z;
+   has $z;
+   
+   method new : common {
+     my $self = bless [$_[1], $_[3], $_[5]], $class;
+     
+     my @field_names = qw(x y z);
+     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+     $self->[$field_ids{z}] = 0 unless defined $self->[$field_ids{z}];
+     
+     return $self;
    }
 
    method pos { return ( $self->next::method, $z ) }
