@@ -1005,19 +1005,7 @@ XS_INTERNAL(injected_constructor)
   
   (void)items;
   
-  SV *class = ST(0);
-
-  HV *stash = gv_stashsv(class, 0);
-  if(!stash)
-    croak("Unable to find stash for class %" SVf, class);
-
-  DEBUG_SET_CURCOP_LINE(__LINE__);
-  SV *self = sv_2mortal(newRV_noinc((SV *)newHV()));
-  sv_bless(self, stash);
-
-  ST(0) = &PL_sv_undef;
-  
-  XSRETURN(1);
+  XSRETURN(0);
 }
 
 XS_INTERNAL(injected_DOES)
@@ -1182,6 +1170,10 @@ ClassMeta *ObjectPad_mop_create_class(pTHX_ enum MetaType type, SV *name)
     /* Inject the constructor */
     SV *newname = newSVpvf("%" SVf "::new", name);
     SAVEFREESV(newname);
+
+    HV *stash = gv_stashsv(name, 0);
+    if(!stash)
+      croak("Unable to find stash for class %" SVf, name);
 
     CV *newcv = newXS_flags(SvPV_nolen(newname), injected_constructor, __FILE__, NULL, SvFLAGS(newname) & SVf_UTF8);
     CvXSUBANY(newcv).any_ptr = meta;

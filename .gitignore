@@ -20,3 +20,4 @@ XSParseSublike.h
 _build
 core
 core.*
+*.o
