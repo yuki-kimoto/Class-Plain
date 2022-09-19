@@ -11,7 +11,7 @@ class Base::Class {
    field $data;
    method data { $data }
 
-   BUILD {
+   ADJUST {
       $data = "base data"
    }
 }
@@ -20,7 +20,7 @@ class Derived::Class :isa(Base::Class) {
    field $data;
    method data { $data }
 
-   BUILD {
+   ADJUST {
       $data = "derived data";
    }
 }

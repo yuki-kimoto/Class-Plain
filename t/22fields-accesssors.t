@@ -12,14 +12,10 @@ my $MATCH_ARGCOUNT =
    $] >= 5.033006 ? qr/ \(got \d+; expected \d+\)/ : "";
 
 class Colour {
-   field $red   :reader            :writer;
-   field $green :reader(get_green) :writer;
-   field $blue  :accessor;
-   field $white :accessor;
-
-   BUILD {
-      ( $red, $green, $blue, $white ) = @_;
-   }
+   field $red   :param :reader            :writer;
+   field $green :param :reader(get_green) :writer;
+   field $blue  :param :accessor;
+   field $white :param :accessor;
 
    method rgbw {
       ( $red, $green, $blue, $white );
@@ -28,7 +24,7 @@ class Colour {
 
 # readers
 {
-   my $col = Colour->new(50, 60, 70, 80);
+   my $col = Colour->new(red => 50, green => 60, blue => 70, white => 80);
 
    is( $col->red,       50, '$col->red' );
    is( $col->get_green, 60, '$col->get_green' );

@@ -9,13 +9,14 @@ use Test::Refcount;
 use Object::Pad;
 
 class Point {
-   BUILD { @$self = @_; }
-
+   has $x : param;
+   has $y : param;
+   
    method where { sprintf "(%d,%d)", @$self }
 }
 
 {
-   my $p = Point->new( 10, 20 );
+   my $p = Point->new(x => 10, y => 20 );
    is_oneref( $p, '$p has refcount 1 initially' );
 
    is( $p->where, "(10,20)", '$p->where' );
@@ -25,14 +26,16 @@ class Point {
 # anon methods
 {
    class Point3 {
-      BUILD { @$self = @_; }
-
+     has $x : param;
+     has $y : param;
+     has $z : param;
+     
       our $clearer = method {
          @$self = ( 0 ) x 3;
       };
    }
 
-   my $p = Point3->new( 1, 2, 3 );
+   my $p = Point3->new(x => 1, y => 2, z => 3 );
    $p->$Point3::clearer();
 
    is_deeply( [ @$p ], [ 0, 0, 0 ],
@@ -45,7 +48,7 @@ SKIP: {
    class RT132321 {
       has $_genvalue;
 
-      BUILD {
+      ADJUST {
          $_genvalue = method { 123 };
       }
 
@@ -53,7 +56,7 @@ SKIP: {
    }
 
    my $obj = RT132321->new;
-   is( $obj->value, 123, '$obj->value from BUILD-generated anon method' );
+   is( $obj->value, 123, '$obj->value from ADJUST-generated anon method' );
 }
 
 # method warns about redeclared $self (RT132428)

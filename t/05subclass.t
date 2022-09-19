@@ -8,19 +8,15 @@ use Test::More;
 use Object::Pad;
 
 class Animal 1.23 {
-   field $legs;
+   field $legs : param;
    method legs { $legs };
-
-   BUILD {
-      ( $legs ) = @_;
-   }
 }
 
 is( $Animal::VERSION, 1.23, 'Versioned class has $VERSION' );
 
 class Spider 4.56 :isa(Animal) {
    method new8 : common {
-     return $class->new(8);
+     return $class->new(legs => 8);
    }
 
    method describe {
