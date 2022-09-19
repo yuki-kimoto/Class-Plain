@@ -516,62 +516,6 @@ static void S_mop_class_apply_role(pTHX_ RoleEmbedding *embedding)
   assert(embedding->offset == -1);
   embedding->offset = classmeta->next_fieldix;
 
-  if(rolemeta->parammap) {
-    HV *src = rolemeta->parammap;
-
-    if(!classmeta->parammap)
-      classmeta->parammap = newHV();
-
-    HV *dst = classmeta->parammap;
-
-    hv_iterinit(src);
-
-    HE *iter;
-    while((iter = hv_iternext(src))) {
-      STRLEN klen = HeKLEN(iter);
-      void *key = HeKEY(iter);
-
-      if(klen < 0 ? hv_exists_ent(dst, (SV *)key, HeHASH(iter))
-                  : hv_exists(dst, (char *)key, klen))
-        croak("Named parameter '%" SVf "' clashes with the one provided by role %" SVf,
-          SVfARG(HeSVKEY_force(iter)), SVfARG(rolemeta->name));
-
-      ParamMeta *roleparammeta = (ParamMeta *)HeVAL(iter);
-      ParamMeta *classparammeta;
-      Newx(classparammeta, 1, struct ParamMeta);
-
-      classparammeta->field   = roleparammeta->field;
-      classparammeta->fieldix = roleparammeta->fieldix + embedding->offset;
-
-      if(klen < 0)
-        hv_store_ent(dst, HeSVKEY(iter), (SV *)classparammeta, HeHASH(iter));
-      else
-        hv_store(dst, HeKEY(iter), klen, (SV *)classparammeta, HeHASH(iter));
-    }
-  }
-
-  if(rolemeta->fieldhooks_initfield) {
-    if(!classmeta->fieldhooks_initfield)
-      classmeta->fieldhooks_initfield = newAV();
-
-    U32 i;
-    for(i = 0; i < av_count(rolemeta->fieldhooks_initfield); i++) {
-      struct FieldHook *roleh = (struct FieldHook *)AvARRAY(rolemeta->fieldhooks_initfield)[i];
-      av_push(classmeta->fieldhooks_initfield, (SV *)embed_fieldhook(roleh, embedding->offset));
-    }
-  }
-
-  if(rolemeta->fieldhooks_construct) {
-    if(!classmeta->fieldhooks_construct)
-      classmeta->fieldhooks_construct = newAV();
-
-    U32 i;
-    for(i = 0; i < av_count(rolemeta->fieldhooks_construct); i++) {
-      struct FieldHook *roleh = (struct FieldHook *)AvARRAY(rolemeta->fieldhooks_construct)[i];
-      av_push(classmeta->fieldhooks_construct, (SV *)embed_fieldhook(roleh, embedding->offset));
-    }
-  }
-
   classmeta->next_fieldix += av_count(rolemeta->direct_fields);
 
   /* TODO: Run an APPLY block if the role has one */
