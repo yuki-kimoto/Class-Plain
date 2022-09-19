@@ -9,13 +9,6 @@ use Object::Pad;
 
 class Animal 1.23 {
    field $legs;
-
-   method new : common {
-     my $self = $class->SUPER::new(@_);
-     
-     return bless $self, ref $class || $class;
-   }
-   
    method legs { $self->{legs} };
 }
 

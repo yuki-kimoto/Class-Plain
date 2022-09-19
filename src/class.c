@@ -970,7 +970,7 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
     croak("Only a class may extend another");
 
   HV *superstash = gv_stashsv(superclassname, 0);
-  if(!superstash || !hv_fetchs(superstash, "new", 0)) {
+  if(!superstash) {
     /* Try to `require` the module then attempt a second time */
     /* load_module() will modify the name argument and take ownership of it */
     load_module(PERL_LOADMOD_NOIMPORT, newSVsv(superclassname), NULL, NULL);
