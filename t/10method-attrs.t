@@ -13,25 +13,25 @@ class Counter {
    has $count;
    
    method new : common {
-     my $self = bless [], $class;
+     my $self = {@_};
      
-     my @field_names = qw(count);
-     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-     $self->[$field_ids{count}] = 0;
+     $self->{count} //= 0;
      
-     return $self;
+     return bless $self, ref $class || $class;
    }
-   method count :lvalue { $count }
+   method count {
+     if (@_) { $self->{count} = $_[0]; return $self; } else { $self->{count} }
+   }
 
    method inc {
-    $count++
+    $self->{count}++
    };
 }
 
 # Counter::count has both :lvalue :method attrs
 {
    is_deeply( [ sort +attributes::get( \&Counter::count ) ],
-      [ 'lvalue', 'method' ],
+      [ 'method' ],
       'attributes of &Counter::count' );
 }
 
@@ -39,7 +39,7 @@ class Counter {
    my $counter = Counter->new;
    is( $counter->count, 0, 'count is initially 0');
 
-   $counter->count = 4;
+   $counter->count(4);
    $counter->inc;
 
    is( $counter->count, 5, 'count is 5' );
@@ -67,8 +67,10 @@ class TwiceCounter :isa(Counter) {
 
 class CountFromTen :isa(Counter) {
    method from_ten :common {
-      my $self = $class->new;
-      $self->count = 10;
+      my $self = $class->SUPER::new(@_);
+      
+      $self->count(10);
+      
       return $self;
    }
 }
