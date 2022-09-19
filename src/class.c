@@ -166,19 +166,7 @@ static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backing
 
   I32 i;
   for(i = 0; i < nfields; i++) {
-    FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
-    char sigil = SvPV_nolen(fieldmeta->name)[0];
-
-    assert(av_count(backingav) == fieldmeta->fieldix + roleoffset);
-
-    switch(sigil) {
-      case '$':
-        av_push(backingav, newSV(0));
-        break;
-
-      default:
-        croak("ARGH: not sure how to handle a slot sigil %c\n", sigil);
-    }
+    av_push(backingav, newSV(0));
   }
 
   if(classmeta->type == METATYPE_CLASS) {
@@ -286,14 +274,6 @@ FieldMeta *ObjectPad_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 
   if(!fieldname || !SvOK(fieldname) || !SvCUR(fieldname))
     croak("fieldname must not be undefined or empty");
-
-  switch(SvPV_nolen(fieldname)[0]) {
-    case '$':
-      break;
-
-    default:
-      croak("fieldname must begin with a sigil");
-  }
 
   U32 i;
   for(i = 0; i < av_count(fields); i++) {

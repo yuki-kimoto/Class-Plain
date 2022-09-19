@@ -312,9 +312,6 @@ static struct FieldHookFuncs fieldhooks_weak = {
 
 static bool fieldhook_param_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  if(SvPVX(fieldmeta->name)[0] != '$')
-    croak("Can only add a named constructor parameter for scalar fields");
-
   U32 flags = 0;
   char *paramname = SvPVX(fieldmeta->name) + 1;
   if(SvUTF8(fieldmeta->name))
@@ -352,7 +349,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   ENTER;
 
   ClassMeta *classmeta = fieldmeta->class;
-  char sigil = SvPVX(fieldmeta->name)[0];
 
   SV *mname_fq = newSVpvf("%" SVf "::%" SVf, classmeta->name, mname);
 
@@ -387,26 +383,14 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   int opt_args = 0;
   int slurpy_arg = 0;
 
-  switch(type) {
-    case ACCESSOR_WRITER:
-      if(sigil == '$')
-        req_args = 1;
-      else
-        slurpy_arg = sigil;
-      break;
-    case ACCESSOR_COMBINED:
-      opt_args = 1;
-      break;
-  }
+  req_args = 1;
 
   ops = op_append_list(OP_LINESEQ, ops,
     make_argcheck_ops(req_args, opt_args, slurpy_arg, mname_fq));
 
   U32 flags = 0;
 
-  switch(sigil) {
-    case '$': flags = OPpFIELDPAD_SV << 8; break;
-  }
+  flags = OPpFIELDPAD_SV << 8;
 
   ops = op_append_list(OP_LINESEQ, ops,
     newFIELDPADOP(flags, ctx.padix, fieldmeta->fieldix));
@@ -452,9 +436,7 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   OPCODE optype = 0;
 
-  switch(SvPVX(fieldmeta->name)[0]) {
-    case '$': optype = OP_PADSV; break;
-  }
+  optype = OP_PADSV;
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
@@ -486,13 +468,9 @@ static void fieldhook_gen_writer_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
   if(type != ACCESSOR_WRITER)
     return;
 
-  switch(SvPVX(fieldmeta->name)[0]) {
-    case '$':
-      ctx->bodyop = newBINOP(OP_SASSIGN, 0,
-        newOP(OP_SHIFT, 0),
-        newPADxVOP(OP_PADSV, 0, ctx->padix));
-      break;
-  }
+  ctx->bodyop = newBINOP(OP_SASSIGN, 0,
+    newOP(OP_SHIFT, 0),
+    newPADxVOP(OP_PADSV, 0, ctx->padix));
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
@@ -510,10 +488,6 @@ static struct FieldHookFuncs fieldhooks_writer = {
 
 static bool fieldhook_accessor_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  if(SvPVX(fieldmeta->name)[0] != '$')
-    /* TODO: A reader for an array or hash field should also be fine */
-    croak("Can only generate accessors for scalar fields");
-
   *hookdata_ptr = make_accessor_mnamesv(aTHX_ fieldmeta, value, "%s");
   return TRUE;
 }
