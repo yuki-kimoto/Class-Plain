@@ -16,16 +16,14 @@ use Object::Pad;
 class C {
    has $x;
    method new : common {
-     my $self = bless [], $class;
+     my $self = $class->SUPER::new(@_);
      
-     my @field_names = qw(x);
-     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-     $self->[$field_ids{x}] = "initial";
+     $self->{x} //= "initial";
      
      return $self;
    }
 
-   method m ( $x = $x ) { $x; }
+   method m { if (@_) { $self->{x} = $_[0]; } else { $self->{x} } }
 }
 
 package main;
