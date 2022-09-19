@@ -1207,29 +1207,6 @@ XS_INTERNAL(injected_constructor)
     }
   }
 
-  {
-    /* Run initfields */
-    ENTER;
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-    SAVEVPTR(PL_curcop);
-    PL_curcop = prevcop;
-#endif
-
-    EXTEND(SP, 2);
-    PUSHMARK(SP);
-    PUSHs(self);
-    if(paramhv)
-      PUSHs((SV *)paramhv);
-    else
-      PUSHs(&PL_sv_undef);
-    PUTBACK;
-
-    assert(meta->initfields);
-    call_sv((SV *)meta->initfields, G_VOID);
-
-    LEAVE;
-  }
-
 #ifdef DEBUG_OVERRIDE_PLCURCOP
   PL_curcop = prevcop;
 #endif
