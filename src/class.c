@@ -213,59 +213,7 @@ SV *ObjectPad_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create)
 {
   SV *rv = SvRV(self);
 
-  switch(repr) {
-    case REPR_NATIVE:
-      if(SvTYPE(rv) != SVt_PVAV)
-        croak("Not an ARRAY reference");
-
-      return rv;
-
-    case REPR_HASH:
-    case_REPR_HASH:
-    {
-      if(SvTYPE(rv) != SVt_PVHV)
-        croak("Not a HASH reference");
-      SV **backingsvp = hv_fetchs((HV *)rv, "Object::Pad/slots", create);
-      if(create && !SvOK(*backingsvp))
-        sv_setrv_noinc(*backingsvp, (SV *)newAV());
-
-      /* A method invoked during a superclass constructor of a classic perl
-       * class might encounter $self without fields. If this is the case we'll
-       * have to create the fields now
-       *   https://rt.cpan.org/Ticket/Display.html?id=132263
-       */
-      if(!backingsvp) {
-        struct ClassMeta *classmeta = mop_get_class_for_stash(SvSTASH(rv));
-        AV *backingav = newAV();
-
-        make_instance_fields(classmeta, backingav, 0);
-
-        backingsvp = hv_fetchs((HV *)rv, "Object::Pad/slots", TRUE);
-        sv_setrv_noinc(*backingsvp, (SV *)backingav);
-      }
-      if(!SvROK(*backingsvp) || SvTYPE(SvRV(*backingsvp)) != SVt_PVAV)
-        croak("Expected $self->{\"Object::Pad/slots\"} to be an ARRAY reference");
-      return SvRV(*backingsvp);
-    }
-
-    case REPR_MAGIC:
-    case_REPR_MAGIC:
-    {
-      MAGIC *mg = mg_findext(rv, PERL_MAGIC_ext, &vtbl_backingav);
-      if(!mg && create)
-        mg = sv_magicext(rv, (SV *)newAV(), PERL_MAGIC_ext, &vtbl_backingav, NULL, 0);
-      if(!mg)
-        croak("Expected to find backing AV magic extension");
-      return mg->mg_obj;
-    }
-
-    case REPR_AUTOSELECT:
-      if(SvTYPE(rv) == SVt_PVHV)
-        goto case_REPR_HASH;
-      goto case_REPR_MAGIC;
-  }
-
-  croak("ARGH unhandled repr type");
+  return rv;
 }
 
 #define embed_cv(cv, embedding)  S_embed_cv(aTHX_ cv, embedding)
