@@ -21,3 +21,4 @@ _build
 core
 core.*
 *.o
+*/*.o

@@ -406,8 +406,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   switch(sigil) {
     case '$': flags = OPpFIELDPAD_SV << 8; break;
-    case '@': flags = OPpFIELDPAD_AV << 8; break;
-    case '%': flags = OPpFIELDPAD_HV << 8; break;
   }
 
   ops = op_append_list(OP_LINESEQ, ops,
@@ -456,8 +454,6 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   switch(SvPVX(fieldmeta->name)[0]) {
     case '$': optype = OP_PADSV; break;
-    case '@': optype = OP_PADAV; break;
-    case '%': optype = OP_PADHV; break;
   }
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
@@ -495,18 +491,6 @@ static void fieldhook_gen_writer_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
       ctx->bodyop = newBINOP(OP_SASSIGN, 0,
         newOP(OP_SHIFT, 0),
         newPADxVOP(OP_PADSV, 0, ctx->padix));
-      break;
-
-    case '@':
-      ctx->bodyop = newBINOP(OP_AASSIGN, 0,
-        force_list_keeping_pushmark(newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv))),
-        force_list_keeping_pushmark(newPADxVOP(OP_PADAV, OPf_MOD|OPf_REF, ctx->padix)));
-      break;
-
-    case '%':
-      ctx->bodyop = newBINOP(OP_AASSIGN, 0,
-        force_list_keeping_pushmark(newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv))),
-        force_list_keeping_pushmark(newPADxVOP(OP_PADHV, OPf_MOD|OPf_REF, ctx->padix)));
       break;
   }
 
