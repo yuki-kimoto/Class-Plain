@@ -12,9 +12,15 @@ use Object::Pad;
       field $count;
       my $allcount = 0;
 
-      method inc { $count++; $allcount++ }
+      method new : common {
+        my $self = $class->SUPER::new(@_);
+        
+        return $self;
+      }
 
-      method count { $count }
+      method inc { $self->{count}++; $allcount++ }
+
+      method count { $self->{count} }
       sub allcount { $allcount }
    }
 

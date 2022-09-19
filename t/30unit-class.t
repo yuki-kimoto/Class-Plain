@@ -10,18 +10,16 @@ use Object::Pad;
 class Counter;
 has $count;
 
- method new : common {
-   my $self = bless [], $class;
-   
-   my @field_names = qw(count);
-   my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-   $self->[$field_ids{count}] = 0;
-   
-   return $self;
- }
+method new : common {
+  my $self = $class->SUPER::new(@_);
+  
+  $self->{count} //= 0;
+  
+  return $self;
+}
 
-method count :lvalue { $count }
-method inc { $count++ }
+method count :lvalue { $self->{count} }
+method inc { $self->{count}++ }
 
 package main;
 
