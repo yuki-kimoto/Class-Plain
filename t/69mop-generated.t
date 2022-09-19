@@ -11,15 +11,8 @@ use Object::Pad::MOP::Class ':experimental(mop)';
 {
    my $classmeta = Object::Pad::MOP::Class->create_class( "Point" );
 
-   my $xfieldmeta = $classmeta->add_field( '$x', reader => 'x' );
-   my $yfieldmeta = $classmeta->add_field( '$y', reader => 'y' );
-
-   $classmeta->add_BUILD( sub {
-      my $self = shift;
-      my ( $x, $y ) = @_;
-      $xfieldmeta->value($self) = $x;
-      $yfieldmeta->value($self) = $y;
-   } );
+   my $xfieldmeta = $classmeta->add_field( '$x', param => 1, reader => 'x' );
+   my $yfieldmeta = $classmeta->add_field( '$y', param => 1, reader => 'y' );
 
    $classmeta->add_method( describe => sub {
       my $self = shift;
@@ -31,7 +24,7 @@ use Object::Pad::MOP::Class ':experimental(mop)';
 }
 
 {
-   my $point = Point->new( 10, 20 );
+   my $point = Point->new(x => 10, y => 20 );
    is( $point->describe, "Point(10, 20)",
       '$point->describe' );
    is( $point->x, 10, '$point->x' );
