@@ -1002,6 +1002,9 @@ XS_INTERNAL(injected_constructor);
 XS_INTERNAL(injected_constructor)
 {
   dXSARGS;
+  
+  (void)items;
+  
   const ClassMeta *meta = XSANY.any_ptr;
   SV *class = ST(0);
   SV *self = NULL;
@@ -1022,41 +1025,6 @@ XS_INTERNAL(injected_constructor)
    */
   AV *args = newAV();
   SAVEFREESV(args);
-
-  {
-    /* @args = $class->BUILDARGS(@_) */
-    ENTER;
-    SAVETMPS;
-
-#ifdef DEBUG_OVERRIDE_PLCURCOP
-    SAVEVPTR(PL_curcop);
-    PL_curcop = prevcop;
-#endif
-
-    /* Splice in an extra copy of `class` so we get one there for the foreign
-     * constructor */
-    EXTEND(SP, 1);
-
-    SV **argstart = SP - items + 2;
-    PUSHMARK(argstart - 1);
-
-    SV **svp;
-    for(svp = SP; svp >= argstart; svp--)
-      *(svp+1) = *svp;
-    *argstart = class;
-    SP++;
-    PUTBACK;
-
-    I32 nargs = call_method("_BUILDARGS", G_ARRAY);
-
-    SPAGAIN;
-
-    for(svp = SP - nargs + 1; svp <= SP; svp++)
-      av_push(args, SvREFCNT_inc(*svp));
-
-    FREETMPS;
-    LEAVE;
-  }
 
   HV *stash = gv_stashsv(class, 0);
   if(!stash)

@@ -11,10 +11,4 @@ sub new {
  return bless $self, ref $class || $class;
 }
 
-sub _BUILDARGS
-{
-   shift; # $class
-   return @_;
-}
-
 1;
