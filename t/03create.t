@@ -10,21 +10,19 @@ use Scalar::Util qw( reftype );
 use Object::Pad;
 
 class Point {
-   has $x : param;
-   has $y : param;
+   has $x;
+   has $y;
 
    method new : common {
-     my $self = bless [@_], $class;
+     my $self = {x => $_[0], y => $_[1]};
      
-     my @field_names = qw(x y);
-     my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
-     $self->[$field_ids{x}] = 0 unless defined $field_ids{x};
-     $self->[$field_ids{y}] = 0 unless defined $field_ids{y};
+     $self->{x} //= 0;
+     $self->{y} //= 0;
      
-     return $self;
+     return bless $self, ref $class || $class;
    }
 
-   method where { sprintf "(%d,%d)", $x, $y }
+   method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
 }
 
 {
