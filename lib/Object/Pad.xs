@@ -776,11 +776,9 @@ static const struct XSParseKeywordHooks kwhooks_has = {
 
 enum PhaserType {
   PHASER_NONE, /* A normal `method`; i.e. not a phaser */
-  PHASER_ADJUST,
 };
 
 static const char *phasertypename[] = {
-  [PHASER_ADJUST] = "ADJUST",
 };
 
 static bool parse_method_permit(pTHX_ void *hookdata)
@@ -1132,9 +1130,6 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
       }
       break;
 
-    case PHASER_ADJUST:
-      mop_class_add_ADJUST(compclassmeta, ctx->cv); /* steal CV */
-      break;
   }
 
   SV **varnamep;
@@ -1191,11 +1186,6 @@ static int parse_phaser(pTHX_ OP **out, void *hookdata)
 
   return xs_parse_sublike(&parse_phaser_hooks, hookdata, out);
 }
-
-static const struct XSParseKeywordHooks kwhooks_ADJUST = {
-  .permit_hintkey = "Object::Pad/ADJUST",
-  .parse = &parse_phaser,
-};
 
 #ifdef HAVE_DMD_HELPER
 static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
@@ -1680,8 +1670,6 @@ BOOT:
 
   register_xs_parse_keyword("field", &kwhooks_field, "field");
   register_xs_parse_keyword("has",   &kwhooks_has,   "has");
-
-  register_xs_parse_keyword("ADJUST",       &kwhooks_ADJUST, (void *)PHASER_ADJUST);
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 

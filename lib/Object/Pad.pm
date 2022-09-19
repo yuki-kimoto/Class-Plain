@@ -107,10 +107,10 @@ sub import_into
 
    # Default imports
    unless( %syms ) {
-      $syms{$_}++ for qw( class role method field has ADJUST );
+      $syms{$_}++ for qw( class role method field has);
    }
 
-   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has ADJUST );
+   delete $syms{$_} and $^H{"Object::Pad/$_"}++ for qw( class role method field has);
 
    croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
 }
@@ -148,11 +148,17 @@ On perl version 5.26 onwards:
    class Point {
       has $x :param;
       has $y :param;
-      
-      ADJUST {
-        $x = 0 unless length $x;
-        $y = 0 unless length $y;
-      }
+
+     method new : common {
+       my $self = bless [@_], $class;
+       
+       my @field_names = qw(x y);
+       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+       $self->[$field_ids{x}] = 0 unless defined $self->[$field_ids{x}];
+       $self->[$field_ids{y}] = 0 unless defined $self->[$field_ids{y}];
+       
+       return $self;
+     }
 
       method move ($dX, $dY) {
          $x += $dX;
@@ -174,10 +180,16 @@ Or, for older perls that lack signatures:
       has $x :param;
       has $y :param;
 
-      ADJUST {
-        $x = 0 unless length $x;
-        $y = 0 unless length $y;
-      }
+     method new : common {
+       my $self = bless [@_], $class;
+       
+       my @field_names = qw(x y);
+       my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
+       $self->[$field_ids{x}] = 0 unless defined $self->[$field_ids{x}];
+       $self->[$field_ids{y}] = 0 unless defined $self->[$field_ids{y}];
+       
+       return $self;
+     }
 
       method move {
          my ($dX, $dY) = @_;
@@ -254,11 +266,6 @@ in this way in roles, and in classes if you intend your class to be extended.
 The constructor will also check for required parameters (these are all the
 parameters for fields that do not have default initialisation expressions). If
 any of these are missing an exception is thrown.
-
-=head3 The ADJUST phase
-
-Next, the C<ADJUST> block of every component class is invoked. This happens
-after the fields are assigned their initial values.
 
 =head1 KEYWORDS
 
@@ -452,19 +459,6 @@ implements the role.
 
    role Name {
       method METHOD;
-   }
-
-A role can provide instance fields. These are visible to any C<ADJUST> blocks
-or methods provided by that role.
-
-I<Since version 0.33.>
-
-   role Name {
-      field $f;
-
-      ADJUST { $f = "a value"; }
-
-      method field { return $f; }
    }
 
 I<Since version 0.57> a role can declare that it provides another role:
@@ -664,32 +658,6 @@ method. A class-common method may be invoked on class names instead of
 instances. Within the method body there is a lexical C<$class> available,
 rather than C<$self>. Because it is not associated with a particular object
 instance, a class-common method cannot see instance fields.
-
-=head2 ADJUST
-
-   ADJUST {
-      ...
-   }
-
-   ADJUST ( $params ) {    # on perl 5.26 onwards
-      ...
-   }
-
-   ADJUST {
-      my $params = shift;
-      ...
-   }
-
-I<Since version 0.43.>
-
-I<Since version 0.66> it receives a reference to the hash containing the
-current constructor parameters. This hash will not contain any constructor
-parameters already consumed by L</:param> declarations on any fields, but only
-the leftovers once those are processed.
-
-An adjust block is not a subroutine and thus is not permitted to use
-subroutine attributes. Note that an C<ADJUST> block is a named phaser block
-and not a method; it does not use the C<sub> or C<method> keyword.
 
 =head1 CREPT FEATURES
 
