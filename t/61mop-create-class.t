@@ -24,24 +24,46 @@ use Object::Pad ':experimental(mop)';
       '->begin_class can create a class' );
 }
 
-class Parent { has $thing;  ADJUST { $thing = "parent" }}
-
 {
-   package Child {
-      BEGIN {
-         Object::Pad->import_into( "Child" );
 
-         my $classmeta = Object::Pad::MOP::Class->begin_class( "Child", isa => "Parent" );
+  my @field_names = qw(thing other);
+  my %field_ids = map { $field_names[$_] => $_ } (0 .. @field_names - 1);
 
-         ::is( $classmeta->name, "Child", '$classmeta->name for Child' );
-      }
-      has $other;
-      ADJUST { $other = "child" }
-      method other { return $other }
-   }
+  class Parent {
+    has $thing;
+     method new : common {
+       my $self = bless [], $class;
+       
+       $self->[$field_ids{thing}] = "parent";
+       
+       return $self;
+     }
+  }
 
-   is( Child->new->other, "child",
-      '->begin_class can extend superclasses' );
+  {
+     package Child {
+        BEGIN {
+           Object::Pad->import_into( "Child" );
+
+           my $classmeta = Object::Pad::MOP::Class->begin_class( "Child", isa => "Parent" );
+
+           ::is( $classmeta->name, "Child", '$classmeta->name for Child' );
+        }
+        has $other;
+        
+       method new : common {
+         my $self = $class->SUPER::new(@_);
+         
+         $self->[$field_ids{other}] = "child";
+         
+         return $self;
+       }
+        method other { return $other }
+     }
+
+     is( Child->new->other, "child",
+        '->begin_class can extend superclasses' );
+  }
 }
 
 done_testing;
