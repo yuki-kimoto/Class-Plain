@@ -727,17 +727,6 @@ An adjust block is not a subroutine and thus is not permitted to use
 subroutine attributes. Note that an C<ADJUST> block is a named phaser block
 and not a method; it does not use the C<sub> or C<method> keyword.
 
-=head2 ADJUSTPARAMS
-
-I<Since version 0.51.>
-
-A synonym for C<ADJUST>.
-
-Prior to version 0.66, the C<ADJUSTPARAMS> keyword created a different kind of
-adjust block that receives a reference to the parameters hash. Since version
-0.66, regular C<ADJUST> blocks also receive this, so the two keywords are now
-synonyms.
-
 =head1 CREPT FEATURES
 
 While not strictly part of being an object system, this module has

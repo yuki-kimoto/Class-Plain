@@ -52,14 +52,14 @@ my @build;
    my @called;
    my $paramsref;
 
-   class WithAdjustParams {
+   class WithADJUST {
       ADJUST {
          push @called, "ADJUST";
       }
 
-      ADJUSTPARAMS {
+      ADJUST {
          my ( $href ) = @_;
-         push @called, "ADJUSTPARAMS";
+         push @called, "ADJUST";
          $paramsref = $href;
       }
 
@@ -68,9 +68,9 @@ my @build;
       }
    }
 
-   WithAdjustParams->new( key => "val" );
-   is_deeply( \@called, [qw( ADJUST ADJUSTPARAMS ADJUST )], 'ADJUST and ADJUSTPARAMS invoked together' );
-   is_deeply( $paramsref, { key => "val" }, 'ADJUSTPARAMS received HASHref' );
+   WithADJUST->new( key => "val" );
+   is_deeply( \@called, [qw( ADJUST ADJUST ADJUST )], 'ADJUST and ADJUST invoked together' );
+   is_deeply( $paramsref, { key => "val" }, 'ADJUST received HASHref' );
 }
 
 {

@@ -1706,7 +1706,6 @@ BOOT:
 
   register_xs_parse_keyword("BUILD",        &kwhooks_BUILD, (void *)PHASER_BUILD);
   register_xs_parse_keyword("ADJUST",       &kwhooks_ADJUST, (void *)PHASER_ADJUST);
-  register_xs_parse_keyword("ADJUSTPARAMS", &kwhooks_ADJUST, (void *)PHASER_ADJUST);
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 

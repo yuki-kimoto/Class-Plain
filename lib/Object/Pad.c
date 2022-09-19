@@ -2942,7 +2942,6 @@ XS_EXTERNAL(boot_Object__Pad)
 
   register_xs_parse_keyword("BUILD",        &kwhooks_BUILD, (void *)PHASER_BUILD);
   register_xs_parse_keyword("ADJUST",       &kwhooks_ADJUST, (void *)PHASER_ADJUST);
-  register_xs_parse_keyword("ADJUSTPARAMS", &kwhooks_ADJUST, (void *)PHASER_ADJUST);
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 
@@ -2951,7 +2950,7 @@ XS_EXTERNAL(boot_Object__Pad)
   ObjectPad__boot_classes(aTHX);
   ObjectPad__boot_fields(aTHX);
 
-#line 2955 "lib/Object/Pad.c"
+#line 2954 "lib/Object/Pad.c"
 
     /* End of Initialisation Section */
 
