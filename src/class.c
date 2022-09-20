@@ -246,8 +246,6 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hoo
     if(super_class_version && SvOK(super_class_version))
       ensure_module_version(super_class_name, super_class_version);
     
-    warn("AAA");
-    
     ClassPlain_mop_class_set_superclass(class_meta, super_class_name);
   }
   else {
