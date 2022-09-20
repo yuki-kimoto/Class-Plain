@@ -7,8 +7,6 @@ typedef struct AdjustBlock {
 
 /* Metadata about a class */
 struct ClassMeta {
-  enum MetaType type : 8;
-
   FIELDOFFSET start_fieldix; /* first field index of this partial within its instance */
   FIELDOFFSET next_fieldix;  /* 1 + final field index of this partial within its instance; */
 

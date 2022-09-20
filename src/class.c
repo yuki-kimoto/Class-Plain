@@ -141,14 +141,11 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
+ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name)
 {
-  assert(type == METATYPE_CLASS);
-
   ClassMeta *meta;
   Newx(meta, 1, ClassMeta);
 
-  meta->type = type;
   meta->name = SvREFCNT_inc(name);
 
   meta->start_fieldix = 0;
@@ -164,8 +161,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 
 void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_name)
 {
-  assert(meta->type == METATYPE_CLASS);
-
   SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
   SAVEFREESV(isa_name);
   AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
@@ -243,9 +238,6 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
 
   if(*end)
     croak("Unexpected characters while parsing :isa() attribute: %s", end);
-
-  if(classmeta->type != METATYPE_CLASS)
-    croak("Only a class may extend another");
 
   HV *superstash = gv_stashsv(super_class_name, 0);
   // Original logic: if(!superstash || !hv_fetchs(superstash, "new", 0)) {

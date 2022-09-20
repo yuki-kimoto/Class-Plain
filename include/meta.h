@@ -64,10 +64,6 @@ struct FieldHook {
   SV *hookdata;
 };
 
-enum MetaType {
-  METATYPE_CLASS,
-};
-
 enum ReprType {
   REPR_NATIVE,       /* instances are in native format - blessed AV as backing */
   REPR_HASH,         /* instances are blessed HASHes; our backing lives in $self->{"Class::Plain/slots"} */
@@ -83,7 +79,7 @@ OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags);
 OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
 
 /* Class API */
-ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name);
+ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name);
 
 ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash);
 

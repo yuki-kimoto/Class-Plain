@@ -188,7 +188,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   if(!packagename)
     croak("Expected a class name after 'class'");
 
-  enum MetaType type = (enum MetaType)hookdata;
+  IV type = (IV)hookdata;
 
   SV *packagever = args[argi++]->sv;
 
@@ -777,7 +777,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
 
-  register_xs_parse_keyword("class", &kwhooks_class, (void *)METATYPE_CLASS);
+  register_xs_parse_keyword("class", &kwhooks_class, (void *)0);
   register_xs_parse_keyword("field", &kwhooks_field, "field");
   register_xs_parse_keyword("has",   &kwhooks_field,   "has");
 
