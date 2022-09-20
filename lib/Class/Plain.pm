@@ -10,6 +10,8 @@ use warnings;
 
 use Carp;
 
+use mro;
+
 sub dl_load_flags { 0x01 }
 
 require DynaLoader;
