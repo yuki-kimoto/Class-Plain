@@ -5,7 +5,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "object_pad.h"
+#include "meta.h"
 #include "class.h"
 #include "field.h"
 
@@ -73,9 +73,9 @@ void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct Cl
   if(funcs->ver < 57)
     croak("Mismatch in third-party class attribute ABI version field: module wants %d, we require >= 57\n",
         funcs->ver);
-  if(funcs->ver > OBJECTPAD_ABIVERSION)
+  if(funcs->ver > CLASSPLAIN_ABIVERSION)
     croak("Mismatch in third-party class attribute ABI version field: attribute supplies %d, module wants %d\n",
-        funcs->ver, OBJECTPAD_ABIVERSION);
+        funcs->ver, CLASSPLAIN_ABIVERSION);
 
   if(!name || !(name[0] >= 'A' && name[0] <= 'Z'))
     croak("Third-party class attribute names must begin with a capital letter");
@@ -460,7 +460,7 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
 }
 
 static const struct ClassHookFuncs classhooks_isa = {
-  .ver   = OBJECTPAD_ABIVERSION,
+  .ver   = CLASSPLAIN_ABIVERSION,
   .apply = &classhook_isa_apply,
 };
 

@@ -55,7 +55,7 @@
 #  define FIELDIX_MASK        ((1LL<<FIELDIX_TYPE_SHIFT)-1)
 #endif
 
-#include "object_pad.h"
+#include "meta.h"
 #include "class.h"
 #include "field.h"
 

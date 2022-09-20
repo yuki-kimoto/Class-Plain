@@ -1,10 +1,10 @@
-#ifndef __OBJECT_PAD__TYPES_H__
-#define __OBJECT_PAD__TYPES_H__
+#ifndef __CLASS_PLAIN__TYPES_H__
+#define __CLASS_PLAIN__TYPES_H__
 
-#define OBJECTPAD_ABIVERSION_MINOR 57
-#define OBJECTPAD_ABIVERSION_MAJOR 0
+#define CLASSPLAIN_ABIVERSION_MINOR 57
+#define CLASSPLAIN_ABIVERSION_MAJOR 0
 
-#define OBJECTPAD_ABIVERSION  ((OBJECTPAD_ABIVERSION_MAJOR << 16) | (OBJECTPAD_ABIVERSION_MINOR))
+#define CLASSPLAIN_ABIVERSION  ((CLASSPLAIN_ABIVERSION_MAJOR << 16) | (CLASSPLAIN_ABIVERSION_MINOR))
 
 /* A FIELDOFFSET is an offset within the AV of an object instance */
 typedef IV FIELDOFFSET;
@@ -29,7 +29,7 @@ struct AccessorGenerationCtx {
 };
 
 struct ClassHookFuncs {
-  U32 ver;  /* caller must initialise to OBJECTPAD_VERSION */
+  U32 ver;  /* caller must initialise to CLASSPLAIN_VERSION */
   U32 flags;
   const char *permit_hintkey;
 
@@ -47,7 +47,7 @@ struct ClassHook {
 };
 
 struct FieldHookFuncs {
-  U32 ver;   /* caller must initialise to OBJECTPAD_VERSION */
+  U32 ver;   /* caller must initialise to CLASSPLAIN_VERSION */
   U32 flags;
   const char *permit_hintkey;
 

@@ -5,7 +5,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "object_pad.h"
+#include "meta.h"
 #include "class.h"
 #include "field.h"
 
@@ -237,7 +237,7 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 }
 
 static struct FieldHookFuncs fieldhooks_reader = {
-  .ver              = OBJECTPAD_ABIVERSION,
+  .ver              = CLASSPLAIN_ABIVERSION,
   .apply            = &fieldhook_reader_apply,
   .seal             = &fieldhook_reader_seal,
   .gen_accessor_ops = &fieldhook_gen_reader_ops,
@@ -271,7 +271,7 @@ static void fieldhook_gen_writer_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 }
 
 static struct FieldHookFuncs fieldhooks_writer = {
-  .ver              = OBJECTPAD_ABIVERSION,
+  .ver              = CLASSPLAIN_ABIVERSION,
   .apply            = &fieldhook_writer_apply,
   .seal             = &fieldhook_writer_seal,
   .gen_accessor_ops = &fieldhook_gen_writer_ops,
@@ -312,7 +312,7 @@ static void fieldhook_gen_accessor_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata,
 }
 
 static struct FieldHookFuncs fieldhooks_accessor = {
-  .ver              = OBJECTPAD_ABIVERSION,
+  .ver              = CLASSPLAIN_ABIVERSION,
   .apply            = &fieldhook_accessor_apply,
   .seal             = &fieldhook_accessor_seal,
   .gen_accessor_ops = &fieldhook_gen_accessor_ops,
