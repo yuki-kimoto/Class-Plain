@@ -237,7 +237,7 @@ static void fieldhook_gen_writer_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
-    newPADxVOP(OP_PADSV, 0, PADIX_SELF));
+    newPADxVOP(OP_PADSV, 0, 1));
 }
 
 static struct FieldHookFuncs fieldhooks_writer = {

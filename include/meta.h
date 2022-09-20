@@ -76,12 +76,6 @@ enum ReprType {
   REPR_AUTOSELECT,   /* pick one of the above depending on foreign_new and SvTYPE()==SVt_PVHV */
 };
 
-/* Special pad indexes within `method` CVs */
-enum {
-  PADIX_SELF = 1,
-  PADIX_SLOTS = 2,
-};
-
 /* Function prototypes */
 
 OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags);

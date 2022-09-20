@@ -60,8 +60,8 @@ static OP *pp_methstart(pTHX)
   if(!SvROK(self) || !SvOBJECT(SvRV(self)))
     croak("Cannot invoke method on a non-instance");
 
-  save_clearsv(&PAD_SVl(PADIX_SELF));
-  sv_setsv(PAD_SVl(PADIX_SELF), self);
+  save_clearsv(&PAD_SVl(1));
+  sv_setsv(PAD_SVl(1), self);
 
   return PL_op->op_next;
 }
@@ -88,8 +88,8 @@ static OP *pp_commonmethstart(pTHX)
     /* TODO: Should handle this somehow */
     croak("Cannot invoke common method on an instance");
 
-  save_clearsv(&PAD_SVl(PADIX_SELF));
-  sv_setsv(PAD_SVl(PADIX_SELF), self);
+  save_clearsv(&PAD_SVl(1));
+  sv_setsv(PAD_SVl(1), self);
 
   return PL_op->op_next;
 }
