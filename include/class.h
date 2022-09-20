@@ -1,8 +1,6 @@
 #ifndef __OBJECT_PAD__CLASS_H__
 #define __OBJECT_PAD__CLASS_H__
 
-#include "suspended_compcv.h"
-
 typedef struct AdjustBlock {
   CV *cv;
 } AdjustBlock;
@@ -43,8 +41,6 @@ struct ClassMeta {
 
   COP *tmpcop;         /* a COP to use during generated constructor */
   CV *methodscope;     /* a temporary CV used just during compilation of a `method` */
-
-  SuspendedCompCVBuffer initfields_compcv; /* temporary PL_compcv + associated state during initfields */
 
   union {
     /* Things that only true classes have */

@@ -605,8 +605,6 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
     Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
       "field initialiser expression is experimental and may be changed or removed without notice");
 
-  resume_compcv_and_save(&compclassmeta->initfields_compcv);
-
   /* Set up this new block as if the current compiler context were its scope */
 
   if(CvOUTSIDE(PL_compcv))

@@ -614,8 +614,6 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
     Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
       "field initialiser expression is experimental and may be changed or removed without notice");
 
-  resume_compcv_and_save(&compclassmeta->initfields_compcv);
-
   /* Set up this new block as if the current compiler context were its scope */
 
   if(CvOUTSIDE(PL_compcv))
@@ -1160,7 +1158,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1164 "lib/Class/Plain.c"
+#line 1162 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1304,7 +1302,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1308 "lib/Class/Plain.c"
+#line 1306 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1329,7 +1327,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1157 "lib/Class/Plain.xs"
+#line 1155 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1366,7 +1364,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1370 "lib/Class/Plain.c"
+#line 1368 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
