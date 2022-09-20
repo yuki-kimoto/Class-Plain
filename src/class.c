@@ -254,14 +254,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-void ClassPlain_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname)
-{
-  if(meta->sealed)
-    croak("Cannot add a new required method to an already-sealed class");
-
-  av_push(meta->requiremethods, SvREFCNT_inc(methodname));
-}
-
 #define ClassPlain_mop_class_implements_role(meta, rolemeta)  S_mop_class_implements_role(aTHX_ meta, rolemeta)
 static bool S_mop_class_implements_role(pTHX_ ClassMeta *meta, ClassMeta *rolemeta)
 {
@@ -279,21 +271,6 @@ void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
 {
   if(meta->sealed) /* idempotent */
     return;
-
-  if(meta->type == METATYPE_CLASS) {
-    U32 nmethods = av_count(meta->requiremethods);
-    U32 i;
-    for(i = 0; i < nmethods; i++) {
-      SV *mname = AvARRAY(meta->requiremethods)[i];
-
-      GV *gv = gv_fetchmeth_sv(meta->stash, mname, 0, 0);
-      if(gv && GvCV(gv))
-        continue;
-
-      croak("Class %" SVf " does not provide a required method named '%" SVf "'",
-        SVfARG(meta->name), SVfARG(mname));
-    }
-  }
 
   meta->sealed = true;
 }
@@ -328,7 +305,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->direct_fields = newAV();
   meta->direct_methods = newAV();
   meta->parammap = NULL;
-  meta->requiremethods = newAV();
 
   meta->cls.supermeta = NULL;
 

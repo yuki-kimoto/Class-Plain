@@ -17,7 +17,6 @@ hax/sv_setrv.c.inc
 include/class.h
 include/field.h
 include/object_pad.h
-include/suspended_compcv.h
 lib/Class/Plain.c
 lib/Class/Plain.o
 lib/Class/Plain.pm
@@ -40,8 +39,6 @@ src/class.c
 src/class.o
 src/field.c
 src/field.o
-src/suspended_compcv.c
-src/suspended_compcv.o
 t/00use.t
 t/01method.t
 t/02fields.t
@@ -59,8 +56,6 @@ t/30unit-class.t
 t/31pad-outside.t
 t/50croak-method.t
 t/52croak-scope.t
-t/75metafunctions.t.stop
 t/99pod.t
-t/lib/91rt141483Role.pm
 XSParseKeyword.h
 XSParseSublike.h
