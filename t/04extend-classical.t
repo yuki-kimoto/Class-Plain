@@ -8,7 +8,7 @@ use Test::More;
 use Class::Plain;
 
 class BaseClass {
-   has data;
+   field data;
 
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -28,6 +28,6 @@ package ExtendedClass {
 my $obj = ExtendedClass->new;
 isa_ok( $obj, "ExtendedClass", '$obj' );
 
-is( $obj->moremethod, 456, '$obj has methods from ExtendedClass' );
+is( $obj->moremethod, 456, '$obj field methods from ExtendedClass' );
 
 done_testing;

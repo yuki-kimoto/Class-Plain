@@ -576,7 +576,6 @@ BOOT:
 
   register_xs_parse_keyword("class", &kwhooks_class, (void *)0);
   register_xs_parse_keyword("field", &kwhooks_field, "field");
-  register_xs_parse_keyword("has",   &kwhooks_field,   "has");
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 

@@ -11,7 +11,7 @@ use Class::Plain;
 use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
 
 class Counter {
-   has count;
+   field count;
    
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -38,14 +38,14 @@ class Counter {
    # BEGIN-time initialised fields get private storage
    my $counter2 = Counter->new;
    is( $counter2->describe, "Count is now 0",
-      '$counter2 has its own $count' );
+      '$counter2 field its own $count' );
 }
 
 {
    use Data::Dumper;
 
    class AllTheTypes {
-      has scalar;
+      field scalar;
 
      method new : common {
        my $self = $class->SUPER::new(@_);

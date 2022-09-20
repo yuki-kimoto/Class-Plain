@@ -752,7 +752,6 @@ XS_EXTERNAL(boot_Class__Plain)
 
   register_xs_parse_keyword("class", &kwhooks_class, (void *)0);
   register_xs_parse_keyword("field", &kwhooks_field, "field");
-  register_xs_parse_keyword("has",   &kwhooks_field,   "has");
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 
@@ -761,7 +760,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 765 "lib/Class/Plain.c"
+#line 764 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

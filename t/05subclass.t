@@ -12,7 +12,7 @@ class Animal 1.23 {
    method legs { $self->{legs} };
 }
 
-is( $Animal::VERSION, 1.23, 'Versioned class has VERSION' );
+is( $Animal::VERSION, 1.23, 'Versioned class field VERSION' );
 
 class Spider 4.56 :isa(Animal) {
    method new8 : common {
@@ -24,7 +24,7 @@ class Spider 4.56 :isa(Animal) {
    }
 }
 
-is( $Spider::VERSION, 4.56, 'Versioned subclass has VERSION' );
+is( $Spider::VERSION, 4.56, 'Versioned subclass field VERSION' );
 
 {
    my $spider = Spider->new8;

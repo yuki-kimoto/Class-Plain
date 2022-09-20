@@ -8,7 +8,7 @@ use Test::More;
 use Class::Plain;
 
 class Counter;
-has count;
+field count;
 
 method new : common {
   my $self = $class->SUPER::new(@_);

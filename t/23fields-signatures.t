@@ -14,7 +14,7 @@ use Class::Plain;
 # See also
 #   https://rt.cpan.org/Ticket/Display.html?id=134456
 class C {
-   has x;
+   field x;
    method new : common {
      my $self = $class->SUPER::new(@_);
      

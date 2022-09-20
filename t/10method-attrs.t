@@ -10,7 +10,7 @@ use Class::Plain;
 use attributes ();
 
 class Counter {
-   has count;
+   field count;
    
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -29,7 +29,7 @@ class Counter {
    };
 }
 
-# Counter::count has both :lvalue :method attrs
+# Counter::count field both :lvalue :method attrs
 {
    is_deeply( [ sort +attributes::get( \&Counter::count ) ],
       [ 'method' ],
