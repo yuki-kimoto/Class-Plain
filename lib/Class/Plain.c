@@ -1137,10 +1137,6 @@ static int dumppackage_class(pTHX_ DMDContext *ctx, const SV *sv)
 }
 #endif
 
-/*********************
- * Custom FieldHooks *
- *********************/
-
 struct CustomFieldHookData
 {
   SV *apply_cb;
@@ -1164,60 +1160,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-/* used by XSUB deconstruct_object */
-#define deconstruct_object_class(av, classmeta, offset)  S_deconstruct_object_class(aTHX_ av, classmeta, offset)
-static U32 S_deconstruct_object_class(pTHX_ AV *backingav, ClassMeta *classmeta, FIELDOFFSET offset)
-{
-  dSP;
-  U32 retcount = 0;
-  AV *fields = classmeta->direct_fields;
-  U32 nfields = av_count(fields);
-
-  EXTEND(SP, nfields * 2);
-
-  FIELDOFFSET i;
-  for(i = 0; i < nfields; i++) {
-    FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
-
-    mPUSHs(newSVpvf("%" SVf ".%" SVf,
-        SVfARG(classmeta->name), SVfARG(fieldmeta->name)));
-
-    SV *value = AvARRAY(backingav)[offset + fieldmeta->fieldix];
-    value = newSVsv(value);
-
-    mPUSHs(value);
-
-    retcount += 2;
-  }
-
-  PUTBACK;
-
-  return retcount;
-}
-
-/* used by XSUB ref_field */
-#define ref_field_class(want_fieldname, backingav, classmeta, offset)  S_ref_field_class(aTHX_ want_fieldname, backingav, classmeta, offset)
-static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta *classmeta, FIELDOFFSET offset)
-{
-  AV *fields = classmeta->direct_fields;
-  U32 nfields = av_count(fields);
-
-  FIELDOFFSET i;
-  for(i = 0; i < nfields; i++) {
-    FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
-
-    if(!sv_eq(want_fieldname, fieldmeta->name))
-      continue;
-
-    /* found it */
-    SV *sv = AvARRAY(backingav)[offset + fieldmeta->fieldix];
-    return newRV_inc(sv);
-  }
-
-  return NULL;
-}
-
-#line 1221 "lib/Class/Plain.c"
+#line 1164 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1361,147 +1304,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1365 "lib/Class/Plain.c"
-
-XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
-{
-    dVAR; dXSARGS;
-    if (items != 1)
-       croak_xs_usage(cv,  "obj");
-    {
-	SV *	RETVAL;
-	SV *	obj = ST(0)
-;
-#line 1216 "lib/Class/Plain.xs"
-  {
-    if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
-      croak("Expected an object reference to metaclass");
-
-    HV *stash = SvSTASH(SvRV(obj));
-
-    GV **gvp = (GV **)hv_fetchs(stash, "META", 0);
-    if(!gvp)
-      croak("Unable to find ClassMeta for %" HEKf, HEKfARG(HvNAME_HEK(stash)));
-
-    RETVAL = newSVsv(GvSV(*gvp));
-  }
-#line 1390 "lib/Class/Plain.c"
-	RETVAL = sv_2mortal(RETVAL);
-	ST(0) = RETVAL;
-    }
-    XSRETURN(1);
-}
-
-
-XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
-{
-    dVAR; dXSARGS;
-    if (items != 1)
-       croak_xs_usage(cv,  "obj");
-    PERL_UNUSED_VAR(ax); /* -Wall */
-    SP -= items;
-    {
-	SV *	obj = ST(0)
-;
-#line 1234 "lib/Class/Plain.xs"
-  {
-    if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
-      croak("Expected an object reference to deconstruct_object");
-
-    ClassMeta *classmeta = mop_get_class_for_stash(SvSTASH(SvRV(obj)));
-
-    AV *backingav = (AV *)get_obj_backingav(obj, classmeta->repr, true);
-
-    U32 retcount = 0;
-
-    PUSHs(sv_mortalcopy(classmeta->name));
-    retcount++;
-
-    PUTBACK;
-
-    while(classmeta) {
-      retcount += deconstruct_object_class(backingav, classmeta, 0);
-
-      classmeta = classmeta->cls.supermeta;
-    }
-
-    SPAGAIN;
-    XSRETURN(retcount);
-  }
-#line 1434 "lib/Class/Plain.c"
-	PUTBACK;
-	return;
-    }
-}
-
-
-XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
-{
-    dVAR; dXSARGS;
-    if (items != 2)
-       croak_xs_usage(cv,  "fieldname, obj");
-    {
-	SV *	RETVAL;
-	SV *	fieldname = ST(0)
-;
-	SV *	obj = ST(1)
-;
-#line 1262 "lib/Class/Plain.xs"
-  {
-    SV *want_classname = NULL, *want_fieldname;
-
-    if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
-      croak("Expected an object reference to ref_field");
-
-    SvGETMAGIC(fieldname);
-
-    char *s = SvPV_nolen(fieldname);
-    char *dotpos;
-    if((dotpos = strchr(s, '.'))) {
-      U32 flags = SvUTF8(fieldname) ? SVf_UTF8 : 0;
-      want_classname = newSVpvn_flags(s, dotpos - s, flags);
-      want_fieldname = newSVpvn_flags(dotpos + 1, strlen(dotpos + 1), flags);
-    }
-    else {
-      want_fieldname = SvREFCNT_inc(fieldname);
-    }
-
-    SAVEFREESV(want_classname);
-    SAVEFREESV(want_fieldname);
-
-    ClassMeta *classmeta = mop_get_class_for_stash(SvSTASH(SvRV(obj)));
-
-    AV *backingav = (AV *)get_obj_backingav(obj, classmeta->repr, true);
-
-    while(classmeta) {
-      if(!want_classname || sv_eq(want_classname, classmeta->name)) {
-        RETVAL = ref_field_class(want_fieldname, backingav, classmeta, 0);
-        if(RETVAL)
-          goto done;
-      }
-
-      classmeta = classmeta->cls.supermeta;
-    }
-
-    if(want_classname)
-      croak("Could not find a field called %" SVf " in class %" SVf,
-        SVfARG(want_fieldname), SVfARG(want_classname));
-    else
-      croak("Could not find a field called %" SVf " in any class",
-        SVfARG(want_fieldname));
-done:
-    ;
-  }
-#line 1499 "lib/Class/Plain.c"
-	RETVAL = sv_2mortal(RETVAL);
-	ST(0) = RETVAL;
-    }
-    XSRETURN(1);
-}
-
+#line 1308 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1513,13 +1316,6 @@ XS_EXTERNAL(boot_Class__Plain)
 #else
     dVAR; dXSBOOTARGSXSAPIVERCHK;
 #endif
-#if (PERL_REVISION == 5 && PERL_VERSION < 9)
-    char* file = __FILE__;
-#else
-    const char* file = __FILE__;
-#endif
-
-    PERL_UNUSED_VAR(file);
 
     PERL_UNUSED_VAR(cv); /* -W */
     PERL_UNUSED_VAR(items); /* -W */
@@ -1530,13 +1326,10 @@ XS_EXTERNAL(boot_Class__Plain)
 #  endif
 #endif
 
-        newXS_deffile("Class::Plain::MetaFunctions::metaclass", XS_Class__Plain__MetaFunctions_metaclass);
-        newXS_deffile("Class::Plain::MetaFunctions::deconstruct_object", XS_Class__Plain__MetaFunctions_deconstruct_object);
-        newXS_deffile("Class::Plain::MetaFunctions::ref_field", XS_Class__Plain__MetaFunctions_ref_field);
 
     /* Initialisation Section */
 
-#line 1311 "lib/Class/Plain.xs"
+#line 1157 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1573,7 +1366,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1577 "lib/Class/Plain.c"
+#line 1370 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
