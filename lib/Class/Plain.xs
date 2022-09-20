@@ -676,16 +676,14 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
 
   CvOUTSIDE(PL_compcv) = methodscope;
 
-  if(!compmethodmeta->is_common)
-    /* instance method */
-    ClassPlain_extend_pad_vars(compclassmeta);
+  if(compmethodmeta->is_common) {
+    IV var_index = pad_add_name_pvs("$class", 0, NULL, NULL);
+    if (!(var_index == 1)) {
+      croak("[Unexpected]Invalid $class index %d", (int)var_index);
+    }
+  }
   else {
-    /* :common method */
-    PADOFFSET padix;
-
-    padix = pad_add_name_pvs("$class", 0, NULL, NULL);
-    if(padix != PADIX_SELF)
-      croak("ARGH: Expected that padix[$class] = 1");
+    ClassPlain_extend_pad_vars(compclassmeta);
   }
 
   intro_my();

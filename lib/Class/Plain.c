@@ -685,16 +685,14 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
 
   CvOUTSIDE(PL_compcv) = methodscope;
 
-  if(!compmethodmeta->is_common)
-    /* instance method */
-    ClassPlain_extend_pad_vars(compclassmeta);
+  if(compmethodmeta->is_common) {
+    IV var_index = pad_add_name_pvs("$class", 0, NULL, NULL);
+    if (!(var_index == 1)) {
+      croak("[Unexpected]Invalid $class index %d", (int)var_index);
+    }
+  }
   else {
-    /* :common method */
-    PADOFFSET padix;
-
-    padix = pad_add_name_pvs("$class", 0, NULL, NULL);
-    if(padix != PADIX_SELF)
-      croak("ARGH: Expected that padix[$class] = 1");
+    ClassPlain_extend_pad_vars(compclassmeta);
   }
 
   intro_my();
@@ -920,7 +918,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 924 "lib/Class/Plain.c"
+#line 922 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1064,7 +1062,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1068 "lib/Class/Plain.c"
+#line 1066 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1089,7 +1087,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 917 "lib/Class/Plain.xs"
+#line 915 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1126,7 +1124,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1130 "lib/Class/Plain.c"
+#line 1128 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
