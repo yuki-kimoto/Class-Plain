@@ -49,6 +49,10 @@ SKIP: {
     use experimental 'signatures';
     
     method foo ($foo) {
+      my $ppp = method {
+        1;
+      };
+    
       return $foo;
     }
   }

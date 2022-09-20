@@ -188,8 +188,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   if(args[argi++]->i) {
     /* extends */
     argi++; /* ignore the XPK_CHOICE() integer; `extends` and `isa` are synonyms */
-    if(type != METATYPE_CLASS)
-      croak("Only a class may extend another");
 
     if(superclassname)
       croak("Multiple superclasses are not currently supported");
@@ -406,18 +404,6 @@ static const struct XSParseKeywordHooks kwhooks_field = {
   },
   .build = &build_field,
 };
-/* We use the method-like keyword parser to parse phaser blocks as well as
- * methods. In order to tell what is going on, hookdata will be an integer
- * set to one of the following
- */
-
-enum PhaserType {
-  PHASER_NONE, /* A normal `method`; i.e. not a phaser */
-};
-
-static const char *phasertypename[] = {
-};
-
 static bool parse_method_permit(pTHX_ void *hookdata)
 {
   if(!have_compclassmeta)
@@ -432,17 +418,6 @@ static bool parse_method_permit(pTHX_ void *hookdata)
 
 static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  enum PhaserType type = PTR2UV(hookdata);
-  U32 i;
-  AV *fields = compclassmeta->fields;
-  U32 nfields = av_count(fields);
-
-  if(type != PHASER_NONE)
-    /* We need to fool start_subparse() into thinking this is a named function
-     * so it emits a real CV and not a protosub
-     */
-    ctx->actions &= ~XS_PARSE_SUBLIKE_ACTION_CVf_ANON;
-
   /* Save the methodscope for this subparse, in case of nested methods
    *   (RT132321)
    */
@@ -462,18 +437,6 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   PL_comppad = PadlistARRAY(CvPADLIST(methodscope))[1];
   PL_comppad_name = PadlistNAMES(CvPADLIST(methodscope));
   PL_curpad  = AvARRAY(PL_comppad);
-
-  for(i = 0; i < nfields; i++) {
-    FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
-
-    /* Skip the anonymous ones */
-    if(SvCUR(fieldmeta->name) < 2)
-      continue;
-
-    /* Claim these are all STATE variables just to quiet the "will not stay
-     * shared" warning */
-    pad_add_name_sv(fieldmeta->name, padadd_STATE, NULL, NULL);
-  }
 
   intro_my();
 
@@ -571,8 +534,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  enum PhaserType type = PTR2UV(hookdata);
-
   MethodMeta *compmethodmeta;
   {
     SV *tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0);
@@ -583,20 +544,11 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
   if(ctx->cv)
     CvMETHOD_on(ctx->cv);
 
-  switch(type) {
-    case PHASER_NONE:
-      if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-        MethodMeta *meta = ClassPlain_mop_class_add_method(compclassmeta, ctx->name);
+    if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
+      MethodMeta *meta = ClassPlain_mop_class_add_method(compclassmeta, ctx->name);
 
-        meta->is_common = compmethodmeta->is_common;
-      }
-      break;
-
-  }
-
-  if(type != PHASER_NONE)
-    /* Do not generate REFGEN/ANONCODE optree, do not yield expression */
-    ctx->actions &= ~(XS_PARSE_SUBLIKE_ACTION_REFGEN_ANONCODE|XS_PARSE_SUBLIKE_ACTION_RET_EXPR);
+      meta->is_common = compmethodmeta->is_common;
+    }
 
   SvREFCNT_dec(compmethodmeta->name);
   Safefree(compmethodmeta);
@@ -613,26 +565,6 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .pre_blockend    = parse_method_pre_blockend,
   .post_newcv      = parse_method_post_newcv,
 };
-
-static struct XSParseSublikeHooks parse_phaser_hooks = {
-  .flags           = XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS,
-  .skip_parts      = XS_PARSE_SUBLIKE_PART_NAME|XS_PARSE_SUBLIKE_PART_ATTRS,
-  /* no permit */
-  .pre_subparse    = parse_method_pre_subparse,
-  .post_blockstart = parse_method_post_blockstart,
-  .pre_blockend    = parse_method_pre_blockend,
-  .post_newcv      = parse_method_post_newcv,
-};
-
-static int parse_phaser(pTHX_ OP **out, void *hookdata)
-{
-  if(!have_compclassmeta)
-    croak("Cannot '%s' outside of 'class'", phasertypename[PTR2UV(hookdata)]);
-
-  lex_read_space(0);
-
-  return xs_parse_sublike(&parse_phaser_hooks, hookdata, out);
-}
 
 struct CustomFieldHookData
 {
@@ -675,7 +607,7 @@ BOOT:
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
 
-  register_xs_parse_sublike("method", &parse_method_hooks, (void *)PHASER_NONE);
+  register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
