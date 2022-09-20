@@ -27,7 +27,6 @@ struct AccessorGenerationCtx {
 };
 
 struct ClassHookFuncs {
-  U32 ver;  /* caller must initialise to CLASSPLAIN_VERSION */
   U32 flags;
 
   /* called immediately at apply time; return FALSE means it did its thing immediately, so don't store it */
@@ -44,7 +43,6 @@ struct ClassHook {
 };
 
 struct FieldHookFuncs {
-  U32 ver;   /* caller must initialise to CLASSPLAIN_VERSION */
   U32 flags;
 
   /* called immediately at apply time; return FALSE means it did its thing immediately, so don't store it */

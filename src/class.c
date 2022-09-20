@@ -413,7 +413,6 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
 }
 
 static const struct ClassHookFuncs classhooks_isa = {
-  .ver   = CLASSPLAIN_ABIVERSION,
   .apply = &classhook_isa_apply,
 };
 
