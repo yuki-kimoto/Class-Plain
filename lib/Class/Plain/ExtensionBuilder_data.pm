@@ -110,12 +110,6 @@ enum ReprType {
 enum {
   PADIX_SELF = 1,
   PADIX_SLOTS = 2,
-
-  /* for role methods */
-  PADIX_EMBEDDING = 3,
-
-  /* during initfields */
-  PADIX_INITFIELDS_PARAMS = 4,
 };
 
 /* Function prototypes */
@@ -125,13 +119,6 @@ void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta);
 OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags);
 
 OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
-
-/* op_private flags on FIELDPAD ops */
-enum {
-  OPpFIELDPAD_SV,  /* has $x */
-  OPpFIELDPAD_AV,  /* has @y */
-  OPpFIELDPAD_HV,  /* has %z */
-};
 
 OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix);
 

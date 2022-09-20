@@ -281,8 +281,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   U32 flags = 0;
 
-  flags = OPpFIELDPAD_SV << 8;
-
   ops = op_append_list(OP_LINESEQ, ops,
     ClassPlain_newFIELDPADOP(flags, ctx.padix, fieldmeta->fieldix));
 

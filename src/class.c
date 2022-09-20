@@ -172,26 +172,6 @@ SV *ClassPlain_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create
   return rv;
 }
 
-#define embed_cv(cv, embedding)  S_embed_cv(aTHX_ cv, embedding)
-static CV *S_embed_cv(pTHX_ CV *cv, RoleEmbedding *embedding)
-{
-  assert(cv);
-  assert(CvOUTSIDE(cv));
-
-  /* Perl core's cv_clone() would break in some situation here; see
-   *   https://rt.cpan.org/Ticket/Display.html?id=141483
-   */
-  CV *embedded_cv = cv_copy_flags(cv, 0);
-  SV *embeddingsv = embedding->embeddingsv;
-
-  assert(SvTYPE(embeddingsv) == SVt_PV && SvLEN(embeddingsv) >= sizeof(RoleEmbedding));
-
-  PAD *pad1 = PadlistARRAY(CvPADLIST(embedded_cv))[1];
-  PadARRAY(pad1)[PADIX_EMBEDDING] = SvREFCNT_inc(embeddingsv);
-
-  return embedded_cv;
-}
-
 RoleEmbedding **ClassPlain_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
 {
   assert(meta->type == METATYPE_CLASS);
@@ -293,23 +273,6 @@ static bool S_mop_class_implements_role(pTHX_ ClassMeta *meta, ClassMeta *roleme
 
 
   return false;
-}
-
-static OP *pp_alias_params(pTHX)
-{
-  dSP;
-  PADOFFSET padix = PADIX_INITFIELDS_PARAMS;
-
-  SV *params = POPs;
-
-  if(SvTYPE(params) != SVt_PVHV)
-    RETURN;
-
-  SAVESPTR(PAD_SVl(padix));
-  PAD_SVl(padix) = SvREFCNT_inc(params);
-  save_freesv(params);
-
-  RETURN;
 }
 
 static OP *pp_croak_from_constructor(pTHX)

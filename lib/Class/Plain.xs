@@ -126,22 +126,7 @@ static PADOFFSET S_find_padix_for_field(pTHX_ FieldMeta *fieldmeta)
 static void S_bind_field_to_pad(pTHX_ SV *sv, FIELDOFFSET fieldix, U8 private, PADOFFSET padix)
 {
   SV *val;
-  switch(private) {
-    case OPpFIELDPAD_SV:
-      val = sv;
-      break;
-    case OPpFIELDPAD_AV:
-      if(!SvROK(sv) || SvTYPE(val = SvRV(sv)) != SVt_PVAV)
-        croak("ARGH: expected to find an ARRAY reference at field index %ld", (long int)fieldix);
-      break;
-    case OPpFIELDPAD_HV:
-      if(!SvROK(sv) || SvTYPE(val = SvRV(sv)) != SVt_PVHV)
-        croak("ARGH: expected to find a HASH reference at field index %ld", (long int)fieldix);
-      break;
-    default:
-      croak("ARGH: unsure what to do with this field type");
-  }
-
+  val = sv;
   SAVESPTR(PAD_SVl(padix));
   PAD_SVl(padix) = SvREFCNT_inc(val);
   save_freesv(val);
@@ -842,7 +827,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
         continue;
 
       U8 private = 0;
-      private = OPpFIELDPAD_SV;
 
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
       assert((fieldix & ~FIELDIX_MASK) == 0);
