@@ -9,13 +9,6 @@
 #include "class.h"
 #include "field.h"
 
-#undef register_class_attribute
-
-#ifdef HAVE_DMD_HELPER
-#  define WANT_DMD_API_044
-#  include "DMD_helper.h"
-#endif
-
 #include "perl-backcompat.c.inc"
 #include "sv_setrv.c.inc"
 
@@ -24,14 +17,6 @@
 #include "optree-additions.c.inc"
 #include "newOP_CUSTOM.c.inc"
 #include "cv_copy_flags.c.inc"
-
-#ifdef DEBUGGING
-#  define DEBUG_OVERRIDE_PLCURCOP
-#  define DEBUG_SET_CURCOP_LINE(line)    CopLINE_set(PL_curcop, line)
-#else
-#  undef  DEBUG_OVERRIDE_PLCURCOP
-#  define DEBUG_SET_CURCOP_LINE(line)
-#endif
 
 #define need_PLparser()  ClassPlain__need_PLparser(aTHX)
 void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
@@ -47,7 +32,7 @@ struct ClassAttributeRegistration {
 
 static ClassAttributeRegistration *classattrs = NULL;
 
-static void register_class_attribute(const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
+static void Class_Plain_register_class_attribute(const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
 {
   ClassAttributeRegistration *reg;
   Newx(reg, 1, struct ClassAttributeRegistration);
@@ -58,21 +43,6 @@ static void register_class_attribute(const char *name, const struct ClassHookFun
 
   reg->next  = classattrs;
   classattrs = reg;
-}
-
-void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
-{
-  if(funcs->ver < 57)
-    croak("Mismatch in third-party class attribute ABI version field: module wants %d, we require >= 57\n",
-        funcs->ver);
-  if(funcs->ver > CLASSPLAIN_ABIVERSION)
-    croak("Mismatch in third-party class attribute ABI version field: attribute supplies %d, module wants %d\n",
-        funcs->ver, CLASSPLAIN_ABIVERSION);
-
-  if(!name || !(name[0] >= 'A' && name[0] <= 'Z'))
-    croak("Third-party class attribute names must begin with a capital letter");
-
-  register_class_attribute(name, funcs, funcdata);
 }
 
 void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value)
@@ -449,5 +419,5 @@ static const struct ClassHookFuncs classhooks_isa = {
 
 void ClassPlain__boot_classes(pTHX)
 {
-  register_class_attribute("isa",    &classhooks_isa,    NULL);
+  Class_Plain_register_class_attribute("isa",    &classhooks_isa,    NULL);
 }
