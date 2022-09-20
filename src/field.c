@@ -151,8 +151,17 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   ops = op_append_list(OP_LINESEQ, ops,
     make_argcheck_ops(req_args, opt_args, slurpy_arg, mname_fq));
+  
+  // Run hooks
+  {                                                                                       
+    U32 hooki;                                                                            
+    for(hooki = 0; fieldmeta->hooks && hooki < av_count(fieldmeta->hooks); hooki++) {     
+      struct FieldHook *h = (struct FieldHook *)AvARRAY(fieldmeta->hooks)[hooki];         
+      if(*h->funcs->gen_accessor_ops)                                                                 
+        (*h->funcs->gen_accessor_ops)(aTHX_ fieldmeta, h->hookdata, h->funcdata, type, &ctx);        
+    }                                                                                     
+  }
 
-  MOP_FIELD_RUN_HOOKS(fieldmeta, gen_accessor_ops, type, &ctx);
 
   if(ctx.bodyop)
     ops = op_append_list(OP_LINESEQ, ops, ctx.bodyop);
