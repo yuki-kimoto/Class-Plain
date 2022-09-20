@@ -1052,11 +1052,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
       {"the hooks AV",               DMD_FIELD_PTR,  .ptr = classmeta->hooks},           \
       {"the direct fields AV",       DMD_FIELD_PTR,  .ptr = classmeta->direct_fields},   \
       {"the direct methods AV",      DMD_FIELD_PTR,  .ptr = classmeta->direct_methods},  \
-      {"the param map HV",           DMD_FIELD_PTR,  .ptr = classmeta->parammap},        \
-      {"the requiremethods AV",      DMD_FIELD_PTR,  .ptr = classmeta->requiremethods},  \
-      {"the initfields CV",          DMD_FIELD_PTR,  .ptr = classmeta->initfields},      \
-      {"the ADJUST blocks AV",       DMD_FIELD_PTR,  .ptr = classmeta->adjustblocks},    \
-      {"the temporary method scope", DMD_FIELD_PTR,  .ptr = classmeta->methodscope}
 
   switch(classmeta->type) {
     case METATYPE_CLASS:
@@ -1064,8 +1059,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
         N_COMMON_FIELDS+5, ((const DMDNamedField []){
           COMMON_FIELDS,
           {"the supermeta",                         DMD_FIELD_PTR, .ptr = classmeta->cls.supermeta},
-          {"the foreign superclass constructor CV", DMD_FIELD_PTR, .ptr = classmeta->cls.foreign_new},
-          {"the foreign superclass DOES CV",        DMD_FIELD_PTR, .ptr = classmeta->cls.foreign_does},
         })
       );
       break;

@@ -353,14 +353,8 @@ void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassna
 
     meta->start_fieldix = supermeta->next_fieldix;
     meta->repr = supermeta->repr;
-    meta->cls.foreign_new = supermeta->cls.foreign_new;
   }
   else {
-    /* A subclass of a foreign class */
-    meta->cls.foreign_new = fetch_superclass_method_pv(meta->stash, "new", 3, -1);
-    if(!meta->cls.foreign_new)
-      croak("Unable to find SUPER::new for %" SVf, superclassname);
-
     meta->cls.foreign_does = fetch_superclass_method_pv(meta->stash, "DOES", 4, -1);
   }
 
@@ -378,7 +372,7 @@ void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
     av_push(isa, newSVpvs("Class::Plain::Base"));
 
   if(meta->type == METATYPE_CLASS &&
-      meta->repr == REPR_AUTOSELECT && !meta->cls.foreign_new)
+      meta->repr == REPR_AUTOSELECT)
     meta->repr = REPR_NATIVE;
 
   meta->next_fieldix = meta->start_fieldix;
