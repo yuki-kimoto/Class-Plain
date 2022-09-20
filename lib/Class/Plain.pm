@@ -119,12 +119,6 @@ A single supper class is supported by the C<extends> keyword or the C<isa> attri
 
 If the supper class is not specified, the class inherits L<Class::Plain::Base>.
 
-One or more roles can be composed into the class by the C<does> attribute.
-   
-   class NAME : does(ROLE) dose(ROLE)) {
-      ...
-   }
-
 The following class attributes are supported:
 
 =head3 isa Attribute
@@ -141,59 +135,6 @@ load it by code equivalent to
 
 and thus it must either already exist, or be locatable via the usual C<@INC>
 mechanisms.
-
-=head3 does Attribute
-
-   : does(ROLE)
-   : does(ROLE) does(ROLE)
-
-Composes a role into the class; optionally requiring a version check on the
-role package. This is a newer form of the C<does>
-keywords and should be preferred for new code.
-
-Multiple roles can be composed by using multiple C<:does> attributes, one per
-role.
-
-The package will be loaded in a similar way to how the L</"isa Attribute"> is
-handled.
-
-=head2 role
-
-   role NAME : ATTRS... {
-      ...
-   }
-
-   role NAME : ATTRS...;
-
-Similar to C<class>, but provides a package that defines a new role. A role
-acts similar to a class in some respects, and differently in others.
-
-Like a class, a role can have a version, and named methods.
-
-   role NAME {
-      method a { ... }
-      method b { ... }
-   }
-
-A role does not provide a constructor, and instances cannot directly be
-constructed. A role cannot extend a class.
-
-A role can declare that it required methods of given names from any class that
-does the role.
-
-   role NAME {
-      method METHOD;
-   }
-
-A role can declare that it provides another role:
-
-   role NAME :does(OTHERROLE) { ... }
-
-This will include all of the methods from the included role. Effectively this
-means that applying the "outer" role to a class will imply applying the other
-role as well.
-
-The following role attributes are supported:
 
 =head2 field
    

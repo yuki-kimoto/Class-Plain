@@ -102,11 +102,6 @@ void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char
         (!hints || !hv_fetch(hints, reg->funcs->permit_hintkey, reg->permit_hintkeylen, 0)))
       continue;
 
-    if((reg->funcs->flags & OBJECTPAD_FLAG_ATTR_NO_VALUE) && value)
-      croak("Attribute :%s does not permit a value", name);
-    if((reg->funcs->flags & OBJECTPAD_FLAG_ATTR_MUST_VALUE) && !value)
-      croak("Attribute :%s requires a value", name);
-
     SV *hookdata = value;
 
     if(reg->funcs->apply) {
@@ -965,34 +960,9 @@ static const struct ClassHookFuncs classhooks_isa = {
   .apply = &classhook_isa_apply,
 };
 
-/* :does */
-
-static bool classhook_does_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  SV *rolename = newSV(0), *rolever = newSV(0);
-  SAVEFREESV(rolename);
-  SAVEFREESV(rolever);
-
-  const char *end = split_package_ver(value, rolename, rolever);
-
-  if(*end)
-    croak("Unexpected characters while parsing :does() attribute: %s", end);
-
-  mop_class_load_and_add_role(classmeta, rolename, rolever);
-
-  return FALSE;
-}
-
-static const struct ClassHookFuncs classhooks_does = {
-  .ver   = OBJECTPAD_ABIVERSION,
-  .flags = OBJECTPAD_FLAG_ATTR_MUST_VALUE,
-  .apply = &classhook_does_apply,
-};
-
 void ClassPlain__boot_classes(pTHX)
 {
   register_class_attribute("isa",    &classhooks_isa,    NULL);
-  register_class_attribute("does",   &classhooks_does,   NULL);
 
 #ifdef HAVE_DMD_HELPER
   DMD_ADD_ROOT((SV *)&vtbl_backingav, "the Class::Plain backing AV VTBL");

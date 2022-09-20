@@ -456,24 +456,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   if(superclassname && SvOK(superclassname))
     mop_class_set_superclass(meta, superclassname);
 
-  int ndoess = args[argi++]->i;
-  if(ndoess) {
-    int i;
-    for(i = 0; i < ndoess; i++) {
-      argi++; /* ignore the XPK_CHOICE() integer; `doess` and `does` are synonyms */
-      int nroles = args[argi++]->i;
-      while(nroles--) {
-        SV *rolename = args[argi++]->sv;
-        if(!rolename)
-          croak("Expected a role name after 'does'");
-
-        SV *rolever = args[argi++]->sv;
-
-        mop_class_load_and_add_role(meta, rolename, rolever);
-      }
-    }
-  }
-
   if(superclassname)
     SvREFCNT_dec(superclassname);
 
@@ -581,9 +563,6 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
   /* This should really a repeated (tagged?) choice of a number of things, but
    * right now there's only one thing permitted here anyway
    */
-  XPK_REPEATED(
-    XPK_CHOICE( XPK_LITERAL("does") ), XPK_COMMALIST( XPK_PACKAGENAME, XPK_VSTRING_OPT )
-  ),
   XPK_ATTRIBUTES,
   {0}
 };
