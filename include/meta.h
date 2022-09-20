@@ -6,9 +6,6 @@
 
 #define CLASSPLAIN_ABIVERSION  ((CLASSPLAIN_ABIVERSION_MAJOR << 16) | (CLASSPLAIN_ABIVERSION_MINOR))
 
-/* A FIELDOFFSET is an offset within the AV of an object instance */
-typedef IV FIELDOFFSET;
-
 typedef struct ClassMeta ClassMeta;
 typedef struct FieldMeta FieldMeta;
 typedef struct MethodMeta MethodMeta;
@@ -57,7 +54,7 @@ struct FieldHookFuncs {
 };
 
 struct FieldHook {
-  FIELDOFFSET fieldix; /* unused when in FieldMeta->hooks; used by ClassMeta->fieldhooks_* */
+  IV fieldix; /* unused when in FieldMeta->hooks; used by ClassMeta->fieldhooks_* */
   FieldMeta *fieldmeta;
   const struct FieldHookFuncs *funcs;
   void *funcdata;

@@ -4,7 +4,7 @@
 struct FieldMeta {
   SV *name;
   ClassMeta *class;
-  FIELDOFFSET fieldix;
+  IV fieldix;
   AV *hooks; /* NULL, or AV of raw pointers directly to FieldHook structs */
 };
 
