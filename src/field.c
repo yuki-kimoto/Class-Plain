@@ -25,6 +25,7 @@ FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmet
 
   fieldmeta->name = SvREFCNT_inc(field_name);
   fieldmeta->class = classmeta;
+  fieldmeta->hooks = NULL;
 
   return fieldmeta;
 }
@@ -50,6 +51,7 @@ static void ClassPlain_register_field_attribute(const char *name, const struct F
   reg->funcdata = funcdata;
 
   reg->next = fieldattrs;
+  
   fieldattrs = reg;
 }
 
@@ -75,13 +77,13 @@ void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char
     if(!(*reg->funcs->apply)(aTHX_ fieldmeta, value, &hookdata, reg->funcdata))
       return;
   }
-
   if(hookdata && hookdata == value)
     SvREFCNT_inc(hookdata);
 
-  if(!fieldmeta->hooks)
+  if(!fieldmeta->hooks) {
     fieldmeta->hooks = newAV();
-
+  }
+  
   struct FieldHook *hook;
   Newx(hook, 1, struct FieldHook);
 
@@ -203,10 +205,17 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
   OPCODE optype = 0;
 
   optype = OP_PADSV;
+  
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
-    newPADxVOP(optype, 0, (IV)ctx->fieldmeta->name));
+    newBINOP(
+      OP_HELEM,
+      0,
+      doref(newPADxVOP(optype, 0, 1), OP_RV2HV, 1),
+      newSVOP(OP_CONST, 0, ctx->fieldmeta->name)
+    )
+  );
 }
 
 static struct FieldHookFuncs fieldhooks_reader = {
