@@ -18,8 +18,7 @@
 #include "newOP_CUSTOM.c.inc"
 #include "cv_copy_flags.c.inc"
 
-#define need_PLparser()  ClassPlain__need_PLparser(aTHX)
-void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
+void ClassPlain_need_PLparser(pTHX);
 
 typedef struct ClassAttributeRegistration ClassAttributeRegistration;
 
@@ -158,7 +157,7 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->fields = newAV();
   meta->methods = newAV();
 
-  need_PLparser();
+  ClassPlain_need_PLparser();
 
   return meta;
 }

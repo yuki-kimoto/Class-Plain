@@ -649,7 +649,7 @@ struct CustomFieldHookData
 };
 
 /* internal function shared by various *.c files */
-void ClassPlain__need_PLparser(pTHX)
+void ClassPlain_need_PLparser(pTHX)
 {
   if(!PL_parser) {
     /* We need to generate just enough of a PL_parser to keep newSTATEOP()

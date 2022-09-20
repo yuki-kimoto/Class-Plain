@@ -16,8 +16,7 @@
 #include "make_argcheck_ops.c.inc"
 #include "newOP_CUSTOM.c.inc"
 
-#define need_PLparser()  ClassPlain__need_PLparser(aTHX)
-void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
+void ClassPlain_need_PLparser(pTHX);
 
 FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmeta)
 {
@@ -125,7 +124,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   SV *mname_fq = newSVpvf("%" SVf "::%" SVf, classmeta->name, mname);
 
-  need_PLparser();
+  ClassPlain_need_PLparser();
 
   I32 floor_ix = start_subparse(FALSE, 0);
   SAVEFREESV(PL_compcv);
