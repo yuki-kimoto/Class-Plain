@@ -183,43 +183,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   SV *packagever = args[argi++]->sv;
 
-  SV *superclassname = NULL;
-
-  if(args[argi++]->i) {
-    /* extends */
-    argi++; /* ignore the XPK_CHOICE() integer; `extends` and `isa` are synonyms */
-
-    if(superclassname)
-      croak("Multiple superclasses are not currently supported");
-
-    superclassname = args[argi++]->sv;
-    if(!superclassname)
-      croak("Expected a superclass name after 'isa'");
-
-    SV *superclassver = args[argi++]->sv;
-
-    HV *superstash = gv_stashsv(superclassname, 0);
-    if(!superstash || !hv_fetchs(superstash, "new", 0)) {
-      /* Try to `require` the module then attempt a second time */
-      /* load_module() will modify the name argument and take ownership of it */
-      load_module(PERL_LOADMOD_NOIMPORT, newSVsv(superclassname), NULL, NULL);
-      superstash = gv_stashsv(superclassname, 0);
-    }
-
-    if(!superstash)
-      croak("Superclass %" SVf " does not exist", superclassname);
-
-    if(superclassver)
-      ensure_module_version(superclassname, superclassver);
-  }
-
   ClassMeta *meta = ClassPlain_mop_create_class(type, packagename);
-
-  if(superclassname && SvOK(superclassname))
-    ClassPlain_mop_class_set_superclass(meta, superclassname);
-
-  if(superclassname)
-    SvREFCNT_dec(superclassname);
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
@@ -315,9 +279,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 static const struct XSParseKeywordPieceType pieces_classlike[] = {
   XPK_PACKAGENAME,
   XPK_VSTRING_OPT,
-  XPK_OPTIONAL(
-    XPK_CHOICE(XPK_LITERAL("isa") ), XPK_PACKAGENAME, XPK_VSTRING_OPT
-  ),
   /* This should really a repeated (tagged?) choice of a number of things, but
    * right now there's only one thing permitted here anyway
    */
