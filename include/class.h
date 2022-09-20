@@ -18,7 +18,6 @@ struct ClassMeta {
   AV *direct_fields;   /* each elem is a raw pointer directly to a FieldMeta */
   AV *direct_methods;  /* each elem is a raw pointer directly to a MethodMeta */
 
-  COP *tmpcop;         /* a COP to use during generated constructor */
   CV *methodscope;     /* a temporary CV used just during compilation of a `method` */
 
   union {

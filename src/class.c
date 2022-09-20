@@ -172,9 +172,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 
   need_PLparser();
 
-  meta->tmpcop = (COP *)newSTATEOP(0, NULL, NULL);
-  CopFILE_set(meta->tmpcop, __FILE__);
-
   return meta;
 }
 
