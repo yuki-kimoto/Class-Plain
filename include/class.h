@@ -14,8 +14,8 @@ struct ClassMeta {
 
   SV *name;
   AV *hooks;           /* NULL, or AV of raw pointers directly to ClassHook structs */
-  AV *direct_fields;   /* each elem is a raw pointer directly to a FieldMeta */
-  AV *direct_methods;  /* each elem is a raw pointer directly to a MethodMeta */
+  AV *fields;   /* each elem is a raw pointer directly to a FieldMeta */
+  AV *methods;  /* each elem is a raw pointer directly to a MethodMeta */
 
   CV *methodscope;     /* a temporary CV used just during compilation of a `method` */
 };

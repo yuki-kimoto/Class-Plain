@@ -443,7 +443,7 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
 {
   enum PhaserType type = PTR2UV(hookdata);
   U32 i;
-  AV *fields = compclassmeta->direct_fields;
+  AV *fields = compclassmeta->fields;
   U32 nfields = av_count(fields);
 
   if(type != PHASER_NONE)

@@ -96,7 +96,7 @@ ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
 
 MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
-  AV *methods = meta->direct_methods;
+  AV *methods = meta->methods;
 
   if(!methodname || !SvOK(methodname) || !SvCUR(methodname))
     croak("methodname must not be undefined or empty");
@@ -114,7 +114,7 @@ MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodnam
 
 FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 {
-  AV *fields = meta->direct_fields;
+  AV *fields = meta->fields;
 
   if(meta->next_fieldix == -1)
     croak("Cannot add a new field to a class that is not yet begun");
@@ -142,16 +142,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-XS_INTERNAL(injected_constructor);
-XS_INTERNAL(injected_constructor)
-{
-  dXSARGS;
-  
-  (void)items;
-  
-  XSRETURN(0);
-}
-
 ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 {
   assert(type == METATYPE_CLASS);
@@ -165,8 +155,8 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->start_fieldix = 0;
   meta->next_fieldix = -1;
   meta->hooks   = NULL;
-  meta->direct_fields = newAV();
-  meta->direct_methods = newAV();
+  meta->fields = newAV();
+  meta->methods = newAV();
 
   need_PLparser();
 
