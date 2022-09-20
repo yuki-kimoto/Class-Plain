@@ -239,22 +239,23 @@ void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_
 {
   assert(meta->type == METATYPE_CLASS);
 
-  SV *isaname = newSVpvf("%" SVf "::ISA", meta->name);
-  SAVEFREESV(isaname);
-  AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
+  SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
+  SAVEFREESV(isa_name);
+  AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
 
   av_push(isa, SvREFCNT_inc(super_class_name));
 }
 
 void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
 {
-  SV *isaname = newSVpvf("%" SVf "::ISA", meta->name);
-  SAVEFREESV(isaname);
+  SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
+  SAVEFREESV(isa_name);
+  AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
 
-  AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
-  if(!av_count(isa))
+  if(!av_count(isa)) {
     av_push(isa, newSVpvs("Class::Plain::Base"));
-
+  }
+  
   if(meta->type == METATYPE_CLASS &&
       meta->repr == REPR_AUTOSELECT)
     meta->repr = REPR_NATIVE;
