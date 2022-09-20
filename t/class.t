@@ -168,4 +168,11 @@ my @build;
   is_deeply($object->{ps}, [1, 2, 3]);
 }
 
+# The empty inheritance
+{
+  class EmptyInheritance : isa() {
+    
+  }
+}
+
 done_testing;

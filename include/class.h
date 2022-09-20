@@ -7,6 +7,7 @@ struct ClassMeta {
   AV *hooks;           /* NULL, or AV of raw pointers directly to ClassHook structs */
   AV *fields;   /* each elem is a raw pointer directly to a FieldMeta */
   AV *methods;  /* each elem is a raw pointer directly to a MethodMeta */
+  IV isa_empty;
 };
 
 struct MethodMeta {
