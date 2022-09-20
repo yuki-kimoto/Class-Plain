@@ -132,8 +132,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 
   av_push(fields, (SV *)fieldmeta);
 
-  MOP_CLASS_RUN_HOOKS(meta, post_add_field, fieldmeta);
-
   return fieldmeta;
 }
 
