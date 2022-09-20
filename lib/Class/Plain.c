@@ -427,11 +427,6 @@ static bool parse_method_permit(pTHX_ void *hookdata)
 
 static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  /* Save the methodscope for this subparse, in case of nested methods
-   *   (RT132321)
-   */
-  SAVESPTR(compclassmeta->methodscope);
-
   /* While creating the new scope CV we need to ENTER a block so as not to
    * break any interpvars
    */
@@ -439,13 +434,6 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   SAVESPTR(PL_comppad);
   SAVESPTR(PL_comppad_name);
   SAVESPTR(PL_curpad);
-
-  CV *methodscope = compclassmeta->methodscope = MUTABLE_CV(newSV_type(SVt_PVCV));
-  CvPADLIST(methodscope) = pad_new(padnew_SAVE);
-
-  PL_comppad = PadlistARRAY(CvPADLIST(methodscope))[1];
-  PL_comppad_name = PadlistNAMES(CvPADLIST(methodscope));
-  PL_curpad  = AvARRAY(PL_comppad);
 
   intro_my();
 
@@ -484,18 +472,6 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext *ctx, SV
 static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
   MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
-
-  /* Splice in the field scope CV in */
-  CV *methodscope = compclassmeta->methodscope;
-
-  if(CvANON(PL_compcv))
-    CvANON_on(methodscope);
-
-  CvOUTSIDE    (methodscope) = CvOUTSIDE    (PL_compcv);
-  CvOUTSIDE_SEQ(methodscope) = CvOUTSIDE_SEQ(PL_compcv);
-
-  CvOUTSIDE(PL_compcv) = methodscope;
-
   if(compmethodmeta->is_common) {
     IV var_index = pad_add_name_pvs("$class", 0, NULL, NULL);
     if (!(var_index == 1)) {
@@ -536,9 +512,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
 
     ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
   }
-
-  compclassmeta->methodscope = NULL;
-
 }
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
@@ -595,7 +568,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 599 "lib/Class/Plain.c"
+#line 572 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -739,7 +712,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 743 "lib/Class/Plain.c"
+#line 716 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -764,7 +737,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 592 "lib/Class/Plain.xs"
+#line 565 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -788,7 +761,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 792 "lib/Class/Plain.c"
+#line 765 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
