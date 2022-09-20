@@ -65,6 +65,12 @@ my @build;
     field ps;
     field b2;
     
+    method b1_init {
+
+      push @{$self->{ps}}, 7;
+      $self->{b1} = 8;
+    }
+    
     method b2_init {
       
       push @{$self->{ps}}, 3;
