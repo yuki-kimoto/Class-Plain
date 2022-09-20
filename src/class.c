@@ -411,32 +411,6 @@ void ClassPlain_mop_class_add_role(pTHX_ ClassMeta *dstmeta, ClassMeta *rolemeta
   }
 }
 
-void ClassPlain_mop_class_load_and_add_role(pTHX_ ClassMeta *meta, SV *rolename, SV *rolever)
-{
-  HV *rolestash = gv_stashsv(rolename, 0);
-  if(!rolestash || !hv_fetchs(rolestash, "META", 0)) {
-    /* Try to`require` the module then attempt a second time */
-    load_module(PERL_LOADMOD_NOIMPORT, newSVsv(rolename), NULL, NULL);
-    rolestash = gv_stashsv(rolename, 0);
-  }
-
-  if(!rolestash)
-    croak("Role %" SVf " does not exist", SVfARG(rolename));
-
-  if(rolever && SvOK(rolever))
-    ensure_module_version(rolename, rolever);
-
-  GV **metagvp = (GV **)hv_fetchs(rolestash, "META", 0);
-  ClassMeta *rolemeta = NULL;
-  if(metagvp)
-    rolemeta = NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*metagvp))));
-
-  if(!rolemeta || rolemeta->type != METATYPE_ROLE)
-    croak("%" SVf " is not a role", SVfARG(rolename));
-
-  mop_class_add_role(meta, rolemeta);
-}
-
 static OP *pp_alias_params(pTHX)
 {
   dSP;
@@ -591,7 +565,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   HV *stash = meta->stash = gv_stashsv(name, GV_ADD);
 
   meta->sealed = false;
-  meta->role_is_invokable = false;
   meta->has_superclass = false;
   meta->start_fieldix = 0;
   meta->next_fieldix = -1;
@@ -609,8 +582,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->cls.supermeta = NULL;
   meta->cls.foreign_new = NULL;
   meta->cls.foreign_does = NULL;
-  meta->cls.direct_roles = newAV();
-  meta->cls.embedded_roles = newAV();
 
   need_PLparser();
 

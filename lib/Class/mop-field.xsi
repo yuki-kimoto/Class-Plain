@@ -1,32 +1,4 @@
 
-SV *
-name(self)
-    SV *self
-  ALIAS:
-    name  = 0
-    sigil = 1
-    class = 2
-  CODE:
-  {
-    FieldMeta *meta = NUM2PTR(FieldMeta *, SvUV(SvRV(self)));
-    switch(ix) {
-      case 0:
-        RETVAL = SvREFCNT_inc(meta->name);
-        break;
-      case 1:
-        RETVAL = newSVpvn(SvPVX(meta->name), 1);
-        break;
-      case 2:
-        RETVAL = newSV(0);
-        sv_setref_uv(RETVAL, "Class::Plain::MOP::Class", PTR2UV(meta->class));
-        break;
-
-      default: RETVAL = NULL;
-    }
-  }
-  OUTPUT:
-    RETVAL
-
 void
 value(self, obj)
     SV *self
@@ -86,58 +58,4 @@ value(self, obj)
     /* stack does not contribute SvREFCNT */
     ST(0) = value;
     XSRETURN(1);
-  }
-
-bool
-has_attribute(self, name)
-    SV *self
-    SV *name
-  CODE:
-  {
-    FieldMeta *meta = NUM2PTR(FieldMeta *, SvUV(SvRV(self)));
-
-    const struct FieldHook *hook = mop_field_get_attribute(meta, SvPV_nolen(name));
-    RETVAL = !!hook;
-  }
-  OUTPUT:
-    RETVAL
-
-SV *
-get_attribute_value(self, name)
-    SV *self
-    SV *name
-  CODE:
-  {
-    FieldMeta *meta = NUM2PTR(FieldMeta *, SvUV(SvRV(self)));
-
-    const struct FieldHook *hook = mop_field_get_attribute(meta, SvPV_nolen(name));
-    if(!hook)
-      croak("Field does not have an attribute called %" SVf, SVfARG(name));
-
-    RETVAL = newSVsv(hook->hookdata);
-  }
-  OUTPUT:
-    RETVAL
-
-void
-get_attribute_values(self, name)
-    SV *self
-    SV *name
-  PPCODE:
-  {
-    FieldMeta *meta = NUM2PTR(FieldMeta *, SvUV(SvRV(self)));
-
-    AV *values = mop_field_get_attribute_values(meta, SvPV_nolen(name));
-    if(!values)
-      croak("Field does not have an attribute called %" SVf, SVfARG(name));
-
-    Size_t count = av_count(values);
-
-    EXTEND(SP, count);
-    for(Size_t i = 0; i < count; i++)
-      PUSHs(SvREFCNT_inc(AvARRAY(values)[i]));
-
-    SvREFCNT_dec(values);
-
-    XSRETURN(count);
   }
