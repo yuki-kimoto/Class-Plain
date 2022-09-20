@@ -576,10 +576,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_field_attrs)", 0))
       croak("Field attributes are not permitted");
 
-    SV *fieldmetasv = newSV(0);
-    sv_setref_uv(fieldmetasv, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
-    SAVEFREESV(fieldmetasv);
-
     while(argi < (nattrs+2)) {
       SV *attrname = args[argi]->attr.name;
       SV *attrval  = args[argi]->attr.value;
@@ -1141,38 +1137,6 @@ struct CustomFieldHookData
   SV *apply_cb;
 };
 
-static bool fieldhook_custom_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  struct CustomFieldHookData *funcdata = _funcdata;
-
-  SV *cb;
-  if((cb = funcdata->apply_cb)) {
-    dSP;
-    ENTER;
-    SAVETMPS;
-
-    SV *fieldmetasv = sv_newmortal();
-    sv_setref_uv(fieldmetasv, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
-
-    PUSHMARK(SP);
-    EXTEND(SP, 2);
-    PUSHs(fieldmetasv);
-    PUSHs(value);
-    PUTBACK;
-
-    call_sv(cb, G_SCALAR);
-
-    SPAGAIN;
-    SV *ret = POPs;
-    *hookdata_ptr = SvREFCNT_inc(ret);
-
-    FREETMPS;
-    LEAVE;
-  }
-
-  return TRUE;
-}
-
 /* internal function shared by various *.c files */
 void ClassPlain__need_PLparser(pTHX)
 {
@@ -1243,10 +1207,6 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
 
   return NULL;
 }
-
-MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Field
-
-INCLUDE: mop-field.xsi
 
 MODULE = Class::Plain    PACKAGE = Class::Plain::MetaFunctions
 
@@ -1370,11 +1330,6 @@ BOOT:
   XopENTRY_set(&xop_fieldpad, xop_class, OA_UNOP); /* technically a lie */
 #endif
   Perl_custom_op_register(aTHX_ &pp_fieldpad, &xop_fieldpad);
-
-  CvLVALUE_on(get_cv("Class::Plain::MOP::Field::value", 0));
-#ifdef HAVE_DMD_HELPER
-  DMD_SET_PACKAGE_HELPER("Class::Plain::MOP::Class", &dumppackage_class);
-#endif
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
 
