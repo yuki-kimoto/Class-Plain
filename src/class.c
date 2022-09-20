@@ -220,11 +220,12 @@ static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgvers
 
 static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  SV *super_class_name = newSV(0), *superclassver = newSV(0);
+  SV* super_class_name = newSV(0);
+  SV* super_class_version = newSV(0);
   SAVEFREESV(super_class_name);
-  SAVEFREESV(superclassver);
+  SAVEFREESV(super_class_version);
 
-  const char *end = split_package_ver(value, super_class_name, superclassver);
+  const char *end = split_package_ver(value, super_class_name, super_class_version);
 
   if(*end)
     croak("Unexpected characters while parsing :isa() attribute: %s", end);
@@ -241,8 +242,8 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
   if(!superstash)
     croak("Superclass %" SVf " does not exist", super_class_name);
 
-  if(superclassver && SvOK(superclassver))
-    ensure_module_version(super_class_name, superclassver);
+  if(super_class_version && SvOK(super_class_version))
+    ensure_module_version(super_class_name, super_class_version);
 
   ClassPlain_mop_class_set_superclass(classmeta, super_class_name);
 
