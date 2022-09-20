@@ -17,6 +17,7 @@ class Colour {
    field blue  ; # :accessor; # Remove accessor
    field white ; # :accessor; # Remove accessor
    
+   method red  { $self->{red} }
    method set_red  { $self->{red} = shift; return $self; }
 
    method get_green { $self->{green} }
