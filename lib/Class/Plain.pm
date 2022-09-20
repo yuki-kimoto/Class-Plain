@@ -168,7 +168,7 @@ If no name is given, the name of the field is used prefixed by C<set_>.
   method NAME : ATTR ATTR ... {
      ...
   }
-  
+
 Define a new named method. This behaves similarly to the C<sub> keyword.
 In addition, the method body will have a lexical called C<$self>
 which contains the invocant object directly; it will already have been shifted
@@ -191,5 +191,7 @@ Marks that this method is a class-common method, instead of a regular instance
 method. A class-common method may be invoked on class names instead of
 instances. Within the method body there is a lexical C<$class> available instead of C<$self>.
 It will already have been shifted from the C<@_> array.
+
+=cut
 
 1;
