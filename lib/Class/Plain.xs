@@ -129,9 +129,6 @@ XS_INTERNAL(xsub_mop_class_seal)
     SAVEFREEPV(PL_parser);
 
     PL_parser->copline = NOLINE;
-#if HAVE_PERL_VERSION(5, 20, 0)
-    PL_parser->preambling = NOLINE;
-#endif
   }
 
   ClassPlain_mop_class_seal(meta);
@@ -679,9 +676,6 @@ void ClassPlain__need_PLparser(pTHX)
     SAVEFREEPV(PL_parser);
 
     PL_parser->copline = NOLINE;
-#if HAVE_PERL_VERSION(5, 20, 0)
-    PL_parser->preambling = NOLINE;
-#endif
   }
 }
 

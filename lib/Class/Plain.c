@@ -138,9 +138,6 @@ XS_INTERNAL(xsub_mop_class_seal)
     SAVEFREEPV(PL_parser);
 
     PL_parser->copline = NOLINE;
-#if HAVE_PERL_VERSION(5, 20, 0)
-    PL_parser->preambling = NOLINE;
-#endif
   }
 
   ClassPlain_mop_class_seal(meta);
@@ -688,13 +685,10 @@ void ClassPlain__need_PLparser(pTHX)
     SAVEFREEPV(PL_parser);
 
     PL_parser->copline = NOLINE;
-#if HAVE_PERL_VERSION(5, 20, 0)
-    PL_parser->preambling = NOLINE;
-#endif
   }
 }
 
-#line 698 "lib/Class/Plain.c"
+#line 692 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -838,7 +832,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 842 "lib/Class/Plain.c"
+#line 836 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -863,7 +857,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 691 "lib/Class/Plain.xs"
+#line 685 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -887,7 +881,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 891 "lib/Class/Plain.c"
+#line 885 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
