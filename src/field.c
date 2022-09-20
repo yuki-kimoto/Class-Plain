@@ -97,11 +97,6 @@ void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char
   if(!reg)
     croak("Unrecognised field attribute :%s", name);
 
-  if((reg->funcs->flags & OBJECTPAD_FLAG_ATTR_NO_VALUE) && value)
-    croak("Attribute :%s does not permit a value", name);
-  if((reg->funcs->flags & OBJECTPAD_FLAG_ATTR_MUST_VALUE) && !value)
-    croak("Attribute :%s requires a value", name);
-
   SV *hookdata = value;
 
   if(reg->funcs->apply) {

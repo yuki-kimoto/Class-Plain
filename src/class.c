@@ -548,15 +548,10 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
 
 static const struct ClassHookFuncs classhooks_isa = {
   .ver   = OBJECTPAD_ABIVERSION,
-  .flags = OBJECTPAD_FLAG_ATTR_MUST_VALUE,
   .apply = &classhook_isa_apply,
 };
 
 void ClassPlain__boot_classes(pTHX)
 {
   register_class_attribute("isa",    &classhooks_isa,    NULL);
-
-#ifdef HAVE_DMD_HELPER
-  DMD_ADD_ROOT((SV *)&vtbl_backingav, "the Class::Plain backing AV VTBL");
-#endif
 }

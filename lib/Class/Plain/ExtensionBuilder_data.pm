@@ -43,11 +43,6 @@ struct AccessorGenerationCtx {
   OP *retop;        /* OP_RETURN */
 };
 
-enum {
-  OBJECTPAD_FLAG_ATTR_NO_VALUE = (1<<0),
-  OBJECTPAD_FLAG_ATTR_MUST_VALUE = (1<<1),
-};
-
 struct ClassHookFuncs {
   U32 ver;  /* caller must initialise to OBJECTPAD_VERSION */
   U32 flags;
