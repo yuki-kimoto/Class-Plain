@@ -275,27 +275,6 @@ static bool S_mop_class_implements_role(pTHX_ ClassMeta *meta, ClassMeta *roleme
   return false;
 }
 
-static OP *pp_croak_from_constructor(pTHX)
-{
-  dSP;
-
-  /* Walk up the caller stack to find the COP of the first caller; i.e. the
-   * first one that wasn't in src/class.c
-   */
-  I32 count = 0;
-  const PERL_CONTEXT *cx;
-  while((cx = caller_cx(count, NULL))) {
-    const char *copfile = CopFILE(cx->blk_oldcop);
-    if(!copfile|| strNE(copfile, "src/class.c")) {
-      PL_curcop = cx->blk_oldcop;
-      break;
-    }
-    count++;
-  }
-
-  croak_sv(POPs);
-}
-
 void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
 {
   if(meta->sealed) /* idempotent */
@@ -325,50 +304,6 @@ void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
 
       croak("Class %" SVf " does not provide a required method named '%" SVf "'",
         SVfARG(meta->name), SVfARG(mname));
-    }
-  }
-
-  {
-    U32 i;
-    for(i = 0; i < av_count(meta->direct_fields); i++) {
-      FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(meta->direct_fields)[i];
-
-      U32 hooki;
-      for(hooki = 0; fieldmeta->hooks && hooki < av_count(fieldmeta->hooks); hooki++) {
-        struct FieldHook *h = (struct FieldHook *)AvARRAY(fieldmeta->hooks)[hooki];
-
-        if(*h->funcs->post_initfield) {
-          if(!meta->fieldhooks_initfield)
-            meta->fieldhooks_initfield = newAV();
-
-          struct FieldHook *fasth;
-          Newx(fasth, 1, struct FieldHook);
-
-          fasth->fieldix   = fieldmeta->fieldix;
-          fasth->fieldmeta = fieldmeta;
-          fasth->funcs     = h->funcs;
-          fasth->funcdata  = h->funcdata;
-          fasth->hookdata  = h->hookdata;
-
-          av_push(meta->fieldhooks_initfield, (SV *)fasth);
-        }
-
-        if(*h->funcs->post_construct) {
-          if(!meta->fieldhooks_construct)
-            meta->fieldhooks_construct = newAV();
-
-          struct FieldHook *fasth;
-          Newx(fasth, 1, struct FieldHook);
-
-          fasth->fieldix   = fieldmeta->fieldix;
-          fasth->fieldmeta = fieldmeta;
-          fasth->funcs     = h->funcs;
-          fasth->funcdata  = h->funcdata;
-          fasth->hookdata  = h->hookdata;
-
-          av_push(meta->fieldhooks_construct, (SV *)fasth);
-        }
-      }
     }
   }
 

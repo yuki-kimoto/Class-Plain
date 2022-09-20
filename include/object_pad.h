@@ -65,10 +65,6 @@ struct FieldHookFuncs {
   /* called as part of accessor generation */
   void (*gen_accessor_ops)(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *funcdata,
           enum AccessorType type, struct AccessorGenerationCtx *ctx);
-
-  /* called by constructor */
-  void (*post_initfield)(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *funcdata, SV *field);
-  void (*post_construct)(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *funcdata, SV *field);
 };
 
 struct FieldHook {
