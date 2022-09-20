@@ -14,8 +14,8 @@ my $MATCH_ARGCOUNT =
 class Colour {
    field red : reader   ; # :reader            :writer; # Remove reader writer
    field green ; # :reader(get_green) :writer; # Remove reader writer
-   field blue  ; # :accessor; # Remove accessor
-   field white ; # :accessor; # Remove accessor
+   field blue  ;
+   field white ;
    
    method red  { $self->{red} }
    method set_red  { $self->{red} = shift; return $self; }

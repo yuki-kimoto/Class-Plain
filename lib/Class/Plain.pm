@@ -169,29 +169,6 @@ If no name is given, the name of the field is used prefixed by C<set_>.
    # equivalent to
    method set_x { $self->{x} = shift; return $self }
 
-=head3 accessor Attribute
-
-Generates a combined reader-writer accessor method to set or return the value
-of the field. These are only permitted for scalar fields. If no name is given,
-the name of the field is used.
-
-This method takes either zero or one additional arguments. If an argument is
-passed, the value of the field is set from this argument (even if it is
-C<undef>). If no argument is passed (i.e. C<scalar @_> is false) then the
-field is not modified. In either case, the value of the field is then
-returned.
-
-   field x : accessor;
-   field x : accessor(x_different_name);
-
-   # equivalent to
-   field x;
-
-   method field {
-      $self->{x} = shift if @_;
-      return $x;
-   }
-
 =head2 has
    
 The alias for the L</field> keyword.

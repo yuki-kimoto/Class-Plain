@@ -257,49 +257,8 @@ static struct FieldHookFuncs fieldhooks_writer = {
   .gen_accessor_ops = &fieldhook_gen_writer_ops,
 };
 
-/* :accessor */
-
-static bool fieldhook_accessor_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
-{
-  *hookdata_ptr = make_accessor_mnamesv(aTHX_ fieldmeta, value, "%s");
-  return TRUE;
-}
-
-/* :accessor */
-
-static void fieldhook_accessor_seal(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata)
-{
-  S_generate_field_accessor_method(aTHX_ fieldmeta, hookdata, ACCESSOR_COMBINED);
-}
-
-static void fieldhook_gen_accessor_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata, enum AccessorType type, struct AccessorGenerationCtx *ctx)
-{
-  if(type != ACCESSOR_COMBINED)
-    return;
-
-  /* $field = shift if @_ */
-  ctx->bodyop = newLOGOP(OP_AND, 0,
-    /* scalar @_ */
-    op_contextualize(newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv)), G_SCALAR),
-    /* $field = shift */
-    newBINOP(OP_SASSIGN, 0,
-      newOP(OP_SHIFT, 0),
-      newPADxVOP(OP_PADSV, 0, (IV)ctx->fieldmeta->name))); // Temporary
-
-  ctx->retop = newLISTOP(OP_RETURN, 0,
-    newOP(OP_PUSHMARK, 0),
-    newPADxVOP(OP_PADSV, 0, (IV)ctx->fieldmeta->name));
-}
-
-static struct FieldHookFuncs fieldhooks_accessor = {
-  .apply            = &fieldhook_accessor_apply,
-  .seal             = &fieldhook_accessor_seal,
-  .gen_accessor_ops = &fieldhook_gen_accessor_ops,
-};
-
 void ClassPlain__boot_fields(pTHX)
 {
   ClassPlain_register_field_attribute("reader",   &fieldhooks_reader,   NULL);
   ClassPlain_register_field_attribute("writer",   &fieldhooks_writer,   NULL);
-  ClassPlain_register_field_attribute("accessor", &fieldhooks_accessor, NULL);
 }
