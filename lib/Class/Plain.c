@@ -585,8 +585,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     }
   }
 
-  ClassPlain_mop_field_seal(fieldmeta);
-
   return KEYWORD_PLUGIN_STMT;
 }
 
@@ -1142,7 +1140,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1146 "lib/Class/Plain.c"
+#line 1144 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1286,7 +1284,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1290 "lib/Class/Plain.c"
+#line 1288 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1311,7 +1309,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1139 "lib/Class/Plain.xs"
+#line 1137 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1348,7 +1346,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1352 "lib/Class/Plain.c"
+#line 1350 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

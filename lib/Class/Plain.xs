@@ -576,8 +576,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     }
   }
 
-  ClassPlain_mop_field_seal(fieldmeta);
-
   return KEYWORD_PLUGIN_STMT;
 }
 

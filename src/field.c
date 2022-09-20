@@ -19,21 +19,16 @@
 #define need_PLparser()  ClassPlain__need_PLparser(aTHX)
 void ClassPlain__need_PLparser(pTHX); /* in Class/Plain.xs */
 
-FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta)
+FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmeta)
 {
   FieldMeta *fieldmeta;
   Newx(fieldmeta, 1, FieldMeta);
 
   assert(classmeta->next_fieldix > -1);
 
-  fieldmeta->name = SvREFCNT_inc(fieldname);
+  fieldmeta->name = SvREFCNT_inc(field_name);
   fieldmeta->class = classmeta;
   fieldmeta->fieldix = classmeta->next_fieldix;
-  fieldmeta->defaultsv = NULL;
-  fieldmeta->defaultexpr = NULL;
-  fieldmeta->paramname = NULL;
-
-  fieldmeta->hooks = NULL;
 
   return fieldmeta;
 }
@@ -118,92 +113,6 @@ void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char
   hook->funcdata = reg->funcdata;
 
   av_push(fieldmeta->hooks, (SV *)hook);
-}
-
-struct FieldHook *ClassPlain_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name)
-{
-  COPHH *cophh = CopHINTHASH_get(PL_curcop);
-
-  /* First, work out what hookfuncs the name maps to */
-
-  FieldAttributeRegistration *reg;
-  for(reg = fieldattrs; reg; reg = reg->next) {
-    if(!strEQ(name, reg->name))
-      continue;
-
-    if(reg->funcs->permit_hintkey &&
-        !cophh_fetch_pvn(cophh, reg->funcs->permit_hintkey, reg->permit_hintkeylen, 0, 0))
-      continue;
-
-    break;
-  }
-
-  if(!reg)
-    return NULL;
-
-  /* Now lets see if fieldmeta has one */
-
-  if(!fieldmeta->hooks)
-    return NULL;
-
-  U32 hooki;
-  for(hooki = 0; hooki < av_count(fieldmeta->hooks); hooki++) {
-    struct FieldHook *hook = (struct FieldHook *)AvARRAY(fieldmeta->hooks)[hooki];
-
-    if(hook->funcs == reg->funcs)
-      return hook;
-  }
-
-  return NULL;
-}
-
-AV *ClassPlain_mop_field_get_attribute_values(pTHX_ FieldMeta *fieldmeta, const char *name)
-{
-  COPHH *cophh = CopHINTHASH_get(PL_curcop);
-
-  /* First, work out what hookfuncs the name maps to */
-
-  FieldAttributeRegistration *reg;
-  for(reg = fieldattrs; reg; reg = reg->next) {
-    if(!strEQ(name, reg->name))
-      continue;
-
-    if(reg->funcs->permit_hintkey &&
-        !cophh_fetch_pvn(cophh, reg->funcs->permit_hintkey, reg->permit_hintkeylen, 0, 0))
-      continue;
-
-    break;
-  }
-
-  if(!reg)
-    return NULL;
-
-  /* Now lets see if fieldmeta has one */
-
-  if(!fieldmeta->hooks)
-    return NULL;
-
-  AV *ret = NULL;
-
-  U32 hooki;
-  for(hooki = 0; hooki < av_count(fieldmeta->hooks); hooki++) {
-    struct FieldHook *hook = (struct FieldHook *)AvARRAY(fieldmeta->hooks)[hooki];
-
-    if(hook->funcs != reg->funcs)
-      continue;
-
-    if(!ret)
-      ret = newAV();
-
-    av_push(ret, newSVsv(hook->hookdata));
-  }
-
-  return ret;
-}
-
-void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta)
-{
-  MOP_FIELD_RUN_HOOKS_NOARGS(fieldmeta, seal);
 }
 
 /*******************
