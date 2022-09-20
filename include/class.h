@@ -8,7 +8,6 @@ typedef struct AdjustBlock {
 /* Metadata about a class */
 struct ClassMeta {
   enum MetaType type : 8;
-  enum ReprType repr : 8;
 
   unsigned int sealed : 1;
 

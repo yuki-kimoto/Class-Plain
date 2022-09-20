@@ -148,7 +148,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   ops = op_append_list(OP_LINESEQ, ops,
     ClassPlain_newMETHSTARTOP(0 |
       (0) |
-      (classmeta->repr << 8)));
+      (0)));
 
   int req_args = 0;
   int opt_args = 0;

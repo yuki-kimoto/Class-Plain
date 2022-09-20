@@ -213,10 +213,6 @@ void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
     av_push(isa, newSVpvs("Class::Plain::Base"));
   }
   
-  if(meta->type == METATYPE_CLASS &&
-      meta->repr == REPR_AUTOSELECT)
-    meta->repr = REPR_NATIVE;
-
   meta->next_fieldix = meta->start_fieldix;
 }
 

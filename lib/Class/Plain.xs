@@ -575,7 +575,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   if(compmethodmeta->is_common) {
     ctx->body = op_append_list(OP_LINESEQ,
       ClassPlain_newCOMMONMETHSTARTOP(0 |
-        (compclassmeta->repr << 8)),
+        (0)),
       ctx->body);
   }
   else {
@@ -585,7 +585,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
     fieldops = op_append_list(OP_LINESEQ, fieldops,
       (methstartop = ClassPlain_newMETHSTARTOP(0 |
         (0) |
-        (compclassmeta->repr << 8))));
+        (0))));
 
     ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
   }
