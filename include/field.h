@@ -1,5 +1,5 @@
-#ifndef __OBJECT_PAD__FIELD_H__
-#define __OBJECT_PAD__FIELD_H__
+#ifndef __CLASS_PLAIND__FIELD_H__
+#define __CLASS_PLAIN__FIELD_H__
 
 struct FieldMeta {
   SV *name;

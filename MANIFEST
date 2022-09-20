@@ -16,20 +16,12 @@ hax/perl-backcompat.c.inc
 hax/sv_setrv.c.inc
 include/class.h
 include/field.h
-include/object_pad.h
+include/meta.h
 lib/Class/Plain.c
 lib/Class/Plain.o
 lib/Class/Plain.pm
 lib/Class/Plain.xs
 lib/Class/Plain/Base.pm
-lib/Class/Plain/ExtensionBuilder.pm
-lib/Class/Plain/ExtensionBuilder_data.pm
-lib/Class/Plain/ExtensionBuilder_data.pm.PL
-lib/Class/Plain/MetaFunctions.pm
-lib/Class/Plain/MOP/Class.pm
-lib/Class/Plain/MOP/Field.pm
-lib/Class/Plain/MOP/FieldAttr.pm
-lib/Class/Plain/MOP/Method.pm
 LICENSE
 MANIFEST			This list of files
 META.json
@@ -53,7 +45,6 @@ t/22fields-accesssors.t
 t/23fields-signatures.t
 t/24fields-constructor.t
 t/30unit-class.t
-t/31pad-outside.t
 t/50croak-method.t
 t/52croak-scope.t
 t/99pod.t

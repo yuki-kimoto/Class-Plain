@@ -1,9 +1,5 @@
-#ifndef __OBJECT_PAD__CLASS_H__
-#define __OBJECT_PAD__CLASS_H__
-
-typedef struct AdjustBlock {
-  CV *cv;
-} AdjustBlock;
+#ifndef __CLASS_PLAIN__CLASS_H__
+#define __CLASS_PLAIN__CLASS_H__
 
 /* Metadata about a class */
 struct ClassMeta {
