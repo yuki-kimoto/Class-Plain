@@ -123,49 +123,12 @@ static XOP xop_methstart;
 static OP *pp_methstart(pTHX)
 {
   SV *self = av_shift(GvAV(PL_defgv));
-  bool create = PL_op->op_flags & OPf_MOD;
 
   if(!SvROK(self) || !SvOBJECT(SvRV(self)))
     croak("Cannot invoke method on a non-instance");
 
   save_clearsv(&PAD_SVl(PADIX_SELF));
   sv_setsv(PAD_SVl(PADIX_SELF), self);
-
-  AV *backingav;
-
-  /* op_private contains the repr type so we can extract backing */
-  backingav = (AV *)ClassPlain_get_obj_backingav(self, PL_op->op_private, create);
-  SvREFCNT_inc(backingav);
-
-  if(backingav) {
-    SAVESPTR(PAD_SVl(PADIX_SLOTS));
-    PAD_SVl(PADIX_SLOTS) = (SV *)backingav;
-    save_freesv((SV *)backingav);
-  }
-
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-  UNOP_AUX_item *aux = cUNOP_AUX->op_aux;
-  if(aux) {
-    U32 fieldcount  = (aux++)->uv;
-    U32 max_fieldix = (aux++)->uv;
-    SV **fieldsvs = AvARRAY(backingav);
-
-    if(max_fieldix > av_top_index(backingav))
-      croak("ARGH: instance does not have a field at index %ld", (long int)max_fieldix);
-
-    while(fieldcount) {
-      PADOFFSET padix   = (aux++)->uv;
-      UV        fieldix = (aux++)->uv;
-
-      U8 private = fieldix >> FIELDIX_TYPE_SHIFT;
-      fieldix &= FIELDIX_MASK;
-
-      bind_field_to_pad(fieldsvs[fieldix], fieldix, private, padix);
-
-      fieldcount--;
-    }
-  }
-#endif
 
   return PL_op->op_next;
 }

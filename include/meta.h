@@ -20,6 +20,7 @@ enum AccessorType {
 };
 
 struct AccessorGenerationCtx {
+  FieldMeta* fieldmeta;
   PADOFFSET padix;
   OP *bodyop;       /* OP_SASSIGN for :writer, empty for :reader */
   OP *post_bodyops;
@@ -92,8 +93,6 @@ OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
 
 OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix);
 
-SV *ClassPlain_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create);
-
 /* Class API */
 ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name);
 
@@ -118,10 +117,6 @@ FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta
 
 void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta);
 
-SV *ClassPlain_mop_field_get_name(pTHX_ FieldMeta *fieldmeta);
-
 void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value);
-
-struct FieldHook *ClassPlain_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name);
 
 #endif

@@ -132,49 +132,12 @@ static XOP xop_methstart;
 static OP *pp_methstart(pTHX)
 {
   SV *self = av_shift(GvAV(PL_defgv));
-  bool create = PL_op->op_flags & OPf_MOD;
 
   if(!SvROK(self) || !SvOBJECT(SvRV(self)))
     croak("Cannot invoke method on a non-instance");
 
   save_clearsv(&PAD_SVl(PADIX_SELF));
   sv_setsv(PAD_SVl(PADIX_SELF), self);
-
-  AV *backingav;
-
-  /* op_private contains the repr type so we can extract backing */
-  backingav = (AV *)ClassPlain_get_obj_backingav(self, PL_op->op_private, create);
-  SvREFCNT_inc(backingav);
-
-  if(backingav) {
-    SAVESPTR(PAD_SVl(PADIX_SLOTS));
-    PAD_SVl(PADIX_SLOTS) = (SV *)backingav;
-    save_freesv((SV *)backingav);
-  }
-
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-  UNOP_AUX_item *aux = cUNOP_AUX->op_aux;
-  if(aux) {
-    U32 fieldcount  = (aux++)->uv;
-    U32 max_fieldix = (aux++)->uv;
-    SV **fieldsvs = AvARRAY(backingav);
-
-    if(max_fieldix > av_top_index(backingav))
-      croak("ARGH: instance does not have a field at index %ld", (long int)max_fieldix);
-
-    while(fieldcount) {
-      PADOFFSET padix   = (aux++)->uv;
-      UV        fieldix = (aux++)->uv;
-
-      U8 private = fieldix >> FIELDIX_TYPE_SHIFT;
-      fieldix &= FIELDIX_MASK;
-
-      bind_field_to_pad(fieldsvs[fieldix], fieldix, private, padix);
-
-      fieldcount--;
-    }
-  }
-#endif
 
   return PL_op->op_next;
 }
@@ -1117,7 +1080,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1121 "lib/Class/Plain.c"
+#line 1084 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1261,7 +1224,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1265 "lib/Class/Plain.c"
+#line 1228 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1286,7 +1249,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1114 "lib/Class/Plain.xs"
+#line 1077 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1323,7 +1286,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1327 "lib/Class/Plain.c"
+#line 1290 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

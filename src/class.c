@@ -118,13 +118,6 @@ static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backing
   }
 }
 
-SV *ClassPlain_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create)
-{
-  SV *rv = SvRV(self);
-
-  return rv;
-}
-
 RoleEmbedding **ClassPlain_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
 {
   assert(meta->type == METATYPE_CLASS);

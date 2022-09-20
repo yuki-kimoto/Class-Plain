@@ -30,11 +30,6 @@ FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmet
   return fieldmeta;
 }
 
-SV *ClassPlain_mop_field_get_name(pTHX_ FieldMeta *fieldmeta)
-{
-  return fieldmeta->name;
-}
-
 typedef struct FieldAttributeRegistration FieldAttributeRegistration;
 
 struct FieldAttributeRegistration {
@@ -147,7 +142,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   struct AccessorGenerationCtx ctx = { 0 };
 
-  ctx.padix = pad_add_name_sv(fieldmeta->name, 0, NULL, NULL);
+  ctx.fieldmeta = fieldmeta;
   intro_my();
 
   OP *ops = op_append_list(OP_LINESEQ, NULL,
@@ -167,9 +162,11 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
     make_argcheck_ops(req_args, opt_args, slurpy_arg, mname_fq));
 
   U32 flags = 0;
-
+  
+  IV tmp_iv = (IV)ctx.fieldmeta->name;
+  
   ops = op_append_list(OP_LINESEQ, ops,
-    ClassPlain_newFIELDPADOP(flags, ctx.padix, fieldmeta->fieldix));
+    ClassPlain_newFIELDPADOP(flags, tmp_iv, fieldmeta->fieldix)); // Tenporary
 
 
   MOP_FIELD_RUN_HOOKS(fieldmeta, gen_accessor_ops, type, &ctx);
@@ -217,7 +214,7 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
-    newPADxVOP(optype, 0, ctx->padix));
+    newPADxVOP(optype, 0, (IV)ctx->fieldmeta->name));
 }
 
 static struct FieldHookFuncs fieldhooks_reader = {
@@ -246,7 +243,7 @@ static void fieldhook_gen_writer_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   ctx->bodyop = newBINOP(OP_SASSIGN, 0,
     newOP(OP_SHIFT, 0),
-    newPADxVOP(OP_PADSV, 0, ctx->padix));
+    newPADxVOP(OP_PADSV, 0, (IV)ctx->fieldmeta->name));
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
@@ -286,11 +283,11 @@ static void fieldhook_gen_accessor_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata,
     /* $field = shift */
     newBINOP(OP_SASSIGN, 0,
       newOP(OP_SHIFT, 0),
-      newPADxVOP(OP_PADSV, 0, ctx->padix)));
+      newPADxVOP(OP_PADSV, 0, (IV)ctx->fieldmeta->name))); // Temporary
 
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
-    newPADxVOP(OP_PADSV, 0, ctx->padix));
+    newPADxVOP(OP_PADSV, 0, (IV)ctx->fieldmeta->name));
 }
 
 static struct FieldHookFuncs fieldhooks_accessor = {
