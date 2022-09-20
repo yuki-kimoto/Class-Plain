@@ -280,18 +280,6 @@ void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
   if(meta->sealed) /* idempotent */
     return;
 
-  if(meta->type == METATYPE_CLASS &&
-      meta->cls.supermeta && !meta->cls.supermeta->sealed) {
-    /* Must defer sealing until superclass is sealed first
-     * (RT133190)
-     */
-    ClassMeta *supermeta = meta->cls.supermeta;
-    if(!supermeta->pending_submeta)
-      supermeta->pending_submeta = newAV();
-    av_push(supermeta->pending_submeta, (SV *)meta);
-    return;
-  }
-
   if(meta->type == METATYPE_CLASS) {
     U32 nmethods = av_count(meta->requiremethods);
     U32 i;
@@ -308,20 +296,6 @@ void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
   }
 
   meta->sealed = true;
-
-  if(meta->pending_submeta) {
-    int i;
-    SV **arr = AvARRAY(meta->pending_submeta);
-    for(i = 0; i < av_count(meta->pending_submeta); i++) {
-      ClassMeta *submeta = (ClassMeta *)arr[i];
-      arr[i] = &PL_sv_undef;
-
-      ClassPlain_mop_class_seal(submeta);
-    }
-
-    SvREFCNT_dec(meta->pending_submeta);
-    meta->pending_submeta = NULL;
-  }
 }
 
 XS_INTERNAL(injected_constructor);
@@ -344,7 +318,7 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->type = type;
   meta->name = SvREFCNT_inc(name);
 
-  HV *stash = meta->stash = gv_stashsv(name, GV_ADD);
+  meta->stash = gv_stashsv(name, GV_ADD);
 
   meta->sealed = false;
   meta->has_superclass = false;
@@ -355,44 +329,13 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->direct_methods = newAV();
   meta->parammap = NULL;
   meta->requiremethods = newAV();
-  meta->repr   = REPR_AUTOSELECT;
-  meta->pending_submeta = NULL;
-
-  meta->fieldhooks_initfield = NULL;
-  meta->fieldhooks_construct = NULL;
 
   meta->cls.supermeta = NULL;
-  meta->cls.foreign_new = NULL;
-  meta->cls.foreign_does = NULL;
 
   need_PLparser();
 
   meta->tmpcop = (COP *)newSTATEOP(0, NULL, NULL);
   CopFILE_set(meta->tmpcop, __FILE__);
-
-  meta->methodscope = NULL;
-
-  {
-    /* Inject the constructor */
-    SV *newname = newSVpvf("%" SVf "::new", name);
-    SAVEFREESV(newname);
-
-    HV *stash = gv_stashsv(name, 0);
-    if(!stash)
-      croak("Unable to find stash for class %" SVf, name);
-  }
-
-  {
-    GV **gvp = (GV **)hv_fetchs(stash, "META", GV_ADD);
-    GV *gv = *gvp;
-    gv_init_pvn(gv, stash, "META", 4, 0);
-    GvMULTI_on(gv);
-
-    SV *sv;
-    sv_setref_uv(sv = GvSVn(gv), "Class::Plain::MOP::Class", PTR2UV(meta));
-
-    newCONSTSUB(meta->stash, "META", sv);
-  }
 
   return meta;
 }
