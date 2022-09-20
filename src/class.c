@@ -148,7 +148,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name)
 
   meta->name = SvREFCNT_inc(name);
 
-  meta->start_fieldix = 0;
   meta->next_fieldix = -1;
   meta->hooks   = NULL;
   meta->fields = newAV();
@@ -178,7 +177,7 @@ void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
     av_push(isa, newSVpvs("Class::Plain::Base"));
   }
   
-  meta->next_fieldix = meta->start_fieldix;
+  meta->next_fieldix = 0;
 }
 
 /*******************
