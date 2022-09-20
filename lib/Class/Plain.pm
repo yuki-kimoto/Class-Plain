@@ -140,9 +140,6 @@ C<Class::Plain> - a simple syntax for lexical field-based objects
 
 =head1 SYNOPSIS
 
-On perl version 5.26 onwards:
-
-   use v5.26;
    use Class::Plain;
 
    class Point {
@@ -174,19 +171,15 @@ On perl version 5.26 onwards:
 
 This module provides a class syntax for hash-based Perl OO.
 
-=head2 Inheritance
-
-The class that has not the parent class inherits L<Class::Plain::Base>.
-
 =head1 KEYWORDS
 
 =head2 class
 
-   class Name : ATTRS... {
+   class NAME : ATTRS... {
       ...
    }
 
-   class Name : ATTRS...;
+   class NAME : ATTRS...;
 
 Behaves similarly to the C<package> keyword, but provides a package that
 defines a new class.
@@ -196,25 +189,27 @@ that block define the new class and the preceding package continues
 afterwards. If not, it sets the class as the package context of following
 keywords and definitions.
 
-   class Name { ... }
+   class NAME { ... }
 
-   class Name;
+   class NAME;
 
-A single superclass is supported by the C<extends> keyword or the C<isa> attribute.
+A single supper class is supported by the C<extends> keyword or the C<isa> attribute.
    
-   # Moo-ish
-   class Name extends BASECLASS {
+   # Moo/Moose-ish
+   class NAME extends SUPER_CLASS {
       ...
    }
    
    # Corinna-ish
-   class Name : isa(BASECLASS) {
+   class NAME : isa(SUPER_CLASS) {
       ...
    }
 
+If the supper class is not specified, the class inherits L<Class::Plain::Base>.
+
 One or more roles can be composed into the class by the C<does> attribute.
    
-   class Name : does(ROLE) : dose(ROLE)) {
+   class NAME : does(ROLE) dose(ROLE)) {
       ...
    }
 
@@ -224,10 +219,10 @@ The following class attributes are supported:
 
    : isa(CLASS)
 
-Declares a superclass that this class extends. At most one superclass is
+Declares a supper class that this class extends. At most one supper class is
 supported.
 
-If the package providing the superclass does not exist, an attempt is made to
+If the package providing the supper class does not exist, an attempt is made to
 load it by code equivalent to
 
    require CLASS ();
@@ -235,13 +230,10 @@ load it by code equivalent to
 and thus it must either already exist, or be locatable via the usual C<@INC>
 mechanisms.
 
-The superclass may or may not itself be implemented by C<Class::Plain>, but if
-it is not then see L<SUBCLASSING CLASSIC PERL CLASSES> for further detail on
-the semantics of how this operates.
-
 =head3 does Attribute
 
    : does(ROLE)
+   : does(ROLE) does(ROLE)
 
 Composes a role into the class; optionally requiring a version check on the
 role package. This is a newer form of the C<does>
@@ -250,23 +242,23 @@ keywords and should be preferred for new code.
 Multiple roles can be composed by using multiple C<:does> attributes, one per
 role.
 
-The package will be loaded in a similar way to how the L</"isa Attribute"> attribute is
+The package will be loaded in a similar way to how the L</"isa Attribute"> is
 handled.
 
 =head2 role
 
-   role Name : ATTRS... {
+   role NAME : ATTRS... {
       ...
    }
 
-   role Name : ATTRS...;
+   role NAME : ATTRS...;
 
 Similar to C<class>, but provides a package that defines a new role. A role
 acts similar to a class in some respects, and differently in others.
 
 Like a class, a role can have a version, and named methods.
 
-   role Name {
+   role NAME {
       method a { ... }
       method b { ... }
    }
@@ -277,14 +269,13 @@ constructed. A role cannot extend a class.
 A role can declare that it required methods of given names from any class that
 does the role.
 
-   role Name {
+   role NAME {
       method METHOD;
    }
 
 A role can declare that it provides another role:
 
-   role Name :does(OTHERROLE) { ... }
-   role Name :does(OTHERROLE OTHERVER) { ... }
+   role NAME :does(OTHERROLE) { ... }
 
 This will include all of the methods from the included role. Effectively this
 means that applying the "outer" role to a class will imply applying the other
@@ -294,15 +285,15 @@ The following role attributes are supported:
 
 =head2 field
    
-   # Moo-ish
-   has Name;
+   # (Raku|Moo/Moose|Mojo::Base|Class::Accessor)-ish
+   has NAME;
    
-   has Name : ATTR ATTR...;
+   has NAME : ATTR ATTR...;
    
    # Corinna-ish
-   field Name;
+   field NAME;
    
-   field Name : ATTR ATTR...;
+   field NAME : ATTR ATTR...;
 
 Declares that the instances of the class or role have a member field of the
 given name.
@@ -365,96 +356,51 @@ The alias for the L</field> keyword.
       ...
    }
 
-   method NAME (SIGNATURE) {
+   method NAME : ATTR ATTR ... {
       ...
    }
-
-   method NAME : ATTRS... {
-      ...
-   }
-
-   method NAME;
-
-Declares a new named method. This behaves similarly to the C<sub> keyword,
-except that within the body of the method all of the member fields are also
-accessible. In addition, the method body will have a lexical called C<$self>
+   
+Declares a new named method. This behaves similarly to the C<sub> keyword.
+In addition, the method body will have a lexical called C<$self>
 which contains the invocant object directly; it will already have been shifted
 from the C<@_> array.
 
 If the method has no body and is given simply as a name, this declares a
-I<required> method for a role. Such a method must be provided by any class
+I<required> method for a role.
+
+   method NAME;
+
+Such a method must be provided by any class
 that does the role. It will be a compiletime error to combine the role
 with a class that does not provide this.
 
-The C<signatures> feature is automatically enabled for method declarations. In
-this case the signature does not have to account for the invocant instance; 
-that is handled directly.
-
-   method m ($one, $two) {
-      say "$self invokes method on one=$one two=$two";
-   }
-
-   ...
-   $obj->m(1, 2);
-
-A list of attributes may be supplied as for C<sub>. The most useful of these
-is C<:lvalue>, allowing easy creation of read-write accessors for fields (but
-see also the C<:reader> and C<:writer>> field attributes).
-
-   class Counter {
-      field count;
-
-      method count :lvalue { $count }
-   }
-
-   my $c = Counter->new;
-   $c->count++;
-
-Every method automatically gets the C<:method> attribute applied, which
-suppresses warnings about ambiguous calls resolved to core functions if the
-name of a method matches a core function.
-
-The following additional attributes are recognised by C<Class::Plain> directly:
-
-=head3 override Attribute
-
-Marks that this method expects to override another of the same name from a
-superclass. It is an error at compiletime if the superclass does not provide
-such a method.
+The following method attributes are supported.
 
 =head3 common Attribute
+   
+   # Class method
+   method new : common {
+     my $self = $class->SUPER::new(@_);
+     
+     # ...
+     
+     return $self;
+   }
 
 Marks that this method is a class-common method, instead of a regular instance
 method. A class-common method may be invoked on class names instead of
-instances. Within the method body there is a lexical C<$class> available,
-rather than C<$self>. Because it is not associated with a particular object
-instance, a class-common method cannot see instance fields.
+instances. Within the method body there is a lexical C<$class> available.
+It will already have been shifted from the C<@_> array.
 
-=head1 CREPT FEATURES
+=head3 override Attribute
 
-While not strictly part of being an object system, this module has
-nevertheless gained a number of behaviours by feature creep, as they have been
-found useful.
+   method foo : override {
+     
+   }
+ 
+Marks that this method expects to override another of the same name from a
+supper class. It is an error at compiletime if the supper class does not provide
+such a method.
 
-=head2 Implied Pragmata
-
-In order to encourage users to write clean, modern code, the body of the
-C<class> block acts as if the following pragmata are in effect:
-
-   use strict;
-   use warnings;
-   no indirect ':fatal';  # or  no feature 'indirect' on perl 5.32 onwards
-   use feature 'signatures';
-
-This list may be extended in subsequent versions to add further restrictions
-and should not be considered exhaustive.
-
-Further additions will only be ones that remove "discouraged" or deprecated
-language features with the overall goal of enforcing a more clean modern style
-within the body. As long as you write code that is in a clean, modern style
-(and I fully accept that this wording is vague and subjective) you should not
-find any new restrictions to be majorly problematic. Either the code will
-continue to run unaffected, or you may have to make some small alterations to
-bring it into a conforming style.
 
 1;

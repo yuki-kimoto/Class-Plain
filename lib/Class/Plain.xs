@@ -576,17 +576,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   else
     croak("Expected a block or ';'");
 
-  import_pragma("strict", NULL);
-  import_pragma("warnings", NULL);
-#if HAVE_PERL_VERSION(5, 31, 9)
-  import_pragma("-feature", "indirect");
-#else
-  import_pragma("-indirect", ":fatal");
-#endif
-#ifdef HAVE_PARSE_SUBSIGNATURE
-  import_pragma("experimental", "signatures");
-#endif
-
   /* CARGOCULT from perl/op.c:Perl_package() */
   {
     SAVEGENERICSV(PL_curstash);
