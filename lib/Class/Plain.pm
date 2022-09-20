@@ -21,27 +21,18 @@ our $XSAPI_VERSION = "0.48";
 
 use Class::Plain::Base;
 
-sub import
-{
+sub import {
    my $class = shift;
    my $caller = caller;
-
-   $class->import_into( $caller, @_ );
-}
-
-sub import_into
-{
-   my $class = shift;
-   my $caller = shift;
 
    my %syms = map { $_ => 1 } @_;
 
    # Default imports
    unless( %syms ) {
-      $syms{$_}++ for qw( class role method field has);
+      $syms{$_}++ for qw( class method field has);
    }
 
-   delete $syms{$_} and $^H{"Class::Plain/$_"}++ for qw( class role method field has);
+   delete $syms{$_} and $^H{"Class::Plain/$_"}++ for qw( class method field has);
 
    croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
 }
