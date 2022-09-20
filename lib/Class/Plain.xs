@@ -16,11 +16,6 @@
 #include "perl-backcompat.c.inc"
 #include "sv_setrv.c.inc"
 
-#ifdef HAVE_DMD_HELPER
-#  define WANT_DMD_API_044
-#  include "DMD_helper.h"
-#endif
-
 #include "perl-additions.c.inc"
 #include "lexer-additions.c.inc"
 #include "forbid_outofblock_ops.c.inc"

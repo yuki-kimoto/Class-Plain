@@ -66,29 +66,18 @@ EOPERL
    }
 }
 
-=pod TODO
-
-# anon methods
 {
-   class Point3 {
-     has x;
-     has y;
-     has z;
+  class MyClassSignature {
+    use experimental 'signatures';
+    
+    method foo ($foo) {
+      return $foo;
+    }
+  }
 
-     our $clearer = method {
-         $self->{x} = 0;
-         $self->{y} = 0;
-         $self->{z} = 0;
-      };
-   }
+  my $foo = MyClassSignature->new;
 
-   my $p = Point3->new(x => 1, y => 2, z => 3 );
-   $p->$Point3::clearer();
-
-   is_deeply( [ $p->{x}, $p->{y}, $p->{z} ], [ 0, 0, 0 ],
-      'anon method' );
+  is($foo->foo(4), 4);
 }
-
-=cut
 
 done_testing;

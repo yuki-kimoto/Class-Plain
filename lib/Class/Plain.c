@@ -25,11 +25,6 @@
 #include "perl-backcompat.c.inc"
 #include "sv_setrv.c.inc"
 
-#ifdef HAVE_DMD_HELPER
-#  define WANT_DMD_API_044
-#  include "DMD_helper.h"
-#endif
-
 #include "perl-additions.c.inc"
 #include "lexer-additions.c.inc"
 #include "forbid_outofblock_ops.c.inc"
@@ -1133,7 +1128,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1137 "lib/Class/Plain.c"
+#line 1132 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1277,7 +1272,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1281 "lib/Class/Plain.c"
+#line 1276 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1302,7 +1297,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1130 "lib/Class/Plain.xs"
+#line 1125 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1339,7 +1334,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1343 "lib/Class/Plain.c"
+#line 1338 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
