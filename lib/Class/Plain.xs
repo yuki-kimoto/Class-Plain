@@ -316,7 +316,7 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
   XPK_PACKAGENAME,
   XPK_VSTRING_OPT,
   XPK_OPTIONAL(
-    XPK_CHOICE( XPK_LITERAL("extends"), XPK_LITERAL("isa") ), XPK_PACKAGENAME, XPK_VSTRING_OPT
+    XPK_CHOICE(XPK_LITERAL("isa") ), XPK_PACKAGENAME, XPK_VSTRING_OPT
   ),
   /* This should really a repeated (tagged?) choice of a number of things, but
    * right now there's only one thing permitted here anyway

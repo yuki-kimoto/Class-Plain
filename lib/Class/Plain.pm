@@ -98,28 +98,13 @@ that block define the new class and the preceding package continues
 afterwards. If not, it sets the class as the package context of following
 keywords and definitions.
 
-A single supper class is supported by the C<extends> keyword or the C<isa> attribute.
-   
-   # Moo/Moose-ish
-   class NAME extends SUPER_CLASS {
-      ...
-   }
-   
-   # Corinna-ish
-   class NAME : isa(SUPER_CLASS) {
-      ...
-   }
-
-If the supper class is not specified, the class inherits L<Class::Plain::Base>.
-
 The following class attributes are supported:
 
 =head3 isa Attribute
 
    : isa(CLASS)
 
-Define a supper class that this class extends. At most one supper class is
-supported.
+Define a supper class that this class extends.
 
 If the package providing the supper class does not exist, an attempt is made to
 load it by code equivalent to
@@ -128,6 +113,8 @@ load it by code equivalent to
 
 and thus it must either already exist, or be locatable via the usual C<@INC>
 mechanisms.
+
+If the supper class is not specified, the class inherits L<Class::Plain::Base>.
 
 =head2 field
    
