@@ -7,22 +7,24 @@ use Test::More;
 
 use Scalar::Util qw( reftype );
 
+use B;
+
 use Class::Plain;
 
 class Point {
-   field x;
-   field y;
+  field x;
+  field y;
 
-   method new : common {
-     my $self = $class->SUPER::new(x => $_[0], y => $_[1]);
-     
-     $self->{x} //= 0;
-     $self->{y} //= 0;
-     
-     return $self;
-   }
+  method new : common {
+    my $self = $class->SUPER::new(x => $_[0], y => $_[1]);
+    
+    $self->{x} //= 0;
+    $self->{y} //= 0;
+    
+    return $self;
+  }
 
-   method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
+  method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
 }
 
 {
@@ -33,19 +35,19 @@ class Point {
 my @build;
 
 {
-   my $newarg_destroyed;
-   my $buildargs_result_destroyed;
-   package DestroyWatch {
-      sub new { bless [ $_[1] ], $_[0] }
-      sub DESTROY { ${ $_[0][0] }++ }
-   }
+  my $newarg_destroyed;
+  my $buildargs_result_destroyed;
+  package DestroyWatch {
+     sub new { bless [ $_[1] ], $_[0] }
+     sub DESTROY { ${ $_[0][0] }++ }
+  }
 
-   class RefcountTest {
-   }
+  class RefcountTest {
+  }
 
-   RefcountTest->new( DestroyWatch->new( \$newarg_destroyed ) );
+  RefcountTest->new( DestroyWatch->new( \$newarg_destroyed ) );
 
-   is( $newarg_destroyed, 1, 'argument to ->new destroyed' );
+  is( $newarg_destroyed, 1, 'argument to ->new destroyed' );
 }
 
 # The multiple inheritance
@@ -81,8 +83,6 @@ my @build;
   class MultiClass : isa(MultiBase1) isa(MultiBase2) {
     field ps;
     
-    our @ISA;
-    
     method new : common {
       my $self = $class->SUPER::new(@_);
       
@@ -110,6 +110,58 @@ my @build;
   }
   
   my $object = MultiClass->new;
+  
+  is_deeply($object->{b1}, 3);
+  is_deeply($object->{b2}, 4);
+  is_deeply($object->{ps}, [1, 2, 3]);
+}
+
+# The multiple inheritance
+{
+  class ImportBase1 {
+    field ps;
+    field b1;
+    
+    method init {
+
+      push @{$self->{ps}}, 2;
+      $self->{b1} = 3;
+    }
+  }
+  
+  class ImportBase2 {
+    field ps;
+    field b2;
+    
+    method init {
+      
+      push @{$self->{ps}}, 3;
+      $self->{b2} = 4;
+    }
+  }
+
+  class ImportClass {
+    field ps;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{ps} //= [];
+      
+      $self->init;
+      
+      return $self;
+    }
+    
+    method init {
+      push @{$self->{ps}}, 1;
+      
+      $self->ImportBase1::init;
+      $self->ImportBase2::init;
+    }
+  }
+  
+  my $object = ImportClass->new;
   
   is_deeply($object->{b1}, 3);
   is_deeply($object->{b2}, 4);
