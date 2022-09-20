@@ -13,7 +13,6 @@ struct ClassMeta {
   FIELDOFFSET next_fieldix;  /* 1 + final field index of this partial within its instance; */
 
   SV *name;
-  HV *stash;
   AV *hooks;           /* NULL, or AV of raw pointers directly to ClassHook structs */
   AV *direct_fields;   /* each elem is a raw pointer directly to a FieldMeta */
   AV *direct_methods;  /* each elem is a raw pointer directly to a MethodMeta */

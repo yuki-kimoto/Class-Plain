@@ -162,8 +162,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->type = type;
   meta->name = SvREFCNT_inc(name);
 
-  meta->stash = gv_stashsv(name, GV_ADD);
-
   meta->start_fieldix = 0;
   meta->next_fieldix = -1;
   meta->hooks   = NULL;

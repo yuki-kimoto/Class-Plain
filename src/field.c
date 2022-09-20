@@ -125,12 +125,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   SV *mname_fq = newSVpvf("%" SVf "::%" SVf, classmeta->name, mname);
 
-  if(PL_curstash != classmeta->stash) {
-    /* RT141599 */
-    SAVESPTR(PL_curstash);
-    PL_curstash = classmeta->stash;
-  }
-
   need_PLparser();
 
   I32 floor_ix = start_subparse(FALSE, 0);

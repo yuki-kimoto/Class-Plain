@@ -278,7 +278,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     SAVEGENERICSV(PL_curstash);
     save_item(PL_curstname);
 
-    PL_curstash = (HV *)SvREFCNT_inc(meta->stash);
+    PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(meta->name, GV_ADD));
     sv_setsv(PL_curstname, packagename);
 
     PL_hints |= HINT_BLOCK_SCOPE;
