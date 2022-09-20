@@ -94,22 +94,6 @@ ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
   return NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*gvp))));
 }
 
-RoleEmbedding **ClassPlain_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
-{
-  assert(meta->type == METATYPE_CLASS);
-  AV *roles = meta->cls.direct_roles;
-  *nroles = av_count(roles);
-  return (RoleEmbedding **)AvARRAY(roles);
-}
-
-RoleEmbedding **ClassPlain_mop_class_get_all_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
-{
-  assert(meta->type == METATYPE_CLASS);
-  AV *roles = meta->cls.embedded_roles;
-  *nroles = av_count(roles);
-  return (RoleEmbedding **)AvARRAY(roles);
-}
-
 MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   AV *methods = meta->direct_methods;
@@ -120,24 +104,11 @@ MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodnam
   if(!methodname || !SvOK(methodname) || !SvCUR(methodname))
     croak("methodname must not be undefined or empty");
 
-  U32 i;
-  for(i = 0; i < av_count(methods); i++) {
-    MethodMeta *methodmeta = (MethodMeta *)AvARRAY(methods)[i];
-    if(sv_eq(methodmeta->name, methodname)) {
-      if(methodmeta->role)
-        croak("Method '%" SVf "' clashes with the one provided by role %" SVf,
-          SVfARG(methodname), SVfARG(methodmeta->role->name));
-      else
-        croak("Cannot add another method named %" SVf, methodname);
-    }
-  }
-
   MethodMeta *methodmeta;
   Newx(methodmeta, 1, MethodMeta);
 
   methodmeta->name = SvREFCNT_inc(methodname);
   methodmeta->class = meta;
-  methodmeta->role = NULL;
 
   av_push(methods, (SV *)methodmeta);
 
@@ -176,19 +147,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-#define ClassPlain_mop_class_implements_role(meta, rolemeta)  S_mop_class_implements_role(aTHX_ meta, rolemeta)
-static bool S_mop_class_implements_role(pTHX_ ClassMeta *meta, ClassMeta *rolemeta)
-{
-  U32 i, n;
-  RoleEmbedding **embeddings = ClassPlain_mop_class_get_all_roles(meta, &n);
-  for(i = 0; i < n; i++)
-    if(embeddings[i]->rolemeta == rolemeta)
-      return true;
-
-
-  return false;
-}
-
 void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
 {
   if(meta->sealed) /* idempotent */
@@ -225,7 +183,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->hooks   = NULL;
   meta->direct_fields = newAV();
   meta->direct_methods = newAV();
-  meta->parammap = NULL;
 
   need_PLparser();
 
