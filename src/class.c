@@ -144,7 +144,7 @@ ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
 #define make_instance_fields(classmeta, backingav, roleoffset)  S_make_instance_fields(aTHX_ classmeta, backingav, roleoffset)
 static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backingav, FIELDOFFSET roleoffset)
 {
-  assert(classmeta->type == METATYPE_ROLE || roleoffset == 0);
+  assert(roleoffset == 0);
 
   if(classmeta->start_fieldix) {
     /* Superclass actually has some fields */
@@ -276,8 +276,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 
 void ClassPlain_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
-  if(meta->type != METATYPE_ROLE)
-    croak("Can only add a required method to a role");
   if(meta->sealed)
     croak("Cannot add a new required method to an already-sealed class");
 
@@ -288,127 +286,13 @@ void ClassPlain_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodn
 static bool S_mop_class_implements_role(pTHX_ ClassMeta *meta, ClassMeta *rolemeta)
 {
   U32 i, n;
-  switch(meta->type) {
-    case METATYPE_CLASS: {
-      RoleEmbedding **embeddings = mop_class_get_all_roles(meta, &n);
-      for(i = 0; i < n; i++)
-        if(embeddings[i]->rolemeta == rolemeta)
-          return true;
+  RoleEmbedding **embeddings = mop_class_get_all_roles(meta, &n);
+  for(i = 0; i < n; i++)
+    if(embeddings[i]->rolemeta == rolemeta)
+      return true;
 
-      break;
-    }
-
-    case METATYPE_ROLE: {
-      ClassMeta **roles = (ClassMeta **)AvARRAY(meta->role.superroles);
-      U32 n = av_count(meta->role.superroles);
-      /* TODO: this isn't super-efficient in deep cross-linked heirarchies */
-      for(i = 0; i < n; i++) {
-        if(roles[i] == rolemeta)
-          return true;
-        if(mop_class_implements_role(roles[i], rolemeta))
-          return true;
-      }
-      break;
-    }
-  }
 
   return false;
-}
-
-#define embed_role(class, role)  S_embed_role(aTHX_ class, role)
-static RoleEmbedding *S_embed_role(pTHX_ ClassMeta *classmeta, ClassMeta *rolemeta)
-{
-  U32 i;
-
-  if(classmeta->type != METATYPE_CLASS)
-    croak("Can only apply to a class");
-  if(rolemeta->type != METATYPE_ROLE)
-    croak("Can only apply a role to a class");
-
-  HV *srcstash = rolemeta->stash;
-  HV *dststash = classmeta->stash;
-
-  SV *embeddingsv = newSV(sizeof(RoleEmbedding));
-  assert(SvTYPE(embeddingsv) == SVt_PV && SvLEN(embeddingsv) >= sizeof(RoleEmbedding));
-
-  RoleEmbedding *embedding = (RoleEmbedding *)SvPVX(embeddingsv);
-
-  embedding->embeddingsv = embeddingsv;
-  embedding->rolemeta    = rolemeta;
-  embedding->classmeta   = classmeta;
-  embedding->offset      = -1;
-
-  av_push(classmeta->cls.embedded_roles, (SV *)embedding);
-  hv_store_ent(rolemeta->role.applied_classes, classmeta->name, (SV *)embedding, 0);
-
-  U32 nmethods = av_count(rolemeta->direct_methods);
-  for(i = 0; i < nmethods; i++) {
-    MethodMeta *methodmeta = (MethodMeta *)AvARRAY(rolemeta->direct_methods)[i];
-    SV *mname = methodmeta->name;
-
-    HE *he = hv_fetch_ent(srcstash, mname, 0, 0);
-    if(!he || !HeVAL(he) || !GvCV((GV *)HeVAL(he)))
-      croak("ARGH expected to find CODE called %" SVf " in package %" SVf,
-        SVfARG(mname), SVfARG(rolemeta->name));
-
-    {
-      MethodMeta *dstmethodmeta = mop_class_add_method(classmeta, mname);
-      dstmethodmeta->role = rolemeta;
-      dstmethodmeta->is_common = methodmeta->is_common;
-    }
-
-    GV **gvp = (GV **)hv_fetch(dststash, SvPVX(mname), SvCUR(mname), GV_ADD);
-    gv_init_sv(*gvp, dststash, mname, 0);
-    GvMULTI_on(*gvp);
-
-    if(GvCV(*gvp))
-      croak("Method '%" SVf "' clashes with the one provided by role %" SVf,
-        SVfARG(mname), SVfARG(rolemeta->name));
-
-    CV *newcv;
-    GvCV_set(*gvp, newcv = embed_cv(GvCV((GV *)HeVAL(he)), embedding));
-    CvGV_set(newcv, *gvp);
-  }
-
-  nmethods = av_count(rolemeta->requiremethods);
-  for(i = 0; i < nmethods; i++) {
-    av_push(classmeta->requiremethods, SvREFCNT_inc(AvARRAY(rolemeta->requiremethods)[i]));
-  }
-
-  return embedding;
-}
-
-void ClassPlain_mop_class_add_role(pTHX_ ClassMeta *dstmeta, ClassMeta *rolemeta)
-{
-  if(dstmeta->sealed)
-    croak("Cannot add a role to an already-sealed class");
-  /* Can't currently do this as it breaks t/77mop-create-role.t
-  if(!rolemeta->sealed)
-    croak("Cannot add a role that is not yet sealed");
-   */
-
-  if(mop_class_implements_role(dstmeta, rolemeta))
-    return;
-
-  switch(dstmeta->type) {
-    case METATYPE_CLASS: {
-      U32 nroles;
-      if((nroles = av_count(rolemeta->role.superroles)) > 0) {
-        ClassMeta **roles = (ClassMeta **)AvARRAY(rolemeta->role.superroles);
-        U32 i;
-        for(i = 0; i < nroles; i++)
-          mop_class_add_role(dstmeta, roles[i]);
-      }
-
-      RoleEmbedding *embedding = embed_role(dstmeta, rolemeta);
-      av_push(dstmeta->cls.direct_roles, (SV *)embedding);
-      return;
-    }
-
-    case METATYPE_ROLE:
-      av_push(dstmeta->role.superroles, (SV *)rolemeta);
-      return;
-  }
 }
 
 static OP *pp_alias_params(pTHX)
@@ -554,7 +438,7 @@ XS_INTERNAL(injected_constructor)
 
 ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 {
-  assert(type == METATYPE_CLASS || type == METATYPE_ROLE);
+  assert(type == METATYPE_CLASS);
 
   ClassMeta *meta;
   Newx(meta, 1, ClassMeta);

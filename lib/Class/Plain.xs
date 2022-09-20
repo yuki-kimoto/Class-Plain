@@ -817,7 +817,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
       newSTATEOP(0, NULL, NULL));
     fieldops = op_append_list(OP_LINESEQ, fieldops,
       (methstartop = newMETHSTARTOP(0 |
-        (compclassmeta->type == METATYPE_ROLE ? OPf_SPECIAL : 0) |
+        (0) |
         (compclassmeta->repr << 8))));
 
     int i;

@@ -269,7 +269,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
     newSTATEOP(0, NULL, NULL));
   ops = op_append_list(OP_LINESEQ, ops,
     newMETHSTARTOP(0 |
-      (classmeta->type == METATYPE_ROLE ? OPf_SPECIAL : 0) |
+      (0) |
       (classmeta->repr << 8)));
 
   int req_args = 0;

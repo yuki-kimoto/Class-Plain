@@ -81,7 +81,6 @@ struct FieldHook {
 
 enum MetaType {
   METATYPE_CLASS,
-  METATYPE_ROLE,
 };
 
 enum ReprType {
