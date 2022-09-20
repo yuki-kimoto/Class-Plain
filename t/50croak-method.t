@@ -19,13 +19,4 @@ class Point {
       'message from method on non-instance' );
 }
 
-{
-   my $obj = bless [], "DifferentClass";
-
-   ok( !eval { $obj->Point::clear },
-      'method on wrong class fails' );
-   like( $@, qr/^Cannot invoke foreign method on non-derived instance /,
-      'message from method on wrong class' );
-}
-
 done_testing;

@@ -162,76 +162,18 @@ static OP *pp_methstart(pTHX)
 {
   SV *self = av_shift(GvAV(PL_defgv));
   bool create = PL_op->op_flags & OPf_MOD;
-  bool is_role = PL_op->op_flags & OPf_SPECIAL;
 
   if(!SvROK(self) || !SvOBJECT(SvRV(self)))
     croak("Cannot invoke method on a non-instance");
-
-  HV *classstash;
-  FIELDOFFSET offset;
-  RoleEmbedding *embedding = NULL;
-
-  if(is_role) {
-    /* Embedding info is stored in pad1; PAD_SVl() will look at CvDEPTH. We'll
-     * have to grab it manually */
-    PAD *pad1 = PadlistARRAY(CvPADLIST(find_runcv(0)))[1];
-    SV *embeddingsv = PadARRAY(pad1)[PADIX_EMBEDDING];
-
-    if(embeddingsv && embeddingsv != &PL_sv_undef &&
-       (embedding = (RoleEmbedding *)SvPVX(embeddingsv))) {
-      if(embedding == &embedding_standalone) {
-        classstash = NULL;
-        offset     = 0;
-      }
-      else {
-        classstash = embedding->classmeta->stash;
-        offset     = embedding->offset;
-      }
-    }
-    else {
-      croak("Cannot invoke a role method directly");
-    }
-  }
-  else {
-    classstash = CvSTASH(find_runcv(0));
-    offset     = 0;
-  }
-
-  if(classstash) {
-    if(!HvNAME(classstash) || !sv_derived_from_hv(self, classstash))
-      croak("Cannot invoke foreign method on non-derived instance");
-  }
 
   save_clearsv(&PAD_SVl(PADIX_SELF));
   sv_setsv(PAD_SVl(PADIX_SELF), self);
 
   AV *backingav;
 
-  if(is_role) {
-    if(embedding == &embedding_standalone) {
-      backingav = NULL;
-    }
-    else {
-      SV *instancedata = get_obj_backingav(self, embedding->classmeta->repr, create);
-
-      if(create) {
-        backingav = (AV *)instancedata;
-        SvREFCNT_inc((SV *)backingav);
-      }
-      else {
-        backingav = newAV();
-        /* MASSIVE CHEAT */
-        AvARRAY(backingav) = AvARRAY(instancedata) + offset;
-        AvFILLp(backingav) = AvFILLp(instancedata) - offset;
-        AvREAL_off(backingav);
-      }
-    }
-  }
-  else {
-    /* op_private contains the repr type so we can extract backing */
-    backingav = (AV *)get_obj_backingav(self, PL_op->op_private, create);
-    SvREFCNT_inc(backingav);
-  }
+  /* op_private contains the repr type so we can extract backing */
+  backingav = (AV *)get_obj_backingav(self, PL_op->op_private, create);
+  SvREFCNT_inc(backingav);
 
   if(backingav) {
     SAVESPTR(PAD_SVl(PADIX_SLOTS));
