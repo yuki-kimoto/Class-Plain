@@ -66,59 +66,6 @@ void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
     croak("ARGH: Expected that padix[@slots] = 2");
 }
 
-#define find_padix_for_field(fieldmeta)  S_find_padix_for_field(aTHX_ fieldmeta)
-static PADOFFSET S_find_padix_for_field(pTHX_ FieldMeta *fieldmeta)
-{
-  const char *fieldname = SvPVX(fieldmeta->name);
-#if HAVE_PERL_VERSION(5, 20, 0)
-  const PADNAMELIST *nl = PadlistNAMES(CvPADLIST(PL_compcv));
-  PADNAME **names = PadnamelistARRAY(nl);
-  PADOFFSET padix;
-
-  for(padix = 1; padix <= PadnamelistMAXNAMED(nl); padix++) {
-    PADNAME *name = names[padix];
-
-    if(!name || !PadnameLEN(name))
-      continue;
-
-    const char *pv = PadnamePV(name);
-    if(!pv)
-      continue;
-
-    /* field names are all OUTER vars. This is necessary so we don't get
-     * confused by signatures params of the same name
-     *   https://rt.cpan.org/Ticket/Display.html?id=134456
-     */
-    if(!PadnameOUTER(name))
-      continue;
-    if(!strEQ(pv, fieldname))
-      continue;
-
-    /* TODO: for extra robustness we could compare the SV * in the pad itself */
-
-    return padix;
-  }
-
-  return NOT_IN_PAD;
-#else
-  /* Before the new pad API, the best we can do is call pad_findmy_pv()
-   * It won't get confused about signatures params because these perls are too
-   * old for signatures anyway
-   */
-  return pad_findmy_pv(fieldname, 0);
-#endif
-}
-
-#define bind_field_to_pad(sv, fieldix, private, padix)  S_bind_field_to_pad(aTHX_ sv, fieldix, private, padix)
-static void S_bind_field_to_pad(pTHX_ SV *sv, FIELDOFFSET fieldix, U8 private, PADOFFSET padix)
-{
-  SV *val;
-  val = sv;
-  SAVESPTR(PAD_SVl(padix));
-  PAD_SVl(padix) = SvREFCNT_inc(val);
-  save_freesv(val);
-}
-
 static XOP xop_methstart;
 static OP *pp_methstart(pTHX)
 {
@@ -165,44 +112,6 @@ OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags)
 {
   OP *op = newOP_CUSTOM(&pp_commonmethstart, flags);
   op->op_private = (U8)(flags >> 8);
-  return op;
-}
-
-static XOP xop_fieldpad;
-static OP *pp_fieldpad(pTHX)
-{
-#ifdef HAVE_UNOP_AUX
-  FIELDOFFSET fieldix = PTR2IV(cUNOP_AUX->op_aux);
-#else
-  UNOP_with_IV *op = (UNOP_with_IV *)PL_op;
-  FIELDOFFSET fieldix = op->iv;
-#endif
-  PADOFFSET targ = PL_op->op_targ;
-
-  if(SvTYPE(PAD_SV(PADIX_SLOTS)) != SVt_PVAV)
-    croak("ARGH: expected ARRAY of slots at PADIX_SLOTS");
-
-  AV *backingav = (AV *)PAD_SV(PADIX_SLOTS);
-
-  if(fieldix > av_top_index(backingav))
-    croak("ARGH: instance does not have a field at index %ld", (long int)fieldix);
-
-  bind_field_to_pad(AvARRAY(backingav)[fieldix], fieldix, PL_op->op_private, targ);
-
-  return PL_op->op_next;
-}
-
-OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix)
-{
-#ifdef HAVE_UNOP_AUX
-  OP *op = newUNOP_AUX(OP_CUSTOM, flags, NULL, NUM2PTR(UNOP_AUX_item *, fieldix));
-#else
-  OP *op = newUNOP_with_IV(OP_CUSTOM, flags, NULL, fieldix);
-#endif
-  op->op_targ = padix;
-  op->op_private = (U8)(flags >> 8);
-  op->op_ppaddr = &pp_fieldpad;
-
   return op;
 }
 
@@ -925,15 +834,6 @@ BOOT:
   XopENTRY_set(&xop_commonmethstart, xop_desc, "enter method :common");
   XopENTRY_set(&xop_commonmethstart, xop_class, OA_BASEOP);
   Perl_custom_op_register(aTHX_ &pp_commonmethstart, &xop_commonmethstart);
-
-  XopENTRY_set(&xop_fieldpad, xop_name, "fieldpad");
-  XopENTRY_set(&xop_fieldpad, xop_desc, "fieldpad()");
-#ifdef HAVE_UNOP_AUX
-  XopENTRY_set(&xop_fieldpad, xop_class, OA_UNOP_AUX);
-#else
-  XopENTRY_set(&xop_fieldpad, xop_class, OA_UNOP); /* technically a lie */
-#endif
-  Perl_custom_op_register(aTHX_ &pp_fieldpad, &xop_fieldpad);
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
 

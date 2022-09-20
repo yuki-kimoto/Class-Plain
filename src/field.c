@@ -161,14 +161,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   ops = op_append_list(OP_LINESEQ, ops,
     make_argcheck_ops(req_args, opt_args, slurpy_arg, mname_fq));
 
-  U32 flags = 0;
-  
-  IV tmp_iv = (IV)ctx.fieldmeta->name;
-  
-  ops = op_append_list(OP_LINESEQ, ops,
-    ClassPlain_newFIELDPADOP(flags, tmp_iv, fieldmeta->fieldix)); // Tenporary
-
-
   MOP_FIELD_RUN_HOOKS(fieldmeta, gen_accessor_ops, type, &ctx);
 
   if(ctx.bodyop)
