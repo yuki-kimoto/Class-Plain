@@ -702,7 +702,6 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
 
 static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  enum PhaserType type = PTR2UV(hookdata);
   PADNAMELIST *fieldnames = PadlistNAMES(CvPADLIST(compclassmeta->methodscope));
   I32 nfields = av_count(compclassmeta->direct_fields);
   PADNAME **snames = PadnamelistARRAY(fieldnames);
@@ -725,33 +724,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
 
     SAVEFREESV((SV *)fieldmap);
 #endif
-
-    {
-      ENTER;
-      SAVEVPTR(PL_curcop);
-
-      /* See https://rt.cpan.org/Ticket/Display.html?id=132428
-       *   https://github.com/Perl/perl5/issues/17754
-       */
-      PADOFFSET padix;
-      for(padix = PADIX_SELF + 1; padix <= PadnamelistMAX(PadlistNAMES(CvPADLIST(PL_compcv))); padix++) {
-        PADNAME *pn = padnames[padix];
-
-        if(PadnameIsNULL(pn) || !PadnameLEN(pn))
-          continue;
-
-        const char *pv = PadnamePV(pn);
-        if(!pv || !strEQ(pv, "$self"))
-          continue;
-
-        COP *padcop = NULL;
-        if(find_cop_for_lvintro(padix, ctx->body, &padcop))
-          PL_curcop = padcop;
-        warn("\"my\" variable $self masks earlier declaration in same scope");
-      }
-
-      LEAVE;
-    }
 
     fieldops = op_append_list(OP_LINESEQ, fieldops,
       newSTATEOP(0, NULL, NULL));
@@ -809,24 +781,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
 #endif
     }
 
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-    if(fieldcount) {
-      UNOP_AUX_item *aux;
-      Newx(aux, 2 + fieldcount*2, UNOP_AUX_item);
-      cUNOP_AUXx(methstartop)->op_aux = aux;
-
-      (aux++)->uv = fieldcount;
-      (aux++)->uv = max_fieldix;
-
-      for(Size_t i = 0; i < av_count(fieldmap); i++) {
-        if(!AvARRAY(fieldmap)[i] || !SvOK(AvARRAY(fieldmap)[i]))
-          continue;
-
-        (aux++)->uv = i;
-        (aux++)->uv = SvUV(AvARRAY(fieldmap)[i]);
-      }
-    }
-#endif
     ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
   }
   else if(ctx->body && compmethodmeta->is_common) {
@@ -838,41 +792,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
 
   compclassmeta->methodscope = NULL;
 
-  /* Restore CvOUTSIDE(PL_compcv) back to where it should be */
-  {
-    CV *outside = CvOUTSIDE(PL_compcv);
-    PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
-    PADNAMELIST *outside_pnl = PadlistNAMES(CvPADLIST(outside));
-
-    /* Lexical captures will need their parent pad index fixing
-     * Technically these only matter for CvANON because they're only used when
-     * reconstructing the parent pad captures by OP_ANONCODE. But we might as
-     * well be polite and fix them for all CVs
-     */
-    PADOFFSET padix;
-    for(padix = 1; padix <= PadnamelistMAX(pnl); padix++) {
-      PADNAME *pn = PadnamelistARRAY(pnl)[padix];
-      if(PadnameIsNULL(pn) ||
-         !PadnameOUTER(pn) ||
-         !PARENT_PAD_INDEX(pn))
-        continue;
-
-      PADNAME *outside_pn = PadnamelistARRAY(outside_pnl)[PARENT_PAD_INDEX(pn)];
-
-      PARENT_PAD_INDEX_set(pn, PARENT_PAD_INDEX(outside_pn));
-      if(!PadnameOUTER(outside_pn))
-        PadnameOUTER_off(pn);
-    }
-
-    CvOUTSIDE(PL_compcv)     = CvOUTSIDE(outside);
-    CvOUTSIDE_SEQ(PL_compcv) = CvOUTSIDE_SEQ(outside);
-  }
-
-  if(type != PHASER_NONE)
-    /* We need to remove the name now to stop newATTRSUB() from creating this
-     * as a named symbol table entry
-     */
-    ctx->actions &= ~XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL;
 }
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
@@ -898,20 +817,6 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
       }
       break;
 
-  }
-
-  SV **varnamep;
-  if((varnamep = hv_fetchs(ctx->moddata, "Class::Plain/method_varname", 0))) {
-    PADOFFSET padix = pad_add_name_sv(*varnamep, 0, NULL, NULL);
-    intro_my();
-
-    SV **svp = &PAD_SVl(padix);
-
-    if(*svp)
-      SvREFCNT_dec(*svp);
-
-    *svp = newRV_inc((SV *)ctx->cv);
-    SvREADONLY_on(*svp);
   }
 
   if(type != PHASER_NONE)
@@ -1080,7 +985,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1084 "lib/Class/Plain.c"
+#line 989 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1224,7 +1129,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1228 "lib/Class/Plain.c"
+#line 1133 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1249,7 +1154,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1077 "lib/Class/Plain.xs"
+#line 982 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1286,7 +1191,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1290 "lib/Class/Plain.c"
+#line 1195 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
