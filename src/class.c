@@ -115,9 +115,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 {
   AV *fields = meta->fields;
 
-  if(meta->next_fieldix == -1)
-    croak("Cannot add a new field to a class that is not yet begun");
-
   if(!fieldname || !SvOK(fieldname) || !SvCUR(fieldname))
     croak("fieldname must not be undefined or empty");
 
@@ -134,7 +131,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   FieldMeta *fieldmeta = ClassPlain_mop_create_field(fieldname, meta);
 
   av_push(fields, (SV *)fieldmeta);
-  meta->next_fieldix++;
 
   MOP_CLASS_RUN_HOOKS(meta, post_add_field, fieldmeta);
 
@@ -148,7 +144,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name)
 
   meta->name = SvREFCNT_inc(name);
 
-  meta->next_fieldix = -1;
   meta->hooks   = NULL;
   meta->fields = newAV();
   meta->methods = newAV();
@@ -176,8 +171,6 @@ void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
   if(!av_count(isa)) {
     av_push(isa, newSVpvs("Class::Plain::Base"));
   }
-  
-  meta->next_fieldix = 0;
 }
 
 /*******************

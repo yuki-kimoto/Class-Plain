@@ -7,8 +7,6 @@ typedef struct AdjustBlock {
 
 /* Metadata about a class */
 struct ClassMeta {
-  IV next_fieldix;  /* 1 + final field index of this partial within its instance; */
-
   SV *name;
   AV *hooks;           /* NULL, or AV of raw pointers directly to ClassHook structs */
   AV *fields;   /* each elem is a raw pointer directly to a FieldMeta */
