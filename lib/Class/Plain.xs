@@ -23,21 +23,9 @@
 #include "optree-additions.c.inc"
 #include "newOP_CUSTOM.c.inc"
 
-#ifdef HAVE_UNOP_AUX
-#  define METHSTART_CONTAINS_FIELD_BINDINGS
-
-/* We'll reserve the top two bits of a UV for storing the `type` value for a
- * fieldpad operation; the remainder stores the fieldix itself */
-#  define UVBITS (UVSIZE*8)
-#  define FIELDIX_TYPE_SHIFT  (UVBITS-2)
-#  define FIELDIX_MASK        ((1LL<<FIELDIX_TYPE_SHIFT)-1)
-#endif
-
 #include "meta.h"
 #include "class.h"
 #include "field.h"
-
-#define warn_deprecated(...)  Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED), __VA_ARGS__)
 
 typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, void *data);
 
@@ -68,13 +56,7 @@ static OP *pp_methstart(pTHX)
 
 OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags)
 {
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-  /* We know we're on 5.22 or above, so no worries about assert failures */
-  OP *op = newUNOP_AUX(OP_CUSTOM, flags, NULL, NULL);
-  op->op_ppaddr = &pp_methstart;
-#else
   OP *op = newOP_CUSTOM(&pp_methstart, flags);
-#endif
   op->op_private = (U8)(flags >> 8);
   return op;
 }
@@ -229,7 +211,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   if(args[argi++]->i) {
     /* extends */
-    warn_deprecated("'%s' modifier keyword is deprecated; use :isa() attribute instead", args[argi]->i ? "isa" : "extends");
     argi++; /* ignore the XPK_CHOICE() integer; `extends` and `isa` are synonyms */
     if(type != METATYPE_CLASS)
       croak("Only a class may extend another");
@@ -681,109 +662,6 @@ static int parse_phaser(pTHX_ OP **out, void *hookdata)
   return xs_parse_sublike(&parse_phaser_hooks, hookdata, out);
 }
 
-#ifdef HAVE_DMD_HELPER
-static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
-{
-  DMD_DUMP_STRUCT(ctx, "Class::Plain/FieldMeta", fieldmeta, sizeof(FieldMeta),
-    6, ((const DMDNamedField []){
-      {"the name SV",          DMD_FIELD_PTR,  .ptr = fieldmeta->name},
-      {"the class",            DMD_FIELD_PTR,  .ptr = fieldmeta->class},
-      {"the default value SV", DMD_FIELD_PTR,  .ptr = ClassPlain_mop_field_get_default_sv(fieldmeta)},
-      /* TODO: Maybe hunt for constants in the defaultexpr optree fragment? */
-      {"fieldix",              DMD_FIELD_UINT, .n   = fieldmeta->fieldix},
-      {"the :param name SV",   DMD_FIELD_PTR,  .ptr = fieldmeta->paramname},
-      {"the hooks AV",         DMD_FIELD_PTR,  .ptr = fieldmeta->hooks},
-    })
-  );
-}
-
-static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
-{
-  DMD_DUMP_STRUCT(ctx, "Class::Plain/MethodMeta", methodmeta, sizeof(MethodMeta),
-    4, ((const DMDNamedField []){
-      {"the name SV",     DMD_FIELD_PTR,  .ptr = methodmeta->name},
-      {"the class",       DMD_FIELD_PTR,  .ptr = methodmeta->class},
-      {"is_common",       DMD_FIELD_BOOL, .b   = methodmeta->is_common},
-    })
-  );
-}
-
-static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
-{
-  DMD_DUMP_STRUCT(ctx, "Class::Plain/AdjustBlock", adjustblock, sizeof(AdjustBlock),
-    2, ((const DMDNamedField []){
-      {"the CV",          DMD_FIELD_PTR,  .ptr = adjustblock->cv},
-    })
-  );
-}
-
-static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
-{
-  /* We'll handle the two types of classmeta by claiming two different struct
-   * types
-   */
-
-#define N_COMMON_FIELDS 16
-#define COMMON_FIELDS \
-      {"type",                       DMD_FIELD_U8,   .n   = classmeta->type},            \
-      {"repr",                       DMD_FIELD_U8,   .n   = classmeta->repr},            \
-      {"sealed",                     DMD_FIELD_BOOL, .b   = classmeta->sealed},          \
-      {"start_fieldix",              DMD_FIELD_UINT, .n   = classmeta->start_fieldix},   \
-      {"the name SV",                DMD_FIELD_PTR,  .ptr = classmeta->name},            \
-      {"the stash SV",               DMD_FIELD_PTR,  .ptr = classmeta->stash},           \
-      {"the pending submeta AV",     DMD_FIELD_PTR,  .ptr = classmeta->pending_submeta}, \
-      {"the hooks AV",               DMD_FIELD_PTR,  .ptr = classmeta->hooks},           \
-      {"the direct fields AV",       DMD_FIELD_PTR,  .ptr = classmeta->direct_fields},   \
-      {"the direct methods AV",      DMD_FIELD_PTR,  .ptr = classmeta->direct_methods},  \
-
-  switch(classmeta->type) {
-    case METATYPE_CLASS:
-      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.class", classmeta, sizeof(ClassMeta),
-        N_COMMON_FIELDS+5, ((const DMDNamedField []){
-          COMMON_FIELDS,
-          {"the supermeta",                         DMD_FIELD_PTR, .ptr = classmeta->cls.supermeta},
-        })
-      );
-      break;
-  }
-
-#undef COMMON_FIELDS
-
-  I32 i;
-
-  for(i = 0; i < av_count(classmeta->direct_fields); i++) {
-    FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(classmeta->direct_fields)[i];
-
-    dump_fieldmeta(aTHX_ ctx, fieldmeta);
-  }
-
-  for(i = 0; i < av_count(classmeta->direct_methods); i++) {
-    MethodMeta *methodmeta = (MethodMeta *)AvARRAY(classmeta->direct_methods)[i];
-
-    dump_methodmeta(aTHX_ ctx, methodmeta);
-  }
-
-  for(i = 0; classmeta->adjustblocks && i < av_count(classmeta->adjustblocks); i++) {
-    AdjustBlock *adjustblock = (AdjustBlock *)AvARRAY(classmeta->adjustblocks)[i];
-
-    dump_adjustblock(aTHX_ ctx, adjustblock);
-  }
-}
-
-static int dumppackage_class(pTHX_ DMDContext *ctx, const SV *sv)
-{
-  int ret = 0;
-
-  ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV((SV *)sv));
-
-  dump_classmeta(aTHX_ ctx, meta);
-
-  ret += DMD_ANNOTATE_SV(sv, (SV *)meta, "the Class::Plain class");
-
-  return ret;
-}
-#endif
-
 struct CustomFieldHookData
 {
   SV *apply_cb;
@@ -812,11 +690,7 @@ MODULE = Class::Plain    PACKAGE = Class::Plain::MetaFunctions
 BOOT:
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-  XopENTRY_set(&xop_methstart, xop_class, OA_UNOP_AUX);
-#else
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
-#endif
   Perl_custom_op_register(aTHX_ &pp_methstart, &xop_methstart);
 
   XopENTRY_set(&xop_commonmethstart, xop_name, "commonmethstart");

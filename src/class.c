@@ -94,30 +94,6 @@ ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
   return NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*gvp))));
 }
 
-#define make_instance_fields(classmeta, backingav, roleoffset)  S_make_instance_fields(aTHX_ classmeta, backingav, roleoffset)
-static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backingav, FIELDOFFSET roleoffset)
-{
-  assert(roleoffset == 0);
-
-  if(classmeta->start_fieldix) {
-    /* Superclass actually has some fields */
-    assert(classmeta->type == METATYPE_CLASS);
-    assert(classmeta->cls.supermeta->sealed);
-
-    make_instance_fields(classmeta->cls.supermeta, backingav, 0);
-  }
-
-  AV *fields = classmeta->direct_fields;
-  I32 nfields = av_count(fields);
-
-  av_extend(backingav, classmeta->next_fieldix - 1 + roleoffset);
-
-  I32 i;
-  for(i = 0; i < nfields; i++) {
-    av_push(backingav, newSV(0));
-  }
-}
-
 RoleEmbedding **ClassPlain_mop_class_get_direct_roles(pTHX_ const ClassMeta *meta, U32 *nroles)
 {
   assert(meta->type == METATYPE_CLASS);
