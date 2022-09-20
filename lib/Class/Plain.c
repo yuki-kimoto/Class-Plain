@@ -32,14 +32,6 @@
 #include "optree-additions.c.inc"
 #include "newOP_CUSTOM.c.inc"
 
-#if HAVE_PERL_VERSION(5, 26, 0)
-#  define HAVE_PARSE_SUBSIGNATURE
-#endif
-
-#if HAVE_PERL_VERSION(5, 28, 0)
-#  define HAVE_UNOP_AUX_PV
-#endif
-
 #ifdef HAVE_UNOP_AUX
 #  define METHSTART_CONTAINS_FIELD_BINDINGS
 
@@ -1128,7 +1120,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1132 "lib/Class/Plain.c"
+#line 1124 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1272,7 +1264,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1276 "lib/Class/Plain.c"
+#line 1268 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1297,7 +1289,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1125 "lib/Class/Plain.xs"
+#line 1117 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1334,7 +1326,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1338 "lib/Class/Plain.c"
+#line 1330 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

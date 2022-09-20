@@ -23,14 +23,6 @@
 #include "optree-additions.c.inc"
 #include "newOP_CUSTOM.c.inc"
 
-#if HAVE_PERL_VERSION(5, 26, 0)
-#  define HAVE_PARSE_SUBSIGNATURE
-#endif
-
-#if HAVE_PERL_VERSION(5, 28, 0)
-#  define HAVE_UNOP_AUX_PV
-#endif
-
 #ifdef HAVE_UNOP_AUX
 #  define METHSTART_CONTAINS_FIELD_BINDINGS
 
