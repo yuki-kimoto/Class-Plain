@@ -17,18 +17,7 @@ __PACKAGE__->DynaLoader::bootstrap( our $VERSION );
 
 our $XSAPI_VERSION = "0.48";
 
-# So that feature->import will work in `class`
-require feature;
-if( $] >= 5.020 ) {
-   require experimental;
-   require indirect if $] < 5.031009;
-}
-
-require mro;
-
-require Class::Plain::MOP::Class;
-
-use base 'Class::Plain::Base';
+use Class::Plain::Base;
 
 sub import
 {
@@ -38,70 +27,10 @@ sub import
    $class->import_into( $caller, @_ );
 }
 
-sub _import_experimental
-{
-   shift;
-   my ( $syms, @experiments ) = @_;
-
-   my %enabled;
-
-   my $i = 0;
-   while( $i < @$syms ) {
-      my $sym = $syms->[$i];
-
-      if( $sym eq ":experimental" ) {
-         $enabled{$_}++ for @experiments;
-      }
-      elsif( $sym =~ m/^:experimental\((.*)\)$/ ) {
-         my $tags = $1 =~ s/^\s+|\s+$//gr; # trim
-         $enabled{$_}++ for split m/\s+/, $tags;
-      }
-      else {
-         $i++;
-         next;
-      }
-
-      splice @$syms, $i, 1, ();
-   }
-
-   foreach ( @experiments ) {
-      $^H{"Class::Plain/experimental($_)"}++ if delete $enabled{$_};
-   }
-
-   croak "Unrecognised :experimental features @{[ keys %enabled ]}" if keys %enabled;
-}
-
-sub _import_configuration
-{
-   shift;
-   my ( $syms ) = @_;
-
-   # Undocumented options, purely to support Feature::Compat::Class adjusting
-   # the behaviour to closer match core's  use feature 'class'
-
-   my $i = 0;
-   while( $i < @$syms ) {
-      my $sym = $syms->[$i];
-
-      if( $sym =~ m/^:config\((.*)\)$/ ) {
-         my $opts = $1 =~ s/^\s+|\s+$//gr; # trim
-         $^H{"Class::Plain/configure($_)"}++ for split m/\s+/, $opts;
-      }
-      else {
-         $i++;
-         next;
-      }
-
-      splice @$syms, $i, 1, ();
-   }
-}
-
 sub import_into
 {
    my $class = shift;
    my $caller = shift;
-
-   $class->_import_configuration( \@_ );
 
    my %syms = map { $_ => 1 } @_;
 
@@ -114,23 +43,6 @@ sub import_into
 
    croak "Unrecognised import symbols @{[ keys %syms ]}" if keys %syms;
 }
-
-# The universal base-class methods
-
-sub Class::Plain::UNIVERSAL::_BUILDARGS
-{
-   shift; # $class
-   return @_;
-}
-
-# Back-compat wrapper
-sub Class::Plain::MOP::SlotAttr::register
-{
-   shift; # $class
-   carp "Class::Plain::MOP::SlotAttr->register is now deprecated; use Class::Plain::MOP::FieldAttr->register instead";
-   return Class::Plain::MOP::FieldAttr->register( @_ );
-}
-
 
 =encoding UTF-8
 
