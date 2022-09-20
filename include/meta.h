@@ -31,7 +31,6 @@ struct AccessorGenerationCtx {
 struct ClassHookFuncs {
   U32 ver;  /* caller must initialise to CLASSPLAIN_VERSION */
   U32 flags;
-  const char *permit_hintkey;
 
   /* called immediately at apply time; return FALSE means it did its thing immediately, so don't store it */
   bool (*apply)(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *funcdata);
@@ -49,7 +48,6 @@ struct ClassHook {
 struct FieldHookFuncs {
   U32 ver;   /* caller must initialise to CLASSPLAIN_VERSION */
   U32 flags;
-  const char *permit_hintkey;
 
   /* called immediately at apply time; return FALSE means it did its thing immediately, so don't store it */
   bool (*apply)(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *funcdata);

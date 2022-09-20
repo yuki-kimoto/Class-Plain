@@ -526,7 +526,6 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
 };
 
 static const struct XSParseKeywordHooks kwhooks_class = {
-  .permit_hintkey = "Class::Plain/class",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
@@ -595,7 +594,6 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
 
 static const struct XSParseKeywordHooks kwhooks_field = {
   .flags = XPK_FLAG_STMT,
-  .permit_hintkey = "Class::Plain/field",
 
   .check = &check_field,
 
@@ -965,7 +963,6 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .flags           = XS_PARSE_SUBLIKE_FLAG_FILTERATTRS |
                      XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS |
                      XS_PARSE_SUBLIKE_FLAG_BODY_OPTIONAL,
-  .permit_hintkey  = "Class::Plain/method",
   .permit          = parse_method_permit,
   .pre_subparse    = parse_method_pre_subparse,
   .filter_attr     = parse_method_filter_attr,
@@ -1120,7 +1117,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 1124 "lib/Class/Plain.c"
+#line 1121 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1264,7 +1261,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1268 "lib/Class/Plain.c"
+#line 1265 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1289,7 +1286,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1117 "lib/Class/Plain.xs"
+#line 1114 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1326,7 +1323,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1330 "lib/Class/Plain.c"
+#line 1327 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

@@ -517,7 +517,6 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
 };
 
 static const struct XSParseKeywordHooks kwhooks_class = {
-  .permit_hintkey = "Class::Plain/class",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
@@ -586,7 +585,6 @@ static void setup_parse_field_initexpr(pTHX_ void *hookdata)
 
 static const struct XSParseKeywordHooks kwhooks_field = {
   .flags = XPK_FLAG_STMT,
-  .permit_hintkey = "Class::Plain/field",
 
   .check = &check_field,
 
@@ -956,7 +954,6 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .flags           = XS_PARSE_SUBLIKE_FLAG_FILTERATTRS |
                      XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS |
                      XS_PARSE_SUBLIKE_FLAG_BODY_OPTIONAL,
-  .permit_hintkey  = "Class::Plain/method",
   .permit          = parse_method_permit,
   .pre_subparse    = parse_method_pre_subparse,
   .filter_attr     = parse_method_filter_attr,

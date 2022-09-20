@@ -24,11 +24,8 @@ FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmet
   FieldMeta *fieldmeta;
   Newx(fieldmeta, 1, FieldMeta);
 
-  assert(classmeta->next_fieldix > -1);
-
   fieldmeta->name = SvREFCNT_inc(field_name);
   fieldmeta->class = classmeta;
-  fieldmeta->fieldix = classmeta->next_fieldix;
 
   return fieldmeta;
 }
@@ -42,10 +39,7 @@ typedef struct FieldAttributeRegistration FieldAttributeRegistration;
 
 struct FieldAttributeRegistration {
   FieldAttributeRegistration *next;
-
   const char *name;
-  STRLEN permit_hintkeylen;
-
   const struct FieldHookFuncs *funcs;
   void *funcdata;
 };
@@ -61,29 +55,18 @@ static void ClassPlain_register_field_attribute(const char *name, const struct F
   reg->funcs    = funcs;
   reg->funcdata = funcdata;
 
-  if(funcs->permit_hintkey)
-    reg->permit_hintkeylen = strlen(funcs->permit_hintkey);
-  else
-    reg->permit_hintkeylen = 0;
-
   reg->next = fieldattrs;
   fieldattrs = reg;
 }
 
 void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value)
 {
-  HV *hints = GvHV(PL_hintgv);
-
   if(value && (!SvPOK(value) || !SvCUR(value)))
     value = NULL;
 
   FieldAttributeRegistration *reg;
   for(reg = fieldattrs; reg; reg = reg->next) {
     if(!strEQ(name, reg->name))
-      continue;
-
-    if(reg->funcs->permit_hintkey &&
-       (!hints || !hv_fetch(hints, reg->funcs->permit_hintkey, reg->permit_hintkeylen, 0)))
       continue;
 
     break;
@@ -187,6 +170,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   ops = op_append_list(OP_LINESEQ, ops,
     ClassPlain_newFIELDPADOP(flags, ctx.padix, fieldmeta->fieldix));
+
 
   MOP_FIELD_RUN_HOOKS(fieldmeta, gen_accessor_ops, type, &ctx);
 

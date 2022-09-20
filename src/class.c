@@ -40,10 +40,7 @@ typedef struct ClassAttributeRegistration ClassAttributeRegistration;
 
 struct ClassAttributeRegistration {
   ClassAttributeRegistration *next;
-
   const char *name;
-  STRLEN permit_hintkeylen;
-
   const struct ClassHookFuncs *funcs;
   void *funcdata;
 };
@@ -58,11 +55,6 @@ static void register_class_attribute(const char *name, const struct ClassHookFun
   reg->name = name;
   reg->funcs = funcs;
   reg->funcdata = funcdata;
-
-  if(funcs->permit_hintkey)
-    reg->permit_hintkeylen = strlen(funcs->permit_hintkey);
-  else
-    reg->permit_hintkeylen = 0;
 
   reg->next  = classattrs;
   classattrs = reg;
@@ -80,26 +72,17 @@ void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct Cl
   if(!name || !(name[0] >= 'A' && name[0] <= 'Z'))
     croak("Third-party class attribute names must begin with a capital letter");
 
-  if(!funcs->permit_hintkey)
-    croak("Third-party class attributes require a permit hinthash key");
-
   register_class_attribute(name, funcs, funcdata);
 }
 
 void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value)
 {
-  HV *hints = GvHV(PL_hintgv);
-
   if(value && (!SvPOK(value) || !SvCUR(value)))
     value = NULL;
 
   ClassAttributeRegistration *reg;
   for(reg = classattrs; reg; reg = reg->next) {
     if(!strEQ(name, reg->name))
-      continue;
-
-    if(reg->funcs->permit_hintkey &&
-        (!hints || !hv_fetch(hints, reg->funcs->permit_hintkey, reg->permit_hintkeylen, 0)))
       continue;
 
     SV *hookdata = value;
