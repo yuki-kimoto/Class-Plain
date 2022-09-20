@@ -80,13 +80,6 @@ void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
   padix = pad_add_name_pvs("@(Class::Plain/slots)", 0, NULL, NULL);
   if(padix != PADIX_SLOTS)
     croak("ARGH: Expected that padix[@slots] = 2");
-
-  if(meta->type == METATYPE_ROLE) {
-    /* Don't give this a padname or Future::AsyncAwait will break it (RT137649) */
-    padix = pad_add_name_pvs("", 0, NULL, NULL);
-    if(padix != PADIX_EMBEDDING)
-      croak("ARGH: Expected that padix[(embedding)] = 3");
-  }
 }
 
 #define find_padix_for_field(fieldmeta)  S_find_padix_for_field(aTHX_ fieldmeta)
