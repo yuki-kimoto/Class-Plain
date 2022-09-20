@@ -62,4 +62,41 @@ SKIP: {
   is($foo->foo(4), 4);
 }
 
+{
+  class ClassAnonMethod {
+     field data;
+
+     method new : common {
+       my $self = $class->SUPER::new(@_);
+       
+       return $self;
+     }
+
+     my $priv = method {
+        "data<$self->{data}>";
+     };
+
+     method m { return $self->$priv }
+  }
+
+  {
+     my $obj = ClassAnonMethod->new( data => "value" );
+     is( $obj->m, "data<value>", 'method can invoke captured method ref' );
+  }
+}
+
+{
+  class ClassException {
+     field x;
+     method clear { $self->{x} = 0 }
+  }
+
+  {
+     ok( !eval { ClassException->clear },
+        'method on non-instance fails' );
+     like( $@, qr/^Cannot invoke method on a non-instance /,
+        'message from method on non-instance' );
+  }
+}
+
 done_testing;
