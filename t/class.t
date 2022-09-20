@@ -171,8 +171,18 @@ my @build;
 # The empty inheritance
 {
   class EmptyInheritance : isa() {
-    
   }
+  
+  is_deeply(\@EmptyInheritance::ISA, []);
+}
+
+# The own super class
+{
+  class EmptyInheritance : isa() {
+    push @EmptyInheritance::ISA, 'MyBase';
+  }
+  
+  is_deeply(\@EmptyInheritance::ISA, ['MyBase']);
 }
 
 done_testing;

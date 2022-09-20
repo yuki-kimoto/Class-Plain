@@ -145,6 +145,7 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name)
   meta->hooks   = NULL;
   meta->fields = newAV();
   meta->methods = newAV();
+  meta->isa_empty = 0;
 
   ClassPlain_need_PLparser();
 
@@ -165,9 +166,11 @@ void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
   SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
   SAVEFREESV(isa_name);
   AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
-
-  if(!av_count(isa)) {
-    av_push(isa, newSVpvs("Class::Plain::Base"));
+  
+  if (!meta->isa_empty) {
+    if(!av_count(isa)) {
+      av_push(isa, newSVpvs("Class::Plain::Base"));
+    }
   }
 }
 
