@@ -19,15 +19,6 @@ struct ClassMeta {
   AV *direct_methods;  /* each elem is a raw pointer directly to a MethodMeta */
 
   CV *methodscope;     /* a temporary CV used just during compilation of a `method` */
-
-  union {
-    /* Things that only true classes have */
-    struct {
-      ClassMeta *supermeta; /* superclass */
-      CV *foreign_new;      /* superclass is not Class::Plain, here is the constructor */
-      CV *foreign_does;     /* superclass is not Class::Plain, here is SUPER::DOES (which could be UNIVERSAL::DOES) */
-    } cls; /* not 'class' or C++ compilers get upset */
-  };
 };
 
 struct MethodMeta {
