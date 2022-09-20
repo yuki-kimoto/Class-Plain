@@ -10,14 +10,7 @@ use Class::Plain;
 use lib "t/lib";
 BEGIN { require "91rt141483Role.pm" }
 
-class C :does(R) {
-  method new : common {
-    my $self = $class->SUPER::new(@_);
-    
-    return $self;
-  }
-  
-}
+class C : does(R) {}
 
 is( C->new->name, "Gantenbein", 'Value preserved from role-scoped lexical' );
 
