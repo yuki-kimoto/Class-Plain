@@ -103,10 +103,10 @@ The following class attributes are supported:
 =head3 isa Attribute
  
  # The single inheritance
- : isa(CLASS)
+ : isa(SUPER_CLASS)
  
  # The multiple inheritance
- : isa(CLASS1) isa(Class2)
+ : isa(SUPER_CLASS1) isa(SUPER_Class2)
  
  # The super class is nothing
  : isa()
@@ -115,13 +115,11 @@ Define a supper classes that this class extends.
 
 If the supper class is not specified by C<isa> attribute, the class inherits L<Class::Plain::Base>.
 
-If the package providing the supper class does not exist, an attempt is made to
-load it by code equivalent to
-c
-  require CLASS ();
+The super class is added to the end of C<@ISA>.
 
-and thus it must either already exist, or be locatable via the usual C<@INC>
-mechanisms.
+If the the super class name doesn't exists in the Perl's symbol table, the super class is loaded.
+
+Otherwise if the super class doesn't have the C<new> method and doesn't have the class names in C<@ISA>, the super class is loaded.
 
 =head2 field
   

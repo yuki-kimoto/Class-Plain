@@ -235,8 +235,34 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hoo
       croak("Unexpected characters while parsing :isa() attribute: %s", end);
 
     HV *superstash = gv_stashsv(super_class_name, 0);
+    
+    IV is_load_module;
+    if (superstash) {
+      // The new method
+      SV** new_method = hv_fetchs(superstash, "new", 0);
+      
+      // The length of the classes in @ISA
+      SV* super_class_isa_name = newSVpvf("%" SVf "::ISA", super_class_name);
+      SAVEFREESV(super_class_isa_name);
+      AV* super_class_isa = get_av(SvPV_nolen(super_class_isa_name), GV_ADD | (SvFLAGS(super_class_isa_name) & SVf_UTF8));
+      IV super_class_isa_classes_length = av_count(super_class_isa);
+      
+      if (new_method) {
+        is_load_module = 0;
+      }
+      else if (super_class_isa_classes_length > 0) {
+        is_load_module = 0;
+      }
+      else {
+        is_load_module = 1;
+      }
+    }
+    else {
+      is_load_module = 1;
+    }
+    
     // Original logic: if(!superstash || !hv_fetchs(superstash, "new", 0)) {
-    if(!superstash) {
+    if(is_load_module) {
       /* Try to `require` the module then attempt a second time */
       /* load_module() will modify the name argument and take ownership of it */
       load_module(PERL_LOADMOD_NOIMPORT, newSVsv(super_class_name), NULL, NULL);
