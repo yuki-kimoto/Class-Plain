@@ -53,7 +53,7 @@ class TwiceCounter :isa(Counter) {
      return $self;
    }
    
-   method inc :override { $self->SUPER::inc; $self->SUPER::inc; }
+   method inc { $self->SUPER::inc; $self->SUPER::inc; }
 }
 
 {

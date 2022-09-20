@@ -376,21 +376,8 @@ static void S_apply_method_common(pTHX_ MethodMeta *meta, const char *val, void 
   meta->is_common = true;
 }
 
-static void S_apply_method_override(pTHX_ MethodMeta *meta, const char *val, void *_data)
-{
-  if(!meta->name)
-    croak("Cannot apply :override to anonymous methods");
-
-  GV *gv = gv_fetchmeth_sv(compclassmeta->stash, meta->name, 0, 0);
-  if(gv && GvCV(gv))
-    return;
-
-  croak("Superclass does not have a method named '%" SVf "'", SVfARG(meta->name));
-}
-
 static struct MethodAttributeDefinition method_attributes[] = {
   { "common",   &S_apply_method_common,   NULL },
-  { "override", &S_apply_method_override, NULL },
   { 0 }
 };
 

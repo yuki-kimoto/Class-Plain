@@ -245,15 +245,4 @@ method. A class-common method may be invoked on class names instead of
 instances. Within the method body there is a lexical C<$class> available.
 It will already have been shifted from the C<@_> array.
 
-=head3 override Attribute
-
-   method foo : override {
-     
-   }
- 
-Marks that this method expects to override another of the same name from a
-supper class. It is an error at compiletime if the supper class does not provide
-such a method.
-
-
 1;
