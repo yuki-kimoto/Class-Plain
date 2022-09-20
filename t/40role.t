@@ -35,7 +35,7 @@ role BRole {
    method two { return 2 }
 }
 
-class BClass :does(ARole) :does(BRole) {
+class BClass does ARole, BRole {
   method new : common {
     my $self = $class->SUPER::new(@_);
     

@@ -182,11 +182,11 @@ The class that has not the parent class inherits L<Class::Plain::Base>.
 
 =head2 class
 
-   class Name :ATTRS... {
+   class Name : ATTRS... {
       ...
    }
 
-   class Name :ATTRS...;
+   class Name : ATTRS...;
 
 Behaves similarly to the C<package> keyword, but provides a package that
 defines a new class.
@@ -200,45 +200,29 @@ keywords and definitions.
 
    class Name;
 
-A single superclass is supported by the keyword C<isa>
-
-   class Name isa BASECLASS {
+A single superclass is supported by the C<extends> keyword or the C<isa> attribute.
+   
+   # Moo-ish
+   class Name extends BASECLASS {
+      ...
+   }
+   
+   # Corinna-ish
+   class Name : isa(BASECLASS) {
       ...
    }
 
-Prior to version 0.41 this was called C<extends>, which is currently
-recognised as a compatibility synonym. Both C<extends> and C<isa> keywords are
-now deprecated, in favour of the L</:isa> attribute which is preferred
-because it follows a more standard grammar without this special-case.
-
-One or more roles can be composed into the class by the keyword C<does>
-
-   class Name does ROLE, ROLE,... {
+One or more roles can be composed into the class by the C<does> attribute.
+   
+   class Name : does(ROLE) : dose(ROLE)) {
       ...
    }
-
-Prior to version 0.41 this was called C<implements>, which is currently
-recognised as a compatibility synonym. Both C<implements> and C<does> keywords
-are now deprecated, in favour of the L</:does> attribute which is preferred
-because it follows a more standard grammar without this special-case.
-
-An optional list of attributes may be supplied in similar syntax as for subs
-or lexical variables. (These are annotations about the class itself; the
-concept should not be confused with per-object-instance data, which here is
-called "fields").
-
-Whitespace is permitted within the value and is automatically trimmed, but as
-standard Perl parsing rules, no space is permitted between the attribute's
-name and the open parenthesis of its value:
-
-   :attr( value here )     # is permitted
-   :attr (value here)      # not permitted
 
 The following class attributes are supported:
 
-=head3 :isa
+=head3 isa Attribute
 
-   :isa(CLASS)
+   : isa(CLASS)
 
 Declares a superclass that this class extends. At most one superclass is
 supported.
@@ -255,27 +239,27 @@ The superclass may or may not itself be implemented by C<Class::Plain>, but if
 it is not then see L<SUBCLASSING CLASSIC PERL CLASSES> for further detail on
 the semantics of how this operates.
 
-=head3 :does
+=head3 does Attribute
 
-   :does(ROLE)
+   : does(ROLE)
 
 Composes a role into the class; optionally requiring a version check on the
-role package. This is a newer form of the C<implements> and C<does>
+role package. This is a newer form of the C<does>
 keywords and should be preferred for new code.
 
 Multiple roles can be composed by using multiple C<:does> attributes, one per
 role.
 
-The package will be loaded in a similar way to how the L</:isa> attribute is
+The package will be loaded in a similar way to how the L</"isa Attribute"> attribute is
 handled.
 
 =head2 role
 
-   role Name :ATTRS... {
+   role Name : ATTRS... {
       ...
    }
 
-   role Name :ATTRS...;
+   role Name : ATTRS...;
 
 Similar to C<class>, but provides a package that defines a new role. A role
 acts similar to a class in some respects, and differently in others.
@@ -291,7 +275,7 @@ A role does not provide a constructor, and instances cannot directly be
 constructed. A role cannot extend a class.
 
 A role can declare that it required methods of given names from any class that
-implements the role.
+does the role.
 
    role Name {
       method METHOD;
@@ -309,9 +293,15 @@ role as well.
 The following role attributes are supported:
 
 =head2 field
-
+   
+   # Moo-ish
+   has Name;
+   
+   has Name : ATTR ATTR...;
+   
+   # Corinna-ish
    field Name;
-
+   
    field Name : ATTR ATTR...;
 
 Declares that the instances of the class or role have a member field of the
@@ -319,40 +309,34 @@ given name.
 
 The following field attributes are supported:
 
-=head3 :reader, :reader(NAME)
+=head3 reader Attribute
 
 Generates a reader method to return the current value of the field. If no name
 is given, the name of the field is used.
 
    field x :reader;
+   field x :reader(x_different_name);
 
    # equivalent to
    field x;  method x { return $x }
 
-=head3 :writer, :writer(NAME)
+=head3 writer Attribute
 
 Generates a writer method to set a new value of the field from its arguments.
 If no name is given, the name of the field is used prefixed by C<set_>.
 
    field x :writer;
 
+   field x :writer(set_x_different_name);
+
    # equivalent to
-   field x;
-   method set_x { $x = shift; return $self }
+   method set_x { $self->{x} = shift; return $self }
 
-a generated writer method will return the object
-invocant itself, allowing a chaining style.
-
-   $obj->set_x("x")
-      ->set_y("y")
-      ->set_z("z");
-
-=head3 :accessor, :accessor(NAME)
+=head3 accessor Attribute
 
 Generates a combined reader-writer accessor method to set or return the value
 of the field. These are only permitted for scalar fields. If no name is given,
-the name of the field is used. A prefix character C<_> will be removed if
-present.
+the name of the field is used.
 
 This method takes either zero or one additional arguments. If an argument is
 passed, the value of the field is set from this argument (even if it is
@@ -361,21 +345,18 @@ field is not modified. In either case, the value of the field is then
 returned.
 
    field x :accessor;
+   field x :accessor(x_different_name);
 
    # equivalent to
    field x;
 
    method field {
-      $x = shift if @_;
+      $self->{x} = shift if @_;
       return $x;
    }
 
 =head2 has
-
-   has Name;
-
-   has Name : ATTR ATTR...;
-
+   
 The alias for the L</field> keyword.
 
 =head2 method
@@ -388,7 +369,7 @@ The alias for the L</field> keyword.
       ...
    }
 
-   method NAME :ATTRS... {
+   method NAME : ATTRS... {
       ...
    }
 
@@ -402,7 +383,7 @@ from the C<@_> array.
 
 If the method has no body and is given simply as a name, this declares a
 I<required> method for a role. Such a method must be provided by any class
-that implements the role. It will be a compiletime error to combine the role
+that does the role. It will be a compiletime error to combine the role
 with a class that does not provide this.
 
 The C<signatures> feature is automatically enabled for method declarations. In
@@ -435,13 +416,13 @@ name of a method matches a core function.
 
 The following additional attributes are recognised by C<Class::Plain> directly:
 
-=head3 :override
+=head3 override Attribute
 
 Marks that this method expects to override another of the same name from a
 superclass. It is an error at compiletime if the superclass does not provide
 such a method.
 
-=head3 :common
+=head3 common Attribute
 
 Marks that this method is a class-common method, instead of a regular instance
 method. A class-common method may be invoked on class names instead of

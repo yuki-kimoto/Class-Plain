@@ -523,12 +523,11 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   if(superclassname && SvOK(superclassname))
     mop_class_set_superclass(meta, superclassname);
 
-  int nimplements = args[argi++]->i;
-  if(nimplements) {
+  int ndoess = args[argi++]->i;
+  if(ndoess) {
     int i;
-    for(i = 0; i < nimplements; i++) {
-      warn_deprecated("'%s' modifier keyword is deprecated; use :does() attribute instead", args[argi]->i ? "does" : "implements");
-      argi++; /* ignore the XPK_CHOICE() integer; `implements` and `does` are synonyms */
+    for(i = 0; i < ndoess; i++) {
+      argi++; /* ignore the XPK_CHOICE() integer; `doess` and `does` are synonyms */
       int nroles = args[argi++]->i;
       while(nroles--) {
         SV *rolename = args[argi++]->sv;
@@ -661,7 +660,7 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
    * right now there's only one thing permitted here anyway
    */
   XPK_REPEATED(
-    XPK_CHOICE( XPK_LITERAL("implements"), XPK_LITERAL("does") ), XPK_COMMALIST( XPK_PACKAGENAME, XPK_VSTRING_OPT )
+    XPK_CHOICE( XPK_LITERAL("does") ), XPK_COMMALIST( XPK_PACKAGENAME, XPK_VSTRING_OPT )
   ),
   XPK_ATTRIBUTES,
   {0}
@@ -1440,7 +1439,7 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
   return NULL;
 }
 
-#line 1444 "lib/Class/Plain.c"
+#line 1443 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1584,7 +1583,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1588 "lib/Class/Plain.c"
+#line 1587 "lib/Class/Plain.c"
 
 /* INCLUDE:  Including 'mop-class.xsi' from 'Plain.xs' */
 
@@ -1674,7 +1673,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class__create_class)
       av_push(PL_unitcheckav, (SV *)cv);
     }
   }
-#line 1678 "lib/Class/Plain.c"
+#line 1677 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1698,7 +1697,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_is_class)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = (meta->type == ix);
   }
-#line 1702 "lib/Class/Plain.c"
+#line 1701 "lib/Class/Plain.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
@@ -1720,7 +1719,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_name)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = SvREFCNT_inc(meta->name);
   }
-#line 1724 "lib/Class/Plain.c"
+#line 1723 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1751,7 +1750,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_superclasses)
 
     XSRETURN(0);
   }
-#line 1755 "lib/Class/Plain.c"
+#line 1754 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1801,7 +1800,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_direct_roles)
 
     XSRETURN(count);
   }
-#line 1805 "lib/Class/Plain.c"
+#line 1804 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1849,7 +1848,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_role)
 
     mop_class_add_role(meta, rolemeta);
   }
-#line 1853 "lib/Class/Plain.c"
+#line 1852 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -1908,7 +1907,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_method)
     RETVAL = newSV(0);
     sv_setref_uv(RETVAL, "Class::Plain::MOP::Method", PTR2UV(methodmeta));
   }
-#line 1912 "lib/Class/Plain.c"
+#line 1911 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1960,7 +1959,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_get_direct_method)
     croak("Class %" SVf " does not have a method called '%" SVf "'",
       meta->name, methodname);
   }
-#line 1964 "lib/Class/Plain.c"
+#line 1963 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2018,7 +2017,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_direct_methods)
     } while(recurse && meta);
 
     XSRETURN(retcount);
-#line 2022 "lib/Class/Plain.c"
+#line 2021 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2042,7 +2041,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_required_method)
 
     mop_class_add_required_method(meta, mname);
   }
-#line 2046 "lib/Class/Plain.c"
+#line 2045 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2112,7 +2111,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_field)
     RETVAL = newSV(0);
     sv_setref_uv(RETVAL, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
   }
-#line 2116 "lib/Class/Plain.c"
+#line 2115 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2155,7 +2154,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_get_field)
     croak("Class %" SVf " does not have a field called '%" SVf "'",
       meta->name, fieldname);
   }
-#line 2159 "lib/Class/Plain.c"
+#line 2158 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2189,7 +2188,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_fields)
       sv_setref_iv(ST(i), "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
     }
     XSRETURN(nfields);
-#line 2193 "lib/Class/Plain.c"
+#line 2192 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2223,7 +2222,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_required_method_names)
       ST(i) = sv_2mortal(newSVsv(AvARRAY(required_methods)[i]));
     }
     XSRETURN(nmethods);
-#line 2227 "lib/Class/Plain.c"
+#line 2226 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2243,7 +2242,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_seal)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
 
     mop_class_seal(meta);
-#line 2247 "lib/Class/Plain.c"
+#line 2246 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2280,7 +2279,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Method_name)
       default: RETVAL = NULL;
     }
   }
-#line 2284 "lib/Class/Plain.c"
+#line 2283 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2323,7 +2322,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_name)
       default: RETVAL = NULL;
     }
   }
-#line 2327 "lib/Class/Plain.c"
+#line 2326 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2400,7 +2399,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_value)
     ST(0) = value;
     XSRETURN(1);
   }
-#line 2404 "lib/Class/Plain.c"
+#line 2403 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2426,7 +2425,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_has_attribute)
     const struct FieldHook *hook = mop_field_get_attribute(meta, SvPV_nolen(name));
     RETVAL = !!hook;
   }
-#line 2430 "lib/Class/Plain.c"
+#line 2429 "lib/Class/Plain.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
@@ -2455,7 +2454,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_value)
 
     RETVAL = newSVsv(hook->hookdata);
   }
-#line 2459 "lib/Class/Plain.c"
+#line 2458 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2494,7 +2493,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_values)
 
     XSRETURN(count);
   }
-#line 2498 "lib/Class/Plain.c"
+#line 2497 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2515,7 +2514,7 @@ XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register)
 ;
 	SV *	name = ST(1)
 ;
-#line 1453 "lib/Class/Plain.xs"
+#line 1452 "lib/Class/Plain.xs"
   {
     PERL_UNUSED_VAR(class);
     dKWARG(2);
@@ -2555,7 +2554,7 @@ XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register)
 
     register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
   }
-#line 2559 "lib/Class/Plain.c"
+#line 2558 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2571,7 +2570,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 	SV *	RETVAL;
 	SV *	obj = ST(0)
 ;
-#line 1498 "lib/Class/Plain.xs"
+#line 1497 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to metaclass");
@@ -2584,7 +2583,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 
     RETVAL = newSVsv(GvSV(*gvp));
   }
-#line 2588 "lib/Class/Plain.c"
+#line 2587 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2603,7 +2602,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
     {
 	SV *	obj = ST(0)
 ;
-#line 1516 "lib/Class/Plain.xs"
+#line 1515 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to deconstruct_object");
@@ -2636,7 +2635,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
     SPAGAIN;
     XSRETURN(retcount);
   }
-#line 2640 "lib/Class/Plain.c"
+#line 2639 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2655,7 +2654,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 ;
 	SV *	obj = ST(1)
 ;
-#line 1552 "lib/Class/Plain.xs"
+#line 1551 "lib/Class/Plain.xs"
   {
     SV *want_classname = NULL, *want_fieldname;
 
@@ -2713,7 +2712,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 done:
     ;
   }
-#line 2717 "lib/Class/Plain.c"
+#line 2716 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2804,7 +2803,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1613 "lib/Class/Plain.xs"
+#line 1612 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -2848,7 +2847,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 2852 "lib/Class/Plain.c"
+#line 2851 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

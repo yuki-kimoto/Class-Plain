@@ -514,12 +514,11 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   if(superclassname && SvOK(superclassname))
     mop_class_set_superclass(meta, superclassname);
 
-  int nimplements = args[argi++]->i;
-  if(nimplements) {
+  int ndoess = args[argi++]->i;
+  if(ndoess) {
     int i;
-    for(i = 0; i < nimplements; i++) {
-      warn_deprecated("'%s' modifier keyword is deprecated; use :does() attribute instead", args[argi]->i ? "does" : "implements");
-      argi++; /* ignore the XPK_CHOICE() integer; `implements` and `does` are synonyms */
+    for(i = 0; i < ndoess; i++) {
+      argi++; /* ignore the XPK_CHOICE() integer; `doess` and `does` are synonyms */
       int nroles = args[argi++]->i;
       while(nroles--) {
         SV *rolename = args[argi++]->sv;
@@ -652,7 +651,7 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
    * right now there's only one thing permitted here anyway
    */
   XPK_REPEATED(
-    XPK_CHOICE( XPK_LITERAL("implements"), XPK_LITERAL("does") ), XPK_COMMALIST( XPK_PACKAGENAME, XPK_VSTRING_OPT )
+    XPK_CHOICE( XPK_LITERAL("does") ), XPK_COMMALIST( XPK_PACKAGENAME, XPK_VSTRING_OPT )
   ),
   XPK_ATTRIBUTES,
   {0}
