@@ -65,9 +65,6 @@ struct MethodAttributeDefinition {
  * Class and Field Implementation *
  **********************************/
 
-/* Empty role embedding that is applied to all invokable role methods */
-static RoleEmbedding embedding_standalone = {};
-
 void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
 {
   PADOFFSET padix;
@@ -442,7 +439,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   int nattrs = args[argi++]->i;
   if(nattrs) {
     if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
-      croak("Class/role attributes are not permitted");
+      croak("Class attributes are not permitted");
 
     int i;
     for(i = 0; i < nattrs; i++) {
@@ -552,11 +549,6 @@ static const struct XSParseKeywordHooks kwhooks_class = {
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
-static const struct XSParseKeywordHooks kwhooks_role = {
-  .permit_hintkey = "Class::Plain/role",
-  .pieces = pieces_classlike,
-  .build = &build_classlike,
-};
 
 static void check_field(pTHX_ void *hookdata)
 {
@@ -564,9 +556,6 @@ static void check_field(pTHX_ void *hookdata)
   
   if(!have_compclassmeta)
     croak("Cannot '%s' outside of 'class'", kwname);
-
-  if(compclassmeta->role_is_invokable)
-    croak("Cannot add field data to an invokable role");
 
   if(!sv_eq(PL_curstname, compclassmeta->name))
     croak("Current package name no longer matches current class (%" SVf " vs %" SVf ")",
@@ -720,7 +709,6 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
 
   compmethodmeta->name = SvREFCNT_inc(ctx->name);
   compmethodmeta->class = NULL;
-  compmethodmeta->role  = NULL;
   compmethodmeta->is_common = false;
 
   hv_stores(ctx->moddata, "Class::Plain/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
@@ -775,20 +763,6 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
       croak("ARGH: Expected that padix[$class] = 1");
   }
 
-  if(compclassmeta->type == METATYPE_ROLE) {
-    PAD *pad1 = PadlistARRAY(CvPADLIST(PL_compcv))[1];
-
-    if(compclassmeta->role_is_invokable) {
-      SV *sv = PadARRAY(pad1)[PADIX_EMBEDDING];
-      sv_setpvn(sv, "", 0);
-      SvPVX(sv) = (void *)&embedding_standalone;
-    }
-    else {
-      SvREFCNT_dec(PadARRAY(pad1)[PADIX_EMBEDDING]);
-      PadARRAY(pad1)[PADIX_EMBEDDING] = &PL_sv_undef;
-    }
-  }
-
   intro_my();
 }
 
@@ -803,7 +777,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
-   * declaration; a required method for a role
+   * declaration; a required method
    */
   if(ctx->body && !compmethodmeta->is_common) {
     OP *fieldops = NULL, *methstartop;
@@ -982,16 +956,6 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
   if(ctx->cv)
     CvMETHOD_on(ctx->cv);
 
-  if(!ctx->cv) {
-    /* This is a required method declaration for a role */
-    /* TODO: This was a pretty rubbish way to detect that. We should remember it
-     *   more reliably */
-
-    /* This already checks and complains if meta->type != METATYPE_ROLE */
-    mop_class_add_required_method(compclassmeta, ctx->name);
-    return;
-  }
-
   switch(type) {
     case PHASER_NONE:
       if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
@@ -1080,7 +1044,6 @@ static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
     4, ((const DMDNamedField []){
       {"the name SV",     DMD_FIELD_PTR,  .ptr = methodmeta->name},
       {"the class",       DMD_FIELD_PTR,  .ptr = methodmeta->class},
-      {"the origin role", DMD_FIELD_PTR,  .ptr = methodmeta->role},
       {"is_common",       DMD_FIELD_BOOL, .b   = methodmeta->is_common},
     })
   );
@@ -1091,18 +1054,6 @@ static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
   DMD_DUMP_STRUCT(ctx, "Class::Plain/AdjustBlock", adjustblock, sizeof(AdjustBlock),
     2, ((const DMDNamedField []){
       {"the CV",          DMD_FIELD_PTR,  .ptr = adjustblock->cv},
-    })
-  );
-}
-
-static void dump_roleembedding(pTHX_ DMDContext *ctx, RoleEmbedding *embedding)
-{
-  DMD_DUMP_STRUCT(ctx, "Class::Plain/RoleEmbedding", embedding, sizeof(RoleEmbedding),
-    4, ((const DMDNamedField []){
-      {"the embedding SV", DMD_FIELD_PTR,  .ptr = embedding->embeddingsv},
-      {"the role",         DMD_FIELD_PTR,  .ptr = embedding->rolemeta},
-      {"the class",        DMD_FIELD_PTR,  .ptr = embedding->classmeta},
-      {"offset",           DMD_FIELD_UINT, .n   = embedding->offset}
     })
   );
 }
@@ -1139,18 +1090,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
           {"the supermeta",                         DMD_FIELD_PTR, .ptr = classmeta->cls.supermeta},
           {"the foreign superclass constructor CV", DMD_FIELD_PTR, .ptr = classmeta->cls.foreign_new},
           {"the foreign superclass DOES CV",        DMD_FIELD_PTR, .ptr = classmeta->cls.foreign_does},
-          {"the direct roles AV",                   DMD_FIELD_PTR, .ptr = classmeta->cls.direct_roles},
-          {"the embedded roles AV",                 DMD_FIELD_PTR, .ptr = classmeta->cls.embedded_roles},
-        })
-      );
-      break;
-
-    case METATYPE_ROLE:
-      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.role", classmeta, sizeof(ClassMeta),
-        N_COMMON_FIELDS+2, ((const DMDNamedField []){
-          COMMON_FIELDS,
-          {"the superroles AV",           DMD_FIELD_PTR, .ptr = classmeta->role.superroles},
-          {"the role applied classes HV", DMD_FIELD_PTR, .ptr = classmeta->role.applied_classes},
         })
       );
       break;
@@ -1176,21 +1115,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
     AdjustBlock *adjustblock = (AdjustBlock *)AvARRAY(classmeta->adjustblocks)[i];
 
     dump_adjustblock(aTHX_ ctx, adjustblock);
-  }
-
-  switch(classmeta->type) {
-    case METATYPE_CLASS:
-      for(i = 0; i < av_count(classmeta->cls.direct_roles); i++) {
-        RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(classmeta->cls.direct_roles)[i];
-
-        dump_roleembedding(aTHX_ ctx, embedding);
-      }
-      break;
-
-    case METATYPE_ROLE:
-      /* No need to dump the values of role.applied_classes because any class
-       * they're applied to will have done that already */
-      break;
   }
 }
 
@@ -1420,14 +1344,6 @@ deconstruct_object(SV *obj)
     while(classmeta) {
       retcount += deconstruct_object_class(backingav, classmeta, 0);
 
-      AV *roles = classmeta->cls.direct_roles;
-      U32 nroles = av_count(roles);
-      for(U32 i = 0; i < nroles; i++) {
-        RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(roles)[i];
-
-        retcount += deconstruct_object_class(backingav, embedding->rolemeta, embedding->offset);
-      }
-
       classmeta = classmeta->cls.supermeta;
     }
 
@@ -1469,18 +1385,6 @@ ref_field(SV *fieldname, SV *obj)
         RETVAL = ref_field_class(want_fieldname, backingav, classmeta, 0);
         if(RETVAL)
           goto done;
-      }
-
-      AV *roles = classmeta->cls.direct_roles;
-      U32 nroles = av_count(roles);
-      for(U32 i = 0; i < nroles; i++) {
-        RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(roles)[i];
-
-        if(!want_classname || sv_eq(want_classname, embedding->rolemeta->name)) {
-          RETVAL = ref_field_class(want_fieldname, backingav, embedding->rolemeta, embedding->offset);
-          if(RETVAL)
-            goto done;
-        }
       }
 
       classmeta = classmeta->cls.supermeta;
@@ -1530,8 +1434,6 @@ BOOT:
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
 
   register_xs_parse_keyword("class", &kwhooks_class, (void *)METATYPE_CLASS);
-  register_xs_parse_keyword("role",  &kwhooks_role,  (void *)METATYPE_ROLE);
-
   register_xs_parse_keyword("field", &kwhooks_field, "field");
   register_xs_parse_keyword("has",   &kwhooks_field,   "has");
 

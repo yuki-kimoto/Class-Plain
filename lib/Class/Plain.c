@@ -74,9 +74,6 @@ struct MethodAttributeDefinition {
  * Class and Field Implementation *
  **********************************/
 
-/* Empty role embedding that is applied to all invokable role methods */
-static RoleEmbedding embedding_standalone = {};
-
 void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
 {
   PADOFFSET padix;
@@ -451,7 +448,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   int nattrs = args[argi++]->i;
   if(nattrs) {
     if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
-      croak("Class/role attributes are not permitted");
+      croak("Class attributes are not permitted");
 
     int i;
     for(i = 0; i < nattrs; i++) {
@@ -561,11 +558,6 @@ static const struct XSParseKeywordHooks kwhooks_class = {
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
-static const struct XSParseKeywordHooks kwhooks_role = {
-  .permit_hintkey = "Class::Plain/role",
-  .pieces = pieces_classlike,
-  .build = &build_classlike,
-};
 
 static void check_field(pTHX_ void *hookdata)
 {
@@ -573,9 +565,6 @@ static void check_field(pTHX_ void *hookdata)
   
   if(!have_compclassmeta)
     croak("Cannot '%s' outside of 'class'", kwname);
-
-  if(compclassmeta->role_is_invokable)
-    croak("Cannot add field data to an invokable role");
 
   if(!sv_eq(PL_curstname, compclassmeta->name))
     croak("Current package name no longer matches current class (%" SVf " vs %" SVf ")",
@@ -729,7 +718,6 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
 
   compmethodmeta->name = SvREFCNT_inc(ctx->name);
   compmethodmeta->class = NULL;
-  compmethodmeta->role  = NULL;
   compmethodmeta->is_common = false;
 
   hv_stores(ctx->moddata, "Class::Plain/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
@@ -784,20 +772,6 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
       croak("ARGH: Expected that padix[$class] = 1");
   }
 
-  if(compclassmeta->type == METATYPE_ROLE) {
-    PAD *pad1 = PadlistARRAY(CvPADLIST(PL_compcv))[1];
-
-    if(compclassmeta->role_is_invokable) {
-      SV *sv = PadARRAY(pad1)[PADIX_EMBEDDING];
-      sv_setpvn(sv, "", 0);
-      SvPVX(sv) = (void *)&embedding_standalone;
-    }
-    else {
-      SvREFCNT_dec(PadARRAY(pad1)[PADIX_EMBEDDING]);
-      PadARRAY(pad1)[PADIX_EMBEDDING] = &PL_sv_undef;
-    }
-  }
-
   intro_my();
 }
 
@@ -812,7 +786,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
-   * declaration; a required method for a role
+   * declaration; a required method
    */
   if(ctx->body && !compmethodmeta->is_common) {
     OP *fieldops = NULL, *methstartop;
@@ -991,16 +965,6 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
   if(ctx->cv)
     CvMETHOD_on(ctx->cv);
 
-  if(!ctx->cv) {
-    /* This is a required method declaration for a role */
-    /* TODO: This was a pretty rubbish way to detect that. We should remember it
-     *   more reliably */
-
-    /* This already checks and complains if meta->type != METATYPE_ROLE */
-    mop_class_add_required_method(compclassmeta, ctx->name);
-    return;
-  }
-
   switch(type) {
     case PHASER_NONE:
       if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
@@ -1089,7 +1053,6 @@ static void dump_methodmeta(pTHX_ DMDContext *ctx, MethodMeta *methodmeta)
     4, ((const DMDNamedField []){
       {"the name SV",     DMD_FIELD_PTR,  .ptr = methodmeta->name},
       {"the class",       DMD_FIELD_PTR,  .ptr = methodmeta->class},
-      {"the origin role", DMD_FIELD_PTR,  .ptr = methodmeta->role},
       {"is_common",       DMD_FIELD_BOOL, .b   = methodmeta->is_common},
     })
   );
@@ -1100,18 +1063,6 @@ static void dump_adjustblock(pTHX_ DMDContext *ctx, AdjustBlock *adjustblock)
   DMD_DUMP_STRUCT(ctx, "Class::Plain/AdjustBlock", adjustblock, sizeof(AdjustBlock),
     2, ((const DMDNamedField []){
       {"the CV",          DMD_FIELD_PTR,  .ptr = adjustblock->cv},
-    })
-  );
-}
-
-static void dump_roleembedding(pTHX_ DMDContext *ctx, RoleEmbedding *embedding)
-{
-  DMD_DUMP_STRUCT(ctx, "Class::Plain/RoleEmbedding", embedding, sizeof(RoleEmbedding),
-    4, ((const DMDNamedField []){
-      {"the embedding SV", DMD_FIELD_PTR,  .ptr = embedding->embeddingsv},
-      {"the role",         DMD_FIELD_PTR,  .ptr = embedding->rolemeta},
-      {"the class",        DMD_FIELD_PTR,  .ptr = embedding->classmeta},
-      {"offset",           DMD_FIELD_UINT, .n   = embedding->offset}
     })
   );
 }
@@ -1148,18 +1099,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
           {"the supermeta",                         DMD_FIELD_PTR, .ptr = classmeta->cls.supermeta},
           {"the foreign superclass constructor CV", DMD_FIELD_PTR, .ptr = classmeta->cls.foreign_new},
           {"the foreign superclass DOES CV",        DMD_FIELD_PTR, .ptr = classmeta->cls.foreign_does},
-          {"the direct roles AV",                   DMD_FIELD_PTR, .ptr = classmeta->cls.direct_roles},
-          {"the embedded roles AV",                 DMD_FIELD_PTR, .ptr = classmeta->cls.embedded_roles},
-        })
-      );
-      break;
-
-    case METATYPE_ROLE:
-      DMD_DUMP_STRUCT(ctx, "Class::Plain/ClassMeta.role", classmeta, sizeof(ClassMeta),
-        N_COMMON_FIELDS+2, ((const DMDNamedField []){
-          COMMON_FIELDS,
-          {"the superroles AV",           DMD_FIELD_PTR, .ptr = classmeta->role.superroles},
-          {"the role applied classes HV", DMD_FIELD_PTR, .ptr = classmeta->role.applied_classes},
         })
       );
       break;
@@ -1185,21 +1124,6 @@ static void dump_classmeta(pTHX_ DMDContext *ctx, ClassMeta *classmeta)
     AdjustBlock *adjustblock = (AdjustBlock *)AvARRAY(classmeta->adjustblocks)[i];
 
     dump_adjustblock(aTHX_ ctx, adjustblock);
-  }
-
-  switch(classmeta->type) {
-    case METATYPE_CLASS:
-      for(i = 0; i < av_count(classmeta->cls.direct_roles); i++) {
-        RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(classmeta->cls.direct_roles)[i];
-
-        dump_roleembedding(aTHX_ ctx, embedding);
-      }
-      break;
-
-    case METATYPE_ROLE:
-      /* No need to dump the values of role.applied_classes because any class
-       * they're applied to will have done that already */
-      break;
   }
 }
 
@@ -1329,7 +1253,7 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
   return NULL;
 }
 
-#line 1333 "lib/Class/Plain.c"
+#line 1257 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1473,7 +1397,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1477 "lib/Class/Plain.c"
+#line 1401 "lib/Class/Plain.c"
 
 /* INCLUDE:  Including 'mop-class.xsi' from 'Plain.xs' */
 
@@ -1563,7 +1487,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class__create_class)
       av_push(PL_unitcheckav, (SV *)cv);
     }
   }
-#line 1567 "lib/Class/Plain.c"
+#line 1491 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1587,7 +1511,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_is_class)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = (meta->type == ix);
   }
-#line 1591 "lib/Class/Plain.c"
+#line 1515 "lib/Class/Plain.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
@@ -1609,7 +1533,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_name)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
     RETVAL = SvREFCNT_inc(meta->name);
   }
-#line 1613 "lib/Class/Plain.c"
+#line 1537 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1640,7 +1564,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_superclasses)
 
     XSRETURN(0);
   }
-#line 1644 "lib/Class/Plain.c"
+#line 1568 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1690,7 +1614,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_direct_roles)
 
     XSRETURN(count);
   }
-#line 1694 "lib/Class/Plain.c"
+#line 1618 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1738,7 +1662,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_role)
 
     mop_class_add_role(meta, rolemeta);
   }
-#line 1742 "lib/Class/Plain.c"
+#line 1666 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -1797,7 +1721,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_method)
     RETVAL = newSV(0);
     sv_setref_uv(RETVAL, "Class::Plain::MOP::Method", PTR2UV(methodmeta));
   }
-#line 1801 "lib/Class/Plain.c"
+#line 1725 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1849,7 +1773,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_get_direct_method)
     croak("Class %" SVf " does not have a method called '%" SVf "'",
       meta->name, methodname);
   }
-#line 1853 "lib/Class/Plain.c"
+#line 1777 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1907,7 +1831,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_direct_methods)
     } while(recurse && meta);
 
     XSRETURN(retcount);
-#line 1911 "lib/Class/Plain.c"
+#line 1835 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1931,7 +1855,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_required_method)
 
     mop_class_add_required_method(meta, mname);
   }
-#line 1935 "lib/Class/Plain.c"
+#line 1859 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2001,7 +1925,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_add_field)
     RETVAL = newSV(0);
     sv_setref_uv(RETVAL, "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
   }
-#line 2005 "lib/Class/Plain.c"
+#line 1929 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2044,7 +1968,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_get_field)
     croak("Class %" SVf " does not have a field called '%" SVf "'",
       meta->name, fieldname);
   }
-#line 2048 "lib/Class/Plain.c"
+#line 1972 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2078,7 +2002,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_fields)
       sv_setref_iv(ST(i), "Class::Plain::MOP::Field", PTR2UV(fieldmeta));
     }
     XSRETURN(nfields);
-#line 2082 "lib/Class/Plain.c"
+#line 2006 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2112,7 +2036,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_required_method_names)
       ST(i) = sv_2mortal(newSVsv(AvARRAY(required_methods)[i]));
     }
     XSRETURN(nmethods);
-#line 2116 "lib/Class/Plain.c"
+#line 2040 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2132,7 +2056,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Class_seal)
     ClassMeta *meta = NUM2PTR(ClassMeta *, SvUV(SvRV(self)));
 
     mop_class_seal(meta);
-#line 2136 "lib/Class/Plain.c"
+#line 2060 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2169,7 +2093,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Method_name)
       default: RETVAL = NULL;
     }
   }
-#line 2173 "lib/Class/Plain.c"
+#line 2097 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2212,7 +2136,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_name)
       default: RETVAL = NULL;
     }
   }
-#line 2216 "lib/Class/Plain.c"
+#line 2140 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2289,7 +2213,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_value)
     ST(0) = value;
     XSRETURN(1);
   }
-#line 2293 "lib/Class/Plain.c"
+#line 2217 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2315,7 +2239,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_has_attribute)
     const struct FieldHook *hook = mop_field_get_attribute(meta, SvPV_nolen(name));
     RETVAL = !!hook;
   }
-#line 2319 "lib/Class/Plain.c"
+#line 2243 "lib/Class/Plain.c"
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
@@ -2344,7 +2268,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_value)
 
     RETVAL = newSVsv(hook->hookdata);
   }
-#line 2348 "lib/Class/Plain.c"
+#line 2272 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2383,7 +2307,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_get_attribute_values)
 
     XSRETURN(count);
   }
-#line 2387 "lib/Class/Plain.c"
+#line 2311 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2404,7 +2328,7 @@ XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register)
 ;
 	SV *	name = ST(1)
 ;
-#line 1342 "lib/Class/Plain.xs"
+#line 1266 "lib/Class/Plain.xs"
   {
     PERL_UNUSED_VAR(class);
     dKWARG(2);
@@ -2444,7 +2368,7 @@ XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register)
 
     register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
   }
-#line 2448 "lib/Class/Plain.c"
+#line 2372 "lib/Class/Plain.c"
     }
     XSRETURN_EMPTY;
 }
@@ -2460,7 +2384,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 	SV *	RETVAL;
 	SV *	obj = ST(0)
 ;
-#line 1387 "lib/Class/Plain.xs"
+#line 1311 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to metaclass");
@@ -2473,7 +2397,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 
     RETVAL = newSVsv(GvSV(*gvp));
   }
-#line 2477 "lib/Class/Plain.c"
+#line 2401 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2492,7 +2416,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
     {
 	SV *	obj = ST(0)
 ;
-#line 1405 "lib/Class/Plain.xs"
+#line 1329 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to deconstruct_object");
@@ -2511,21 +2435,13 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
     while(classmeta) {
       retcount += deconstruct_object_class(backingav, classmeta, 0);
 
-      AV *roles = classmeta->cls.direct_roles;
-      U32 nroles = av_count(roles);
-      for(U32 i = 0; i < nroles; i++) {
-        RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(roles)[i];
-
-        retcount += deconstruct_object_class(backingav, embedding->rolemeta, embedding->offset);
-      }
-
       classmeta = classmeta->cls.supermeta;
     }
 
     SPAGAIN;
     XSRETURN(retcount);
   }
-#line 2529 "lib/Class/Plain.c"
+#line 2445 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -2544,7 +2460,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 ;
 	SV *	obj = ST(1)
 ;
-#line 1441 "lib/Class/Plain.xs"
+#line 1357 "lib/Class/Plain.xs"
   {
     SV *want_classname = NULL, *want_fieldname;
 
@@ -2578,18 +2494,6 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
           goto done;
       }
 
-      AV *roles = classmeta->cls.direct_roles;
-      U32 nroles = av_count(roles);
-      for(U32 i = 0; i < nroles; i++) {
-        RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(roles)[i];
-
-        if(!want_classname || sv_eq(want_classname, embedding->rolemeta->name)) {
-          RETVAL = ref_field_class(want_fieldname, backingav, embedding->rolemeta, embedding->offset);
-          if(RETVAL)
-            goto done;
-        }
-      }
-
       classmeta = classmeta->cls.supermeta;
     }
 
@@ -2602,7 +2506,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 done:
     ;
   }
-#line 2606 "lib/Class/Plain.c"
+#line 2510 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -2693,7 +2597,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 1502 "lib/Class/Plain.xs"
+#line 1406 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -2725,8 +2629,6 @@ XS_EXTERNAL(boot_Class__Plain)
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
 
   register_xs_parse_keyword("class", &kwhooks_class, (void *)METATYPE_CLASS);
-  register_xs_parse_keyword("role",  &kwhooks_role,  (void *)METATYPE_ROLE);
-
   register_xs_parse_keyword("field", &kwhooks_field, "field");
   register_xs_parse_keyword("has",   &kwhooks_field,   "has");
 
@@ -2737,7 +2639,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 2741 "lib/Class/Plain.c"
+#line 2643 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

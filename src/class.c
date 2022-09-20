@@ -163,22 +163,6 @@ static void S_make_instance_fields(pTHX_ const ClassMeta *classmeta, AV *backing
   for(i = 0; i < nfields; i++) {
     av_push(backingav, newSV(0));
   }
-
-  if(classmeta->type == METATYPE_CLASS) {
-    U32 nroles;
-    RoleEmbedding **embeddings = mop_class_get_direct_roles(classmeta, &nroles);
-
-    assert(classmeta->type == METATYPE_CLASS || nroles == 0);
-
-    for(i = 0; i < nroles; i++) {
-      RoleEmbedding *embedding = embeddings[i];
-      ClassMeta *rolemeta = embedding->rolemeta;
-
-      assert(rolemeta->sealed);
-
-      make_instance_fields(rolemeta, backingav, embedding->offset);
-    }
-  }
 }
 
 SV *ClassPlain_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create)
@@ -453,49 +437,6 @@ void ClassPlain_mop_class_load_and_add_role(pTHX_ ClassMeta *meta, SV *rolename,
   mop_class_add_role(meta, rolemeta);
 }
 
-#define embed_fieldhook(roleh, offset)  S_embed_fieldhook(aTHX_ roleh, offset)
-static struct FieldHook *S_embed_fieldhook(pTHX_ struct FieldHook *roleh, FIELDOFFSET offset)
-{
-  struct FieldHook *classh;
-  Newx(classh, 1, struct FieldHook);
-
-  classh->fieldix   = roleh->fieldix + offset;
-  classh->fieldmeta = roleh->fieldmeta;
-  classh->funcs     = roleh->funcs;
-  classh->hookdata  = roleh->hookdata;
-
-  return classh;
-}
-
-#define mop_class_apply_role(embedding)  S_mop_class_apply_role(aTHX_ embedding)
-static void S_mop_class_apply_role(pTHX_ RoleEmbedding *embedding)
-{
-  ClassMeta *classmeta = embedding->classmeta;
-  ClassMeta *rolemeta  = embedding->rolemeta;
-
-  if(classmeta->type != METATYPE_CLASS)
-    croak("Can only apply to a class");
-  if(rolemeta->type != METATYPE_ROLE)
-    croak("Can only apply a role to a class");
-
-  assert(embedding->offset == -1);
-  embedding->offset = classmeta->next_fieldix;
-
-  classmeta->next_fieldix += av_count(rolemeta->direct_fields);
-
-  /* TODO: Run an APPLY block if the role has one */
-}
-
-static void S_apply_roles(pTHX_ ClassMeta *dstmeta, ClassMeta *srcmeta)
-{
-  U32 nroles;
-  RoleEmbedding **arr = mop_class_get_direct_roles(srcmeta, &nroles);
-  U32 i;
-  for(i = 0; i < nroles; i++) {
-    mop_class_apply_role(arr[i]);
-  }
-}
-
 static OP *pp_alias_params(pTHX)
 {
   dSP;
@@ -550,9 +491,6 @@ void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
     av_push(supermeta->pending_submeta, (SV *)meta);
     return;
   }
-
-  if(meta->type == METATYPE_CLASS)
-    S_apply_roles(aTHX_ meta, meta);
 
   if(meta->type == METATYPE_CLASS) {
     U32 nmethods = av_count(meta->requiremethods);
@@ -640,76 +578,6 @@ XS_INTERNAL(injected_constructor)
   XSRETURN(0);
 }
 
-XS_INTERNAL(injected_DOES)
-{
-  dXSARGS;
-  const ClassMeta *meta = XSANY.any_ptr;
-  SV *self = ST(0);
-  SV *wantrole = ST(1);
-
-  PERL_UNUSED_ARG(items);
-
-  CV *cv_does = NULL;
-
-  while(meta != NULL) {
-    AV *roles = meta->type == METATYPE_CLASS ? meta->cls.direct_roles : NULL;
-    I32 nroles = roles ? av_count(roles) : 0;
-
-    if(!cv_does && meta->cls.foreign_does)
-      cv_does = meta->cls.foreign_does;
-
-    if(sv_eq(meta->name, wantrole)) {
-      XSRETURN_YES;
-    }
-
-    int i;
-    for(i = 0; i < nroles; i++) {
-      RoleEmbedding *embedding = (RoleEmbedding *)AvARRAY(roles)[i];
-      if(sv_eq(embedding->rolemeta->name, wantrole)) {
-        XSRETURN_YES;
-      }
-    }
-
-    meta = meta->type == METATYPE_CLASS ? meta->cls.supermeta : NULL;
-  }
-
-  if (cv_does) {
-    /* return $self->DOES(@_); */
-    dSP;
-
-    ENTER;
-    SAVETMPS;
-
-    PUSHMARK(SP);
-    EXTEND(SP, 2);
-    PUSHs(self);
-    PUSHs(wantrole);
-    PUTBACK;
-
-    int count = call_sv((SV*)cv_does, G_SCALAR);
-
-    SPAGAIN;
-
-    bool ret = false;
-
-    if (count)
-      ret = POPi;
-
-    FREETMPS;
-    LEAVE;
-
-    if(ret)
-      XSRETURN_YES;
-  }
-  else {
-    /* We need to also respond to Class::Plain::Base and UNIVERSAL */
-    if(sv_derived_from_sv(self, wantrole, 0))
-      XSRETURN_YES;
-  }
-
-  XSRETURN_NO;
-}
-
 ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 {
   assert(type == METATYPE_CLASS || type == METATYPE_ROLE);
@@ -738,20 +606,11 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->fieldhooks_initfield = NULL;
   meta->fieldhooks_construct = NULL;
 
-  switch(type) {
-    case METATYPE_CLASS:
-      meta->cls.supermeta = NULL;
-      meta->cls.foreign_new = NULL;
-      meta->cls.foreign_does = NULL;
-      meta->cls.direct_roles = newAV();
-      meta->cls.embedded_roles = newAV();
-      break;
-
-    case METATYPE_ROLE:
-      meta->role.superroles = newAV();
-      meta->role.applied_classes = newHV();
-      break;
-  }
+  meta->cls.supermeta = NULL;
+  meta->cls.foreign_new = NULL;
+  meta->cls.foreign_does = NULL;
+  meta->cls.direct_roles = newAV();
+  meta->cls.embedded_roles = newAV();
 
   need_PLparser();
 
@@ -768,13 +627,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
     HV *stash = gv_stashsv(name, 0);
     if(!stash)
       croak("Unable to find stash for class %" SVf, name);
-  }
-
-  {
-    SV *doesname = newSVpvf("%" SVf "::DOES", name);
-    SAVEFREESV(doesname);
-    CV *doescv = newXS_flags(SvPV_nolen(doesname), injected_DOES, __FILE__, NULL, SvFLAGS(doesname) & SVf_UTF8);
-    CvXSUBANY(doescv).any_ptr = meta;
   }
 
   {
@@ -830,19 +682,6 @@ void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassna
     meta->start_fieldix = supermeta->next_fieldix;
     meta->repr = supermeta->repr;
     meta->cls.foreign_new = supermeta->cls.foreign_new;
-
-    U32 nroles;
-    RoleEmbedding **embeddings = mop_class_get_all_roles(supermeta, &nroles);
-    if(nroles) {
-      U32 i;
-      for(i = 0; i < nroles; i++) {
-        RoleEmbedding *embedding = embeddings[i];
-        ClassMeta *rolemeta = embedding->rolemeta;
-
-        av_push(meta->cls.embedded_roles, (SV *)embedding);
-        hv_store_ent(rolemeta->role.applied_classes, meta->name, (SV *)embedding, 0);
-      }
-    }
   }
   else {
     /* A subclass of a foreign class */

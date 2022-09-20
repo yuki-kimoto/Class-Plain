@@ -188,8 +188,8 @@ C<undef>). If no argument is passed (i.e. C<scalar @_> is false) then the
 field is not modified. In either case, the value of the field is then
 returned.
 
-   field x :accessor;
-   field x :accessor(x_different_name);
+   field x : accessor;
+   field x : accessor(x_different_name);
 
    # equivalent to
    field x;
