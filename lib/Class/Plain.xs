@@ -162,7 +162,7 @@ static OP *pp_methstart(pTHX)
   AV *backingav;
 
   /* op_private contains the repr type so we can extract backing */
-  backingav = (AV *)get_obj_backingav(self, PL_op->op_private, create);
+  backingav = (AV *)ClassPlain_get_obj_backingav(self, PL_op->op_private, create);
   SvREFCNT_inc(backingav);
 
   if(backingav) {
@@ -322,7 +322,7 @@ XS_INTERNAL(xsub_mop_class_seal)
 #endif
   }
 
-  mop_class_seal(meta);
+  ClassPlain_mop_class_seal(meta);
 }
 
 #define is_valid_ident_utf8(s)  S_is_valid_ident_utf8(aTHX_ s)
@@ -428,10 +428,10 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
       ensure_module_version(superclassname, superclassver);
   }
 
-  ClassMeta *meta = mop_create_class(type, packagename);
+  ClassMeta *meta = ClassPlain_mop_create_class(type, packagename);
 
   if(superclassname && SvOK(superclassname))
-    mop_class_set_superclass(meta, superclassname);
+    ClassPlain_mop_class_set_superclass(meta, superclassname);
 
   if(superclassname)
     SvREFCNT_dec(superclassname);
@@ -448,17 +448,17 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
       inplace_trim_whitespace(attrval);
 
-      mop_class_apply_attribute(meta, SvPVX(attrname), attrval);
+      ClassPlain_mop_class_apply_attribute(meta, SvPVX(attrname), attrval);
 
       argi++;
     }
   }
 
   if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
-    mop_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
+    ClassPlain_mop_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
-  mop_class_begin(meta);
+  ClassPlain_mop_class_begin(meta);
 
   /* At this point XS::Parse::Keyword has parsed all it can. From here we will
    * take over to perform the odd "block or statement" behaviour of `class`
@@ -509,7 +509,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     if(!lex_consume_unichar('}'))
       croak("Expected }");
 
-    mop_class_seal(meta);
+    ClassPlain_mop_class_seal(meta);
 
     LEAVE;
 
@@ -568,7 +568,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   SV *name = args[argi++]->sv;
 
-  FieldMeta *fieldmeta = mop_class_add_field(compclassmeta, name);
+  FieldMeta *fieldmeta = ClassPlain_mop_class_add_field(compclassmeta, name);
   SvREFCNT_dec(name);
 
   int nattrs = args[argi++]->i;
@@ -582,7 +582,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
       inplace_trim_whitespace(attrval);
 
-      mop_field_apply_attribute(fieldmeta, SvPVX(attrname), attrval);
+      ClassPlain_mop_field_apply_attribute(fieldmeta, SvPVX(attrname), attrval);
 
       if(attrval)
         SvREFCNT_dec(attrval);
@@ -591,7 +591,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     }
   }
 
-  mop_field_seal(fieldmeta);
+  ClassPlain_mop_field_seal(fieldmeta);
 
   return KEYWORD_PLUGIN_STMT;
 }
@@ -747,7 +747,7 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
 
   if(!compmethodmeta->is_common)
     /* instance method */
-    extend_pad_vars(compclassmeta);
+    ClassPlain_extend_pad_vars(compclassmeta);
   else {
     /* :common method */
     PADOFFSET padix;
@@ -816,7 +816,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
     fieldops = op_append_list(OP_LINESEQ, fieldops,
       newSTATEOP(0, NULL, NULL));
     fieldops = op_append_list(OP_LINESEQ, fieldops,
-      (methstartop = newMETHSTARTOP(0 |
+      (methstartop = ClassPlain_newMETHSTARTOP(0 |
         (0) |
         (compclassmeta->repr << 8))));
 
@@ -853,7 +853,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
 #else
       fieldops = op_append_list(OP_LINESEQ, fieldops,
         /* alias the padix from the field */
-        newFIELDPADOP(private << 8, padix, fieldix));
+        ClassPlain_newFIELDPADOP(private << 8, padix, fieldix));
 #endif
 
 #if HAVE_PERL_VERSION(5, 22, 0)
@@ -892,7 +892,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   }
   else if(ctx->body && compmethodmeta->is_common) {
     ctx->body = op_append_list(OP_LINESEQ,
-      newCOMMONMETHSTARTOP(0 |
+      ClassPlain_newCOMMONMETHSTARTOP(0 |
         (compclassmeta->repr << 8)),
       ctx->body);
   }
@@ -953,7 +953,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
   switch(type) {
     case PHASER_NONE:
       if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-        MethodMeta *meta = mop_class_add_method(compclassmeta, ctx->name);
+        MethodMeta *meta = ClassPlain_mop_class_add_method(compclassmeta, ctx->name);
 
         meta->is_common = compmethodmeta->is_common;
       }
@@ -1023,7 +1023,7 @@ static void dump_fieldmeta(pTHX_ DMDContext *ctx, FieldMeta *fieldmeta)
     6, ((const DMDNamedField []){
       {"the name SV",          DMD_FIELD_PTR,  .ptr = fieldmeta->name},
       {"the class",            DMD_FIELD_PTR,  .ptr = fieldmeta->class},
-      {"the default value SV", DMD_FIELD_PTR,  .ptr = mop_field_get_default_sv(fieldmeta)},
+      {"the default value SV", DMD_FIELD_PTR,  .ptr = ClassPlain_mop_field_get_default_sv(fieldmeta)},
       /* TODO: Maybe hunt for constants in the defaultexpr optree fragment? */
       {"fieldix",              DMD_FIELD_UINT, .n   = fieldmeta->fieldix},
       {"the :param name SV",   DMD_FIELD_PTR,  .ptr = fieldmeta->paramname},

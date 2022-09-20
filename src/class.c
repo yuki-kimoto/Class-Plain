@@ -264,7 +264,7 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
       croak("Cannot add another field named %" SVf, fieldname);
   }
 
-  FieldMeta *fieldmeta = mop_create_field(fieldname, meta);
+  FieldMeta *fieldmeta = ClassPlain_mop_create_field(fieldname, meta);
 
   av_push(fields, (SV *)fieldmeta);
   meta->next_fieldix++;
@@ -282,11 +282,11 @@ void ClassPlain_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodn
   av_push(meta->requiremethods, SvREFCNT_inc(methodname));
 }
 
-#define mop_class_implements_role(meta, rolemeta)  S_mop_class_implements_role(aTHX_ meta, rolemeta)
+#define ClassPlain_mop_class_implements_role(meta, rolemeta)  S_mop_class_implements_role(aTHX_ meta, rolemeta)
 static bool S_mop_class_implements_role(pTHX_ ClassMeta *meta, ClassMeta *rolemeta)
 {
   U32 i, n;
-  RoleEmbedding **embeddings = mop_class_get_all_roles(meta, &n);
+  RoleEmbedding **embeddings = ClassPlain_mop_class_get_all_roles(meta, &n);
   for(i = 0; i < n; i++)
     if(embeddings[i]->rolemeta == rolemeta)
       return true;
@@ -418,7 +418,7 @@ void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
       ClassMeta *submeta = (ClassMeta *)arr[i];
       arr[i] = &PL_sv_undef;
 
-      mop_class_seal(submeta);
+      ClassPlain_mop_class_seal(submeta);
     }
 
     SvREFCNT_dec(meta->pending_submeta);
@@ -532,7 +532,7 @@ void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassna
      * seal it now
      */
     if(!supermeta->sealed)
-      mop_class_seal(supermeta);
+      ClassPlain_mop_class_seal(supermeta);
 
     meta->start_fieldix = supermeta->next_fieldix;
     meta->repr = supermeta->repr;
@@ -643,7 +643,7 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
   if(superclassver && SvOK(superclassver))
     ensure_module_version(superclassname, superclassver);
 
-  mop_class_set_superclass(classmeta, superclassname);
+  ClassPlain_mop_class_set_superclass(classmeta, superclassname);
 
   return FALSE;
 }

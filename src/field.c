@@ -256,7 +256,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   I32 save_ix = block_start(TRUE);
 
-  extend_pad_vars(classmeta);
+  ClassPlain_extend_pad_vars(classmeta);
 
   struct AccessorGenerationCtx ctx = { 0 };
 
@@ -266,7 +266,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   OP *ops = op_append_list(OP_LINESEQ, NULL,
     newSTATEOP(0, NULL, NULL));
   ops = op_append_list(OP_LINESEQ, ops,
-    newMETHSTARTOP(0 |
+    ClassPlain_newMETHSTARTOP(0 |
       (0) |
       (classmeta->repr << 8)));
 
@@ -284,7 +284,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   flags = OPpFIELDPAD_SV << 8;
 
   ops = op_append_list(OP_LINESEQ, ops,
-    newFIELDPADOP(flags, ctx.padix, fieldmeta->fieldix));
+    ClassPlain_newFIELDPADOP(flags, ctx.padix, fieldmeta->fieldix));
 
   MOP_FIELD_RUN_HOOKS(fieldmeta, gen_accessor_ops, type, &ctx);
 
@@ -304,7 +304,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   CV *cv = newATTRSUB(floor_ix, newSVOP(OP_CONST, 0, mname_fq), NULL, NULL, ops);
   CvMETHOD_on(cv);
 
-  mop_class_add_method(classmeta, mname);
+  ClassPlain_mop_class_add_method(classmeta, mname);
 
   LEAVE;
 }

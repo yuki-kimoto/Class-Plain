@@ -105,13 +105,10 @@ enum {
 
 /* Function prototypes */
 
-#define extend_pad_vars(meta)  ClassPlain_extend_pad_vars(aTHX_ meta)
 void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta);
 
-#define newMETHSTARTOP(flags)  ClassPlain_newMETHSTARTOP(aTHX_ flags)
 OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags);
 
-#define newCOMMONMETHSTARTOP(flags)  ClassPlain_newCOMMONMETHSTARTOP(aTHX_ flags)
 OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
 
 /* op_private flags on FIELDPAD ops */
@@ -121,54 +118,38 @@ enum {
   OPpFIELDPAD_HV,  /* has %z */
 };
 
-#define newFIELDPADOP(flags, padix, fieldix)  ClassPlain_newFIELDPADOP(aTHX_ flags, padix, fieldix)
 OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix);
 
-#define get_obj_backingav(self, repr, create)  ClassPlain_get_obj_backingav(aTHX_ self, repr, create)
 SV *ClassPlain_get_obj_backingav(pTHX_ SV *self, enum ReprType repr, bool create);
 
 /* Class API */
-#define mop_create_class(type, name)  ClassPlain_mop_create_class(aTHX_ type, name)
 ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name);
 
-#define mop_get_class_for_stash(stash)  ClassPlain_mop_get_class_for_stash(aTHX_ stash)
 ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash);
 
-#define mop_class_set_superclass(class, super)  ClassPlain_mop_class_set_superclass(aTHX_ class, super)
 void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *class, SV *superclassname);
 
-#define mop_class_begin(meta)  ClassPlain_mop_class_begin(aTHX_ meta)
 void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta);
 
-#define mop_class_seal(meta)  ClassPlain_mop_class_seal(aTHX_ meta)
 void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta);
 
-#define mop_class_add_method(class, methodname)  ClassPlain_mop_class_add_method(aTHX_ class, methodname)
 MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
 
-#define mop_class_add_field(class, fieldname)  ClassPlain_mop_class_add_field(aTHX_ class, fieldname)
 FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);
 
-#define mop_class_apply_attribute(classmeta, name, value)  ClassPlain_mop_class_apply_attribute(aTHX_ classmeta, name, value)
 void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value);
 
-#define register_class_attribute(name, funcs, funcdata)  ClassPlain_register_class_attribute(aTHX_ name, funcs, funcdata)
 void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct ClassHookFuncs *funcs, void *funcdata);
 
 /* Field API */
-#define mop_create_field(fieldname, classmeta)  ClassPlain_mop_create_field(aTHX_ fieldname, classmeta)
 FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta);
 
-#define mop_field_seal(fieldmeta)  ClassPlain_mop_field_seal(aTHX_ fieldmeta)
 void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta);
 
-#define mop_field_get_name(fieldmeta)  ClassPlain_mop_field_get_name(aTHX_ fieldmeta)
 SV *ClassPlain_mop_field_get_name(pTHX_ FieldMeta *fieldmeta);
 
-#define mop_field_apply_attribute(fieldmeta, name, value)  ClassPlain_mop_field_apply_attribute(aTHX_ fieldmeta, name, value)
 void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value);
 
-#define mop_field_get_attribute(fieldmeta, name)  ClassPlain_mop_field_get_attribute(aTHX_ fieldmeta, name)
 struct FieldHook *ClassPlain_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name);
 
 #endif
