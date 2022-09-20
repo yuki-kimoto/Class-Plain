@@ -64,14 +64,6 @@ struct FieldHook {
   SV *hookdata;
 };
 
-enum ReprType {
-  REPR_NATIVE,       /* instances are in native format - blessed AV as backing */
-  REPR_HASH,         /* instances are blessed HASHes; our backing lives in $self->{"Class::Plain/slots"} */
-  REPR_MAGIC,        /* instances store backing AV via magic; superconstructor must be foreign */
-
-  REPR_AUTOSELECT,   /* pick one of the above depending on foreign_new and SvTYPE()==SVt_PVHV */
-};
-
 /* Function prototypes */
 
 OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags);
