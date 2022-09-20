@@ -138,8 +138,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
 
   I32 save_ix = block_start(TRUE);
 
-  ClassPlain_extend_pad_vars(classmeta);
-
   struct AccessorGenerationCtx ctx = { 0 };
 
   ctx.fieldmeta = fieldmeta;

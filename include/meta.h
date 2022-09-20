@@ -21,7 +21,6 @@ enum AccessorType {
 
 struct AccessorGenerationCtx {
   FieldMeta* fieldmeta;
-  PADOFFSET padix;
   OP *bodyop;       /* OP_SASSIGN for :writer, empty for :reader */
   OP *post_bodyops;
   OP *retop;        /* OP_RETURN */
@@ -85,13 +84,9 @@ enum {
 
 /* Function prototypes */
 
-void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta);
-
 OP *ClassPlain_newMETHSTARTOP(pTHX_ U32 flags);
 
 OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags);
-
-OP *ClassPlain_newFIELDPADOP(pTHX_ U32 flags, PADOFFSET padix, FIELDOFFSET fieldix);
 
 /* Class API */
 ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name);

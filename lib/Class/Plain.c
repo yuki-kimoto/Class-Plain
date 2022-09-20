@@ -61,20 +61,6 @@ struct MethodAttributeDefinition {
  * Class and Field Implementation *
  **********************************/
 
-void ClassPlain_extend_pad_vars(pTHX_ const ClassMeta *meta)
-{
-  PADOFFSET padix;
-
-  padix = pad_add_name_pvs("$self", 0, NULL, NULL);
-  if(padix != PADIX_SELF)
-    croak("ARGH: Expected that padix[$self] = 1");
-
-  /* Give it a name that isn't valid as a Perl variable so it can't collide */
-  padix = pad_add_name_pvs("@(Class::Plain/slots)", 0, NULL, NULL);
-  if(padix != PADIX_SLOTS)
-    croak("ARGH: Expected that padix[@slots] = 2");
-}
-
 static XOP xop_methstart;
 static OP *pp_methstart(pTHX)
 {
@@ -597,11 +583,14 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
   if(compmethodmeta->is_common) {
     IV var_index = pad_add_name_pvs("$class", 0, NULL, NULL);
     if (!(var_index == 1)) {
-      croak("[Unexpected]Invalid $class index %d", (int)var_index);
+      croak("[Unexpected]Invalid index of the $class variable:%d", (int)var_index);
     }
   }
   else {
-    ClassPlain_extend_pad_vars(compclassmeta);
+    IV var_index = pad_add_name_pvs("$self", 0, NULL, NULL);
+    if(var_index != 1) {
+      croak("[Unexpected]Invalid index of the $self variable:%d", (int)var_index);
+    }
   }
 
   intro_my();
@@ -827,7 +816,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 831 "lib/Class/Plain.c"
+#line 820 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -971,7 +960,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 975 "lib/Class/Plain.c"
+#line 964 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -996,7 +985,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 824 "lib/Class/Plain.xs"
+#line 813 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1024,7 +1013,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1028 "lib/Class/Plain.c"
+#line 1017 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
