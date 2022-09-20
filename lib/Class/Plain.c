@@ -122,27 +122,6 @@ static void S_compclassmeta_set(pTHX_ ClassMeta *meta)
   sv_setiv(sv, (IV)meta);
 }
 
-XS_INTERNAL(xsub_mop_class_seal)
-{
-  dXSARGS;
-  ClassMeta *meta = XSANY.any_ptr;
-
-  PERL_UNUSED_ARG(items);
-
-  if(!PL_parser) {
-    /* We need to generate just enough of a PL_parser to keep newSTATEOP()
-     * happy, otherwise it will SIGSEGV
-     */
-    SAVEVPTR(PL_parser);
-    Newxz(PL_parser, 1, yy_parser);
-    SAVEFREEPV(PL_parser);
-
-    PL_parser->copline = NOLINE;
-  }
-
-  ClassPlain_mop_class_seal(meta);
-}
-
 #define is_valid_ident_utf8(s)  S_is_valid_ident_utf8(aTHX_ s)
 static bool S_is_valid_ident_utf8(pTHX_ const U8 *s)
 {
@@ -326,8 +305,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     if(!lex_consume_unichar('}'))
       croak("Expected }");
 
-    ClassPlain_mop_class_seal(meta);
-
     LEAVE;
 
     /* CARGOCULT from perl/perly.y:PACKAGE BAREWORD BAREWORD '{' */
@@ -338,8 +315,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     return KEYWORD_PLUGIN_STMT;
   }
   else {
-    SAVEDESTRUCTOR_X(&ClassPlain_mop_class_seal, meta);
-
     SAVEHINTS();
     compclassmeta_set(meta);
 
@@ -688,7 +663,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 692 "lib/Class/Plain.c"
+#line 667 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -832,7 +807,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 836 "lib/Class/Plain.c"
+#line 811 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -857,7 +832,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 685 "lib/Class/Plain.xs"
+#line 660 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -881,7 +856,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 885 "lib/Class/Plain.c"
+#line 860 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

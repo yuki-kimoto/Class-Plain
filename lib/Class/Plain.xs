@@ -113,27 +113,6 @@ static void S_compclassmeta_set(pTHX_ ClassMeta *meta)
   sv_setiv(sv, (IV)meta);
 }
 
-XS_INTERNAL(xsub_mop_class_seal)
-{
-  dXSARGS;
-  ClassMeta *meta = XSANY.any_ptr;
-
-  PERL_UNUSED_ARG(items);
-
-  if(!PL_parser) {
-    /* We need to generate just enough of a PL_parser to keep newSTATEOP()
-     * happy, otherwise it will SIGSEGV
-     */
-    SAVEVPTR(PL_parser);
-    Newxz(PL_parser, 1, yy_parser);
-    SAVEFREEPV(PL_parser);
-
-    PL_parser->copline = NOLINE;
-  }
-
-  ClassPlain_mop_class_seal(meta);
-}
-
 #define is_valid_ident_utf8(s)  S_is_valid_ident_utf8(aTHX_ s)
 static bool S_is_valid_ident_utf8(pTHX_ const U8 *s)
 {
@@ -317,8 +296,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     if(!lex_consume_unichar('}'))
       croak("Expected }");
 
-    ClassPlain_mop_class_seal(meta);
-
     LEAVE;
 
     /* CARGOCULT from perl/perly.y:PACKAGE BAREWORD BAREWORD '{' */
@@ -329,8 +306,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     return KEYWORD_PLUGIN_STMT;
   }
   else {
-    SAVEDESTRUCTOR_X(&ClassPlain_mop_class_seal, meta);
-
     SAVEHINTS();
     compclassmeta_set(meta);
 

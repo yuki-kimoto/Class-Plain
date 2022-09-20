@@ -91,8 +91,6 @@ void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *class, SV *superclassn
 
 void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta);
 
-void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta);
-
 MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
 
 FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);

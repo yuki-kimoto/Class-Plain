@@ -98,9 +98,6 @@ MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodnam
 {
   AV *methods = meta->direct_methods;
 
-  if(meta->sealed)
-    croak("Cannot add a new method to an already-sealed class");
-
   if(!methodname || !SvOK(methodname) || !SvCUR(methodname))
     croak("methodname must not be undefined or empty");
 
@@ -121,8 +118,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 
   if(meta->next_fieldix == -1)
     croak("Cannot add a new field to a class that is not yet begun");
-  if(meta->sealed)
-    croak("Cannot add a new field to an already-sealed class");
 
   if(!fieldname || !SvOK(fieldname) || !SvCUR(fieldname))
     croak("fieldname must not be undefined or empty");
@@ -147,14 +142,6 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
   return fieldmeta;
 }
 
-void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta)
-{
-  if(meta->sealed) /* idempotent */
-    return;
-
-  meta->sealed = true;
-}
-
 XS_INTERNAL(injected_constructor);
 XS_INTERNAL(injected_constructor)
 {
@@ -177,7 +164,6 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
 
   meta->stash = gv_stashsv(name, GV_ADD);
 
-  meta->sealed = false;
   meta->start_fieldix = 0;
   meta->next_fieldix = -1;
   meta->hooks   = NULL;
