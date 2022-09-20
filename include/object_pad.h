@@ -171,8 +171,4 @@ void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char
 #define mop_field_get_attribute(fieldmeta, name)  ClassPlain_mop_field_get_attribute(aTHX_ fieldmeta, name)
 struct FieldHook *ClassPlain_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name);
 
-#define register_field_attribute(name, funcs, funcdata)  ClassPlain_register_field_attribute(aTHX_ name, funcs, funcdata)
-void ClassPlain_register_field_attribute(pTHX_ const char *name, const struct FieldHookFuncs *funcs, void *funcdata);
-
-
 #endif

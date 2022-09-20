@@ -9,8 +9,6 @@
 #include "class.h"
 #include "field.h"
 
-#undef register_field_attribute
-
 #include "perl-backcompat.c.inc"
 #include "perl-additions.c.inc"
 #include "force_list_keeping_pushmark.c.inc"
@@ -59,7 +57,7 @@ struct FieldAttributeRegistration {
 
 static FieldAttributeRegistration *fieldattrs = NULL;
 
-static void register_field_attribute(const char *name, const struct FieldHookFuncs *funcs, void *funcdata)
+static void ClassPlain_register_field_attribute(const char *name, const struct FieldHookFuncs *funcs, void *funcdata)
 {
   FieldAttributeRegistration *reg;
   Newx(reg, 1, struct FieldAttributeRegistration);
@@ -418,27 +416,9 @@ static struct FieldHookFuncs fieldhooks_accessor = {
   .gen_accessor_ops = &fieldhook_gen_accessor_ops,
 };
 
-void ClassPlain_register_field_attribute(pTHX_ const char *name, const struct FieldHookFuncs *funcs, void *funcdata)
-{
-  if(funcs->ver < 57)
-    croak("Mismatch in third-party field attribute ABI version field: module wants %d, we require >= 57\n",
-        funcs->ver);
-  if(funcs->ver > OBJECTPAD_ABIVERSION)
-    croak("Mismatch in third-party field attribute ABI version field: attribute supplies %d, module wants %d\n",
-        funcs->ver, OBJECTPAD_ABIVERSION);
-
-  if(!name || !(name[0] >= 'A' && name[0] <= 'Z'))
-    croak("Third-party field attribute names must begin with a capital letter");
-
-  if(!funcs->permit_hintkey)
-    croak("Third-party field attributes require a permit hinthash key");
-
-  register_field_attribute(name, funcs, funcdata);
-}
-
 void ClassPlain__boot_fields(pTHX)
 {
-  register_field_attribute("reader",   &fieldhooks_reader,   NULL);
-  register_field_attribute("writer",   &fieldhooks_writer,   NULL);
-  register_field_attribute("accessor", &fieldhooks_accessor, NULL);
+  ClassPlain_register_field_attribute("reader",   &fieldhooks_reader,   NULL);
+  ClassPlain_register_field_attribute("writer",   &fieldhooks_writer,   NULL);
+  ClassPlain_register_field_attribute("accessor", &fieldhooks_accessor, NULL);
 }
