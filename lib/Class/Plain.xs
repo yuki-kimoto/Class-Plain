@@ -1244,64 +1244,9 @@ static SV *S_ref_field_class(pTHX_ SV *want_fieldname, AV *backingav, ClassMeta 
   return NULL;
 }
 
-MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Class
-
-INCLUDE: mop-class.xsi
-
-MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Method
-
-INCLUDE: mop-method.xsi
-
 MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::Field
 
 INCLUDE: mop-field.xsi
-
-MODULE = Class::Plain    PACKAGE = Class::Plain::MOP::FieldAttr
-
-void
-register(class, name, ...)
-  SV *class
-  SV *name
-  CODE:
-  {
-    PERL_UNUSED_VAR(class);
-    dKWARG(2);
-
-    {
-      if(!cophh_exists_pvs(CopHINTHASH_get(PL_curcop), "Class::Plain/experimental(custom_field_attr)", 0))
-        Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-          "Class::Plain::MOP::FieldAttr is experimental and may be changed or removed without notice");
-    }
-
-    struct FieldHookFuncs *funcs;
-    Newxz(funcs, 1, struct FieldHookFuncs);
-
-    struct CustomFieldHookData *funcdata;
-    Newxz(funcdata, 1, struct CustomFieldHookData);
-
-    funcs->ver = OBJECTPAD_ABIVERSION;
-
-    funcs->apply = &fieldhook_custom_apply;
-
-    static const char *args[] = {
-      "permit_hintkey",
-      "apply",
-      NULL,
-    };
-    while(KWARG_NEXT(args)) {
-      switch(kwarg) {
-        case 0: /* permit_hintkey */
-          funcs->permit_hintkey = savepv(SvPV_nolen(kwval));
-          break;
-
-        case 1: /* apply */
-          funcdata->apply_cb = newSVsv(kwval);
-          break;
-      }
-    }
-
-    register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
-  }
 
 MODULE = Class::Plain    PACKAGE = Class::Plain::MetaFunctions
 

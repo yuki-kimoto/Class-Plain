@@ -1399,18 +1399,6 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 
 #line 1401 "lib/Class/Plain.c"
 
-/* INCLUDE:  Including 'mop-class.xsi' from 'Plain.xs' */
-
-
-/* INCLUDE: Returning to 'Plain.xs' from 'mop-class.xsi' */
-
-
-/* INCLUDE:  Including 'mop-method.xsi' from 'Plain.xs' */
-
-
-/* INCLUDE: Returning to 'Plain.xs' from 'mop-method.xsi' */
-
-
 /* INCLUDE:  Including 'mop-field.xsi' from 'Plain.xs' */
 
 
@@ -1483,7 +1471,7 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_value)
     ST(0) = value;
     XSRETURN(1);
   }
-#line 1487 "lib/Class/Plain.c"
+#line 1475 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1491,63 +1479,6 @@ XS_EUPXS(XS_Class__Plain__MOP__Field_value)
 
 
 /* INCLUDE: Returning to 'Plain.xs' from 'mop-field.xsi' */
-
-
-XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register); /* prototype to pass -Wmissing-prototypes */
-XS_EUPXS(XS_Class__Plain__MOP__FieldAttr_register)
-{
-    dVAR; dXSARGS;
-    if (items < 2)
-       croak_xs_usage(cv,  "class, name, ...");
-    {
-	SV *	class = ST(0)
-;
-	SV *	name = ST(1)
-;
-#line 1266 "lib/Class/Plain.xs"
-  {
-    PERL_UNUSED_VAR(class);
-    dKWARG(2);
-
-    {
-      if(!cophh_exists_pvs(CopHINTHASH_get(PL_curcop), "Class::Plain/experimental(custom_field_attr)", 0))
-        Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-          "Class::Plain::MOP::FieldAttr is experimental and may be changed or removed without notice");
-    }
-
-    struct FieldHookFuncs *funcs;
-    Newxz(funcs, 1, struct FieldHookFuncs);
-
-    struct CustomFieldHookData *funcdata;
-    Newxz(funcdata, 1, struct CustomFieldHookData);
-
-    funcs->ver = OBJECTPAD_ABIVERSION;
-
-    funcs->apply = &fieldhook_custom_apply;
-
-    static const char *args[] = {
-      "permit_hintkey",
-      "apply",
-      NULL,
-    };
-    while(KWARG_NEXT(args)) {
-      switch(kwarg) {
-        case 0: /* permit_hintkey */
-          funcs->permit_hintkey = savepv(SvPV_nolen(kwval));
-          break;
-
-        case 1: /* apply */
-          funcdata->apply_cb = newSVsv(kwval);
-          break;
-      }
-    }
-
-    register_field_attribute(savepv(SvPV_nolen(name)), funcs, funcdata);
-  }
-#line 1548 "lib/Class/Plain.c"
-    }
-    XSRETURN_EMPTY;
-}
 
 
 XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass); /* prototype to pass -Wmissing-prototypes */
@@ -1560,7 +1491,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 	SV *	RETVAL;
 	SV *	obj = ST(0)
 ;
-#line 1311 "lib/Class/Plain.xs"
+#line 1256 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to metaclass");
@@ -1573,7 +1504,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_metaclass)
 
     RETVAL = newSVsv(GvSV(*gvp));
   }
-#line 1577 "lib/Class/Plain.c"
+#line 1508 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1592,7 +1523,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
     {
 	SV *	obj = ST(0)
 ;
-#line 1329 "lib/Class/Plain.xs"
+#line 1274 "lib/Class/Plain.xs"
   {
     if(!SvROK(obj) || !SvOBJECT(SvRV(obj)))
       croak("Expected an object reference to deconstruct_object");
@@ -1617,7 +1548,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_deconstruct_object)
     SPAGAIN;
     XSRETURN(retcount);
   }
-#line 1621 "lib/Class/Plain.c"
+#line 1552 "lib/Class/Plain.c"
 	PUTBACK;
 	return;
     }
@@ -1636,7 +1567,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 ;
 	SV *	obj = ST(1)
 ;
-#line 1357 "lib/Class/Plain.xs"
+#line 1302 "lib/Class/Plain.xs"
   {
     SV *want_classname = NULL, *want_fieldname;
 
@@ -1682,7 +1613,7 @@ XS_EUPXS(XS_Class__Plain__MetaFunctions_ref_field)
 done:
     ;
   }
-#line 1686 "lib/Class/Plain.c"
+#line 1617 "lib/Class/Plain.c"
 	RETVAL = sv_2mortal(RETVAL);
 	ST(0) = RETVAL;
     }
@@ -1718,14 +1649,13 @@ XS_EXTERNAL(boot_Class__Plain)
 #endif
 
         newXS_deffile("Class::Plain::MOP::Field::value", XS_Class__Plain__MOP__Field_value);
-        newXS_deffile("Class::Plain::MOP::FieldAttr::register", XS_Class__Plain__MOP__FieldAttr_register);
         newXS_deffile("Class::Plain::MetaFunctions::metaclass", XS_Class__Plain__MetaFunctions_metaclass);
         newXS_deffile("Class::Plain::MetaFunctions::deconstruct_object", XS_Class__Plain__MetaFunctions_deconstruct_object);
         newXS_deffile("Class::Plain::MetaFunctions::ref_field", XS_Class__Plain__MetaFunctions_ref_field);
 
     /* Initialisation Section */
 
-#line 1406 "lib/Class/Plain.xs"
+#line 1351 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1767,7 +1697,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1771 "lib/Class/Plain.c"
+#line 1701 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
