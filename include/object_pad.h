@@ -143,23 +143,11 @@ void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta);
 #define mop_class_seal(meta)  ClassPlain_mop_class_seal(aTHX_ meta)
 void ClassPlain_mop_class_seal(pTHX_ ClassMeta *meta);
 
-#define mop_class_load_and_add_role(class, rolename, rolever)  ClassPlain_mop_class_load_and_add_role(aTHX_ class, rolename, rolever)
-void ClassPlain_mop_class_load_and_add_role(pTHX_ ClassMeta *class, SV *rolename, SV *rolever);
-
-#define mop_class_add_role(class, role)  ClassPlain_mop_class_add_role(aTHX_ class, role)
-void ClassPlain_mop_class_add_role(pTHX_ ClassMeta *class, ClassMeta *role);
-
 #define mop_class_add_method(class, methodname)  ClassPlain_mop_class_add_method(aTHX_ class, methodname)
 MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
 
 #define mop_class_add_field(class, fieldname)  ClassPlain_mop_class_add_field(aTHX_ class, fieldname)
 FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);
-
-#define mop_class_add_ADJUST(class, cv)  ClassPlain_mop_class_add_ADJUST(aTHX_ class, cv)
-void ClassPlain_mop_class_add_ADJUST(pTHX_ ClassMeta *meta, CV *cv);
-
-#define mop_class_add_required_method(class, methodname)  ClassPlain_mop_class_add_required_method(aTHX_ class, methodname)
-void ClassPlain_mop_class_add_required_method(pTHX_ ClassMeta *meta, SV *methodname);
 
 #define mop_class_apply_attribute(classmeta, name, value)  ClassPlain_mop_class_apply_attribute(aTHX_ classmeta, name, value)
 void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value);
@@ -177,23 +165,11 @@ void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta);
 #define mop_field_get_name(fieldmeta)  ClassPlain_mop_field_get_name(aTHX_ fieldmeta)
 SV *ClassPlain_mop_field_get_name(pTHX_ FieldMeta *fieldmeta);
 
-#define mop_field_get_sigil(fieldmeta)  ClassPlain_mop_field_get_sigil(aTHX_ fieldmeta)
-char ClassPlain_mop_field_get_sigil(pTHX_ FieldMeta *fieldmeta);
-
 #define mop_field_apply_attribute(fieldmeta, name, value)  ClassPlain_mop_field_apply_attribute(aTHX_ fieldmeta, name, value)
 void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value);
 
 #define mop_field_get_attribute(fieldmeta, name)  ClassPlain_mop_field_get_attribute(aTHX_ fieldmeta, name)
 struct FieldHook *ClassPlain_mop_field_get_attribute(pTHX_ FieldMeta *fieldmeta, const char *name);
-
-#define mop_field_get_attribute_values(fieldmeta, name)  ClassPlain_mop_field_get_attribute_values(aTHX_ fieldmeta, name)
-AV *ClassPlain_mop_field_get_attribute_values(pTHX_ FieldMeta *fieldmeta, const char *name);
-
-#define mop_field_get_default_sv(fieldmeta)  ClassPlain_mop_field_get_default_sv(aTHX_ fieldmeta)
-SV *ClassPlain_mop_field_get_default_sv(pTHX_ FieldMeta *fieldmeta);
-
-#define mop_field_set_default_sv(fieldmeta, sv)  ClassPlain_mop_field_set_default_sv(aTHX_ fieldmeta, sv)
-void ClassPlain_mop_field_set_default_sv(pTHX_ FieldMeta *fieldmeta, SV *sv);
 
 #define register_field_attribute(name, funcs, funcdata)  ClassPlain_register_field_attribute(aTHX_ name, funcs, funcdata)
 void ClassPlain_register_field_attribute(pTHX_ const char *name, const struct FieldHookFuncs *funcs, void *funcdata);
