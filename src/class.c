@@ -220,15 +220,12 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   meta->stash = gv_stashsv(name, GV_ADD);
 
   meta->sealed = false;
-  meta->has_superclass = false;
   meta->start_fieldix = 0;
   meta->next_fieldix = -1;
   meta->hooks   = NULL;
   meta->direct_fields = newAV();
   meta->direct_methods = newAV();
   meta->parammap = NULL;
-
-  meta->cls.supermeta = NULL;
 
   need_PLparser();
 
@@ -238,50 +235,15 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ enum MetaType type, SV *name)
   return meta;
 }
 
-void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *superclassname)
+void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_name)
 {
   assert(meta->type == METATYPE_CLASS);
 
-  if(meta->has_superclass)
-    croak("Class already has a superclass, cannot add another");
+  SV *isaname = newSVpvf("%" SVf "::ISA", meta->name);
+  SAVEFREESV(isaname);
+  AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
 
-  AV *isa;
-  {
-    SV *isaname = newSVpvf("%" SVf "::ISA", meta->name);
-    SAVEFREESV(isaname);
-
-    isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
-  }
-
-  av_push(isa, SvREFCNT_inc(superclassname));
-
-  ClassMeta *supermeta = NULL;
-
-  HV *superstash = gv_stashsv(superclassname, 0);
-  GV **metagvp = (GV **)hv_fetchs(superstash, "META", 0);
-  if(metagvp)
-    supermeta = NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*metagvp))));
-
-  if(supermeta) {
-    /* A subclass of an Class::Plain class */
-    if(supermeta->type != METATYPE_CLASS)
-      croak("%" SVf " is not a class", SVfARG(superclassname));
-
-    /* If it isn't yet sealed (e.g. because we're an inner class of it),
-     * seal it now
-     */
-    if(!supermeta->sealed)
-      ClassPlain_mop_class_seal(supermeta);
-
-    meta->start_fieldix = supermeta->next_fieldix;
-    meta->repr = supermeta->repr;
-  }
-  else {
-    meta->cls.foreign_does = fetch_superclass_method_pv(meta->stash, "DOES", 4, -1);
-  }
-
-  meta->has_superclass = true;
-  meta->cls.supermeta = supermeta;
+  av_push(isa, SvREFCNT_inc(super_class_name));
 }
 
 void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
@@ -349,11 +311,11 @@ static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgvers
 
 static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  SV *superclassname = newSV(0), *superclassver = newSV(0);
-  SAVEFREESV(superclassname);
+  SV *super_class_name = newSV(0), *superclassver = newSV(0);
+  SAVEFREESV(super_class_name);
   SAVEFREESV(superclassver);
 
-  const char *end = split_package_ver(value, superclassname, superclassver);
+  const char *end = split_package_ver(value, super_class_name, superclassver);
 
   if(*end)
     croak("Unexpected characters while parsing :isa() attribute: %s", end);
@@ -361,22 +323,22 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *classmeta, SV *value, SV **hook
   if(classmeta->type != METATYPE_CLASS)
     croak("Only a class may extend another");
 
-  HV *superstash = gv_stashsv(superclassname, 0);
+  HV *superstash = gv_stashsv(super_class_name, 0);
   // Original logic: if(!superstash || !hv_fetchs(superstash, "new", 0)) {
   if(!superstash) {
     /* Try to `require` the module then attempt a second time */
     /* load_module() will modify the name argument and take ownership of it */
-    load_module(PERL_LOADMOD_NOIMPORT, newSVsv(superclassname), NULL, NULL);
-    superstash = gv_stashsv(superclassname, 0);
+    load_module(PERL_LOADMOD_NOIMPORT, newSVsv(super_class_name), NULL, NULL);
+    superstash = gv_stashsv(super_class_name, 0);
   }
 
   if(!superstash)
-    croak("Superclass %" SVf " does not exist", superclassname);
+    croak("Superclass %" SVf " does not exist", super_class_name);
 
   if(superclassver && SvOK(superclassver))
-    ensure_module_version(superclassname, superclassver);
+    ensure_module_version(super_class_name, superclassver);
 
-  ClassPlain_mop_class_set_superclass(classmeta, superclassname);
+  ClassPlain_mop_class_set_superclass(classmeta, super_class_name);
 
   return FALSE;
 }
