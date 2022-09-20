@@ -14,10 +14,8 @@ typedef struct FieldMeta FieldMeta;
 typedef struct MethodMeta MethodMeta;
 
 enum AccessorType {
-  ACCESSOR,
   ACCESSOR_READER,
   ACCESSOR_WRITER,
-  ACCESSOR_LVALUE_MUTATOR,
   ACCESSOR_COMBINED,
 };
 
