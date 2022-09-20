@@ -702,29 +702,19 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext *ctx
 
 static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, void *hookdata)
 {
-  PADNAMELIST *fieldnames = PadlistNAMES(CvPADLIST(compclassmeta->methodscope));
-  I32 nfields = av_count(compclassmeta->direct_fields);
-  PADNAME **snames = PadnamelistARRAY(fieldnames);
-  PADNAME **padnames = PadnamelistARRAY(PadlistNAMES(CvPADLIST(PL_compcv)));
-
   MethodMeta *compmethodmeta = NUM2PTR(MethodMeta *, SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodmeta", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
    * declaration; a required method
    */
-  if(ctx->body && !compmethodmeta->is_common) {
+  if(compmethodmeta->is_common) {
+    ctx->body = op_append_list(OP_LINESEQ,
+      ClassPlain_newCOMMONMETHSTARTOP(0 |
+        (compclassmeta->repr << 8)),
+      ctx->body);
+  }
+  else {
     OP *fieldops = NULL, *methstartop;
-#if HAVE_PERL_VERSION(5, 22, 0)
-    U32 cop_seq_low = COP_SEQ_RANGE_LOW(padnames[PADIX_SELF]);
-#endif
-
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-    AV *fieldmap = newAV();
-    U32 fieldcount = 0, max_fieldix = 0;
-
-    SAVEFREESV((SV *)fieldmap);
-#endif
-
     fieldops = op_append_list(OP_LINESEQ, fieldops,
       newSTATEOP(0, NULL, NULL));
     fieldops = op_append_list(OP_LINESEQ, fieldops,
@@ -732,62 +722,7 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
         (0) |
         (compclassmeta->repr << 8))));
 
-    int i;
-    for(i = 0; i < nfields; i++) {
-      FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(compclassmeta->direct_fields)[i];
-      PADNAME *fieldname = snames[i + 1];
-
-      if(!fieldname
-#if HAVE_PERL_VERSION(5, 22, 0)
-        /* On perl 5.22 and above we can use PadnameREFCNT to detect which pad
-         * slots are actually being used
-         */
-         || PadnameREFCNT(fieldname) < 2
-#endif
-        )
-          continue;
-
-      FIELDOFFSET fieldix = fieldmeta->fieldix;
-      PADOFFSET padix = find_padix_for_field(fieldmeta);
-
-      if(padix == NOT_IN_PAD)
-        continue;
-
-      U8 private = 0;
-
-#ifdef METHSTART_CONTAINS_FIELD_BINDINGS
-      assert((fieldix & ~FIELDIX_MASK) == 0);
-      av_store(fieldmap, padix, newSVuv(((UV)private << FIELDIX_TYPE_SHIFT) | fieldix));
-      fieldcount++;
-      if(fieldix > max_fieldix)
-        max_fieldix = fieldix;
-#else
-      fieldops = op_append_list(OP_LINESEQ, fieldops,
-        /* alias the padix from the field */
-        ClassPlain_newFIELDPADOP(private << 8, padix, fieldix));
-#endif
-
-#if HAVE_PERL_VERSION(5, 22, 0)
-      /* Unshare the padname so the one in the methodscope pad returns to refcount 1 */
-      PADNAME *newpadname = newPADNAMEpvn(PadnamePV(fieldname), PadnameLEN(fieldname));
-      PadnameREFCNT_dec(padnames[padix]);
-      padnames[padix] = newpadname;
-
-      /* Turn off OUTER and set a valid COP sequence range, so the lexical is
-       * visible to eval(), PadWalker, perldb, etc.. */
-      PadnameOUTER_off(newpadname);
-      COP_SEQ_RANGE_LOW(newpadname) = cop_seq_low;
-      COP_SEQ_RANGE_HIGH(newpadname) = PL_cop_seqmax;
-#endif
-    }
-
     ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
-  }
-  else if(ctx->body && compmethodmeta->is_common) {
-    ctx->body = op_append_list(OP_LINESEQ,
-      ClassPlain_newCOMMONMETHSTARTOP(0 |
-        (compclassmeta->repr << 8)),
-      ctx->body);
   }
 
   compclassmeta->methodscope = NULL;
@@ -985,7 +920,7 @@ void ClassPlain__need_PLparser(pTHX)
   }
 }
 
-#line 989 "lib/Class/Plain.c"
+#line 924 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -1129,7 +1064,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 1133 "lib/Class/Plain.c"
+#line 1068 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1154,7 +1089,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 982 "lib/Class/Plain.xs"
+#line 917 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
 #ifdef METHSTART_CONTAINS_FIELD_BINDINGS
@@ -1191,7 +1126,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 1195 "lib/Class/Plain.c"
+#line 1130 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
