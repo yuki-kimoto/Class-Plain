@@ -10,11 +10,11 @@ C<Class::Plain::Document::Cookbook> - Cookbook of Class::Plain
 
 =head1 Description
 
-This is the cookbook of the C<Class::Plain>.
+This is the cookbook of the L<Class::Plain>.
 
 =head1 Signatures
 
-Use C<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures>.
+Use L<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures>.
   
   use v5.36; # Enable signatures and other features.
   
@@ -48,9 +48,25 @@ Use C<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsu
   my $point = Point->new(x => 5, y => 10);
   $point->describe;
 
+=head1 Weakening Field
+
+Weaken a field.
+
+  use Scalar::Util 'weaken';
+  
+  use Class::Plain;
+  
+  class Foo {
+    field x;
+    
+    method weaken_x {
+      weaken $self->{x};
+    }
+  }
+
 =head1 Use Other OO Module With Class::Plain
 
-C<Class::Plain> can be used with other OO modules.
+L<Class::Plain> can be used with other OO modules.
 
 =head2 Moo
 
