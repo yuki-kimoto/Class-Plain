@@ -263,17 +263,25 @@ Perl 5.16+.
 
 =head2 Object::Pad
 
-This module is started from the copy of the source code of L<Object::Pad>.
+The implementation of the C<Class::Plain> module is started from the copy of the source code of L<Object::Pad>.
 
 =head2 Corinna
 
-This module uses the keywords and attributes that are specified in L<Corinna|https://github.com/Ovid/Corinna>.
+C<Class::Plain> uses the keywords and attributes that are specified in L<Corinna|https://github.com/Ovid/Corinna>.
 
 The keywords: C<class>, C<field>, C<method>.
 
 The attributes: C<isa>, C<reader>, C<writer>, C<common>.
 
 Only the C<rw> attribute is got from L<Raku|https://www.raku.org>, L<Moo>, L<Moose>.
+
+=head2 XS::Parse::Keyword
+
+The C<class> and C<field> keywords are parsed by L<XS::Parse::Keyword>.
+
+=head2 XS::Parse::Sublike
+
+The C<method> keyword is parsed by L<XS::Parse::Sublike>.
 
 =cut
 
