@@ -101,31 +101,35 @@ void ClassPlain_field_seal(pTHX_ FieldMeta *fieldmeta)
 
 /* :reader */
 
-static SV *make_accessor_mnamesv(pTHX_ FieldMeta *fieldmeta, SV *mname, const char *fmt)
+static SV *make_accessor_method_name_sv(pTHX_ FieldMeta *fieldmeta, SV *method_name, const char *fmt)
 {
-  /* if(mname && !is_valid_ident_utf8((U8 *)mname))
-    croak("Invalid accessor method name");
-    */
-
-  if(mname && SvPOK(mname))
-    return SvREFCNT_inc(mname);
-
-  const char *pv;
-    pv = SvPVX(fieldmeta->name) + 1;
-
-  mname = newSVpvf(fmt, pv);
-  if(SvUTF8(fieldmeta->name))
-    SvUTF8_on(mname);
-  return mname;
+  // The method name is specifed.
+  if (method_name) {
+    if (!SvPOK(method_name)) {
+      croak("The method name must be specified");
+    }
+    
+    return SvREFCNT_inc(method_name);
+  }
+  // The method name is not specified.
+  else {
+    const char *field_name  = SvPVX(fieldmeta->name);
+    
+    method_name = newSVpvf(fmt, field_name);
+  }
+  
+  return method_name;
 }
 
-static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mname, int type)
+static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *method_name, int type)
 {
+  warn("GGG %s", SvPV_nolen(method_name));
+   
   ENTER;
 
   ClassMeta *classmeta = fieldmeta->class;
 
-  SV *mname_fq = newSVpvf("%" SVf "::%" SVf, classmeta->name, mname);
+  SV *method_name_fq = newSVpvf("%" SVf "::%" SVf, classmeta->name, method_name);
 
   ClassPlain_need_PLparser();
 
@@ -153,7 +157,9 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   req_args = 1;
 
   ops = op_append_list(OP_LINESEQ, ops,
-    make_argcheck_ops(req_args, opt_args, slurpy_arg, mname_fq));
+    make_argcheck_ops(req_args, opt_args, slurpy_arg, method_name_fq));
+  
+  warn("AAA");
   
   // Run hooks
   {                                                                                       
@@ -179,22 +185,26 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   SvREFCNT_inc(PL_compcv);
   ops = block_end(save_ix, ops);
 
-  CV *cv = newATTRSUB(floor_ix, newSVOP(OP_CONST, 0, mname_fq), NULL, NULL, ops);
+  CV *cv = newATTRSUB(floor_ix, newSVOP(OP_CONST, 0, method_name_fq), NULL, NULL, ops);
   CvMETHOD_on(cv);
 
-  ClassPlain_class_add_method(classmeta, mname);
-
+  ClassPlain_class_add_method(classmeta, method_name);
+  
+  warn("FFF %s", SvPV_nolen(method_name));
+  
   LEAVE;
 }
 
 static bool fieldhook_reader_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  *hookdata_ptr = make_accessor_mnamesv(aTHX_ fieldmeta, value, "%s");
+  *hookdata_ptr = make_accessor_method_name_sv(aTHX_ fieldmeta, value, "%s");
   return TRUE;
 }
 
 static void fieldhook_reader_seal(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata)
 {
+  warn("HHH %s", SvPV_nolen(hookdata));
+  
   S_generate_field_accessor_method(aTHX_ fieldmeta, hookdata, ACCESSOR_READER);
 }
 
@@ -207,7 +217,8 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   optype = OP_PADSV;
   
-
+  warn("EEE");
+  
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
     newBINOP(
@@ -217,6 +228,9 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
       newSVOP(OP_CONST, 0, ctx->fieldmeta->name)
     )
   );
+
+  warn("FFF");
+
 }
 
 static struct FieldHookFuncs fieldhooks_reader = {
@@ -229,7 +243,7 @@ static struct FieldHookFuncs fieldhooks_reader = {
 
 static bool fieldhook_writer_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  *hookdata_ptr = make_accessor_mnamesv(aTHX_ fieldmeta, value, "set_%s");
+  *hookdata_ptr = make_accessor_method_name_sv(aTHX_ fieldmeta, value, "set_%s");
   return TRUE;
 }
 

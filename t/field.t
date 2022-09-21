@@ -66,7 +66,7 @@ class Counter {
 }
 
 class Colour {
-   field red : reader   ; # :reader            :writer; # Remove reader writer
+   field red ; #: reader   ; # :reader            :writer; # Remove reader writer
    field green ; # :reader(get_green) :writer; # Remove reader writer
    field blue  ;
    field white ;
