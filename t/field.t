@@ -8,6 +8,8 @@ use Test::Refcount;
 
 use Class::Plain;
 
+use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
+
 class Counter {
    field count;
    
