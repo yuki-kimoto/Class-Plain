@@ -71,10 +71,6 @@ class Colour {
    field blue  ;
    field white ;
    
-   method set_red  { $self->{red} = shift; return $self; }
-
-   method set_green { $self->{green} = shift; return $self;  }
-
    method blue { if (@_) { $self->{blue} = $_[0]; return $self; } else { $self->{blue} } }
    method white { if (@_) { $self->{white} = $_[0]; return $self;  } else { $self->{white} } }
 

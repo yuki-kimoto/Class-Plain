@@ -92,12 +92,30 @@ void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *na
       else {
         sv_catpv(sv_reader_code, SvPV_nolen(fieldmeta->name));
       }
-      sv_catpv(sv_reader_code,  " { my $self = shift; $self->{");
+      sv_catpv(sv_reader_code,  " {\n  my $self = shift;\n  $self->{");
       sv_catpv(sv_reader_code, SvPV_nolen(fieldmeta->name));
-      sv_catpv(sv_reader_code, "}; }");
+      sv_catpv(sv_reader_code, "};\n}");
       
       // Generate the reader
       Perl_eval_pv(SvPV_nolen(sv_reader_code), 1);
+    }
+    else if (strcmp(name, "writer") == 0) {
+      // The writer code
+      SV* sv_writer_code = sv_2mortal(newSVpv("", 0));
+      sv_catpv(sv_writer_code, "sub Colour::");
+      if (value) {
+        sv_catpv(sv_writer_code, SvPV_nolen(value));
+      }
+      else {
+        sv_catpv(sv_writer_code, "set_");
+        sv_catpv(sv_writer_code, SvPV_nolen(fieldmeta->name));
+      }
+      sv_catpv(sv_writer_code,  " {\n  my $self = shift;\n  $self->{");
+      sv_catpv(sv_writer_code, SvPV_nolen(fieldmeta->name));
+      sv_catpv(sv_writer_code, "} = shift;\n  return $self;\n}");
+      
+      // Generate the writer
+      Perl_eval_pv(SvPV_nolen(sv_writer_code), 1);
     }
     
     LEAVE;
