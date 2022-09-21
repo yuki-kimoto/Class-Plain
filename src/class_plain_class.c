@@ -96,12 +96,12 @@ MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
   return methodmeta;
 }
 
-FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
+FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *field_name)
 {
   AV *fields = meta->fields;
 
-  if(!fieldname || !SvOK(fieldname) || !SvCUR(fieldname))
-    croak("fieldname must not be undefined or empty");
+  if(!field_name || !SvOK(field_name) || !SvCUR(field_name))
+    croak("field_name must not be undefined or empty");
 
   U32 i;
   for(i = 0; i < av_count(fields); i++) {
@@ -109,11 +109,11 @@ FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
     if(SvCUR(fieldmeta->name) < 2)
       continue;
 
-    if(sv_eq(fieldmeta->name, fieldname))
-      croak("Cannot add another field named %" SVf, fieldname);
+    if(sv_eq(fieldmeta->name, field_name))
+      croak("Cannot add another field named %" SVf, field_name);
   }
 
-  FieldMeta *fieldmeta = ClassPlain_create_field(fieldname, meta);
+  FieldMeta *fieldmeta = ClassPlain_create_field(field_name, meta);
 
   av_push(fields, (SV *)fieldmeta);
 

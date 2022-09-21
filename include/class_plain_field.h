@@ -11,7 +11,7 @@ struct FieldMeta {
 };
 
 /* Field API */
-FieldMeta *ClassPlain_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta);
+FieldMeta *ClassPlain_create_field(pTHX_ SV *field_name, ClassMeta *class_meta);
 
 void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value);
 

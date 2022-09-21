@@ -20,10 +20,10 @@ struct ClassHookFuncs {
   U32 flags;
 
   /* called immediately at apply time; return FALSE means it did its thing immediately, so don't store it */
-  bool (*apply)(pTHX_ ClassMeta *classmeta, SV *value, SV **hookdata_ptr, void *funcdata);
+  bool (*apply)(pTHX_ ClassMeta *class_meta, SV *value, SV **hookdata_ptr, void *funcdata);
 
   /* called by mop_class_add_field() */
-  void (*post_add_field)(pTHX_ ClassMeta *classmeta, SV *hookdata, void *funcdata, FieldMeta *fieldmeta);
+  void (*post_add_field)(pTHX_ ClassMeta *class_meta, SV *hookdata, void *funcdata, FieldMeta *fieldmeta);
 };
 
 struct ClassHook {
@@ -55,7 +55,7 @@ MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
 
 FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);
 
-void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value);
+void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV *value);
 
 void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct ClassHookFuncs *funcs, void *funcdata);
 
