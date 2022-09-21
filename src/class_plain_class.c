@@ -65,17 +65,6 @@ void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *n
   croak("Unrecognised class attribute :%s", name);
 }
 
-/* TODO: get attribute */
-
-ClassMeta *ClassPlain_get_class_for_stash(pTHX_ HV *stash)
-{
-  GV **gvp = (GV **)hv_fetchs(stash, "META", 0);
-  if(!gvp)
-    croak("Unable to find ClassMeta for %" HEKf, HEKfARG(HvNAME_HEK(stash)));
-
-  return NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*gvp))));
-}
-
 MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   AV *methods = meta->methods;
