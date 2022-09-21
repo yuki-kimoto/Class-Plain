@@ -7,7 +7,7 @@ use Test::More;
 
 use Class::Plain;
 
-class BaseClass {
+class BaseClassic {
    field data;
 
    method new : common {
@@ -19,15 +19,15 @@ class BaseClass {
    }
 }
 
-package ExtendedClass {
-   use base qw( BaseClass );
+package ExtendedClassic {
+   use base qw( BaseClassic );
 
    sub moremethod { return 456 }
 }
 
-my $obj = ExtendedClass->new;
-isa_ok( $obj, "ExtendedClass", '$obj' );
+my $obj = ExtendedClassic->new;
+isa_ok( $obj, "ExtendedClassic", '$obj' );
 
-is( $obj->moremethod, 456, '$obj field methods from ExtendedClass' );
+is( $obj->moremethod, 456, '$obj field methods from ExtendedClassic' );
 
 done_testing;
