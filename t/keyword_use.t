@@ -11,13 +11,13 @@ use Test::More;
 
 use Class::Plain;
 
-# B module has the class keyword
+# B module has the class function
 use B;
 
 use MyKeyword;
 
 class Foo {
-  # B module has the class keyword
+  # B module has the class function
   use B;
 
   use MyKeyword;
