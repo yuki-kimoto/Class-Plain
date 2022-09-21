@@ -241,5 +241,58 @@ use lib "$FindBin::Bin/lib";
   is($object->z, 3);
 }
 
+# Symbol Exsiting
+{
+  {
+    {
+      package SymbolExist;
+      
+      class SymbolExistInherit : isa(SymbolExist) {
+        
+      }
+    }
+    
+    my $object = SymbolExistInherit->new(x => 1);
+    is($object->x, 1);
+    $object->set_y(2);
+    is($object->{y}, 2);
+    $object->z(3);
+    is($object->z, 3);
+  }
+
+  {
+    {
+      package SymbolExistHasNew;
+      
+      sub new { 1 }
+      
+      class SymbolExistHasNewInherit : isa(SymbolExistHasNew) {
+        
+      }
+    }
+    
+    is(SymbolExistHasNewInherit->new, 1);
+  }
+
+  {
+    {
+      use SymbolExistHasISASuper;
+      
+      {
+        package SymbolExistHasISA;
+        use base 'SymbolExistHasISASuper';
+        sub foo { 2 }
+      }
+      
+      
+      class SymbolExistHasISAInherit : isa(SymbolExistHasISA) {
+        
+      }
+    }
+    
+    is(SymbolExistHasISAInherit->foo, 2);
+  }
+}
+
 
 done_testing;
