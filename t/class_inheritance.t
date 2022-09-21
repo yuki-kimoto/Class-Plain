@@ -73,8 +73,8 @@ use lib "$FindBin::Bin/lib";
   
   my $object = MultiClass->new;
   
-  is_deeply($object->b1, 3);
-  is_deeply($object->b2, 4);
+  is($object->b1, 3);
+  is($object->b2, 4);
   is_deeply($object->ps, [1, 2, 3]);
 }
 
