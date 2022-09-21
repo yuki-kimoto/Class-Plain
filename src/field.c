@@ -6,8 +6,8 @@
 #include "XSUB.h"
 
 #include "class_plain_parser.h"
-#include "class.h"
-#include "field.h"
+#include "class_plain_class.h"
+#include "class_plain_field.h"
 
 #include "perl-backcompat.c.inc"
 #include "perl-additions.c.inc"

@@ -24,9 +24,9 @@
 #include "newOP_CUSTOM.c.inc"
 
 #include "class_plain_parser.h"
-#include "class.h"
-#include "field.h"
-#include "method.h"
+#include "class_plain_class.h"
+#include "class_plain_field.h"
+#include "class_plain_method.h"
 
 typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, void *data);
 

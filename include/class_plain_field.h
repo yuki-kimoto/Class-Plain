@@ -3,7 +3,7 @@
 
 typedef struct FieldMeta FieldMeta;
 
-#include "class.h"
+#include "class_plain_class.h"
 
 enum AccessorType {
   ACCESSOR_READER,

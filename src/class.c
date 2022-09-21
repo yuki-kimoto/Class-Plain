@@ -5,9 +5,9 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "class.h"
-#include "field.h"
-#include "method.h"
+#include "class_plain_class.h"
+#include "class_plain_field.h"
+#include "class_plain_method.h"
 
 #include "perl-backcompat.c.inc"
 #include "sv_setrv.c.inc"
