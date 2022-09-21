@@ -32,7 +32,6 @@ t/class.t
 t/class_inheritance.t
 t/field.t
 t/keyword.t
-t/keyword_use.t
 t/lib/ModuleClass.pm
 t/lib/ModuleClassIsa.pm
 t/lib/MyKeyword.pm

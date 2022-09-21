@@ -5,7 +5,13 @@ use warnings;
 
 use Test::More;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+
 use Class::Plain;
+
+# B module has the class function
+use B;
 
 {
    ok( !eval <<'EOPERL',
@@ -33,6 +39,14 @@ EOPERL
       'method outside class fails' );
    like( $@, qr/^Cannot 'method' outside of 'class' at /,
       'message from failure of method' );
+}
+
+# Conflict of the class, method, field keywords
+class Foo {
+  # B module has the class function
+  use B;
+
+  use MyKeyword;
 }
 
 done_testing;
