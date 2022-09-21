@@ -10,13 +10,7 @@
 #include "class_plain_method.h"
 
 #include "perl-backcompat.c.inc"
-#include "sv_setrv.c.inc"
-
 #include "perl-additions.c.inc"
-#include "force_list_keeping_pushmark.c.inc"
-#include "optree-additions.c.inc"
-#include "newOP_CUSTOM.c.inc"
-#include "cv_copy_flags.c.inc"
 
 void ClassPlain_need_PLparser(pTHX);
 

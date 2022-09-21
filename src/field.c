@@ -10,11 +10,8 @@
 #include "class_plain_field.h"
 
 #include "perl-backcompat.c.inc"
-#include "perl-additions.c.inc"
-#include "force_list_keeping_pushmark.c.inc"
 #include "optree-additions.c.inc"
 #include "make_argcheck_ops.c.inc"
-#include "newOP_CUSTOM.c.inc"
 
 void ClassPlain_need_PLparser(pTHX);
 
