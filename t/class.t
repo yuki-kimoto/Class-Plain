@@ -187,4 +187,24 @@ use Class::Plain;
   is_deeply(\@EmptyInheritance::ISA, ['MyBase']);
 }
 
+{
+  class MyClassPackageVariable {
+    our $FOO;
+    my $BAR;
+    
+    INIT {
+      $FOO = 1;
+      $BAR = 2;
+    }
+    
+    method FOO : common { $FOO }
+    method BAR : common { $BAR }
+  }
+
+  {
+    is(MyClassPackageVariable->FOO, 1);
+    is(MyClassPackageVariable->BAR, 2);
+  }
+}
+
 done_testing;
