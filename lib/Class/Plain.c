@@ -188,9 +188,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
-      croak("Class attributes are not permitted");
-
     int i;
     for(i = 0; i < nattrs; i++) {
       SV *attrname = args[argi]->attr.name;
@@ -202,10 +199,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
       argi++;
     }
-  }
-
-  if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
-    ClassPlain_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
   ClassPlain_class_begin(meta);
@@ -315,9 +308,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_field_attrs)", 0))
-      croak("Field attributes are not permitted");
-
     while(argi < (nattrs+2)) {
       SV *attrname = args[argi]->attr.name;
       SV *attrval  = args[argi]->attr.value;
@@ -334,24 +324,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
   }
 
   return KEYWORD_PLUGIN_STMT;
-}
-
-static void setup_parse_field_initexpr(pTHX_ void *hookdata)
-{
-  CV *was_compcv = PL_compcv;
-  HV *hints = GvHV(PL_hintgv);
-
-  if(!hints || !hv_fetchs(hints, "Class::Plain/experimental(init_expr)", 0))
-    Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-      "field initialiser expression is experimental and may be changed or removed without notice");
-
-  /* Set up this new block as if the current compiler context were its scope */
-
-  if(CvOUTSIDE(PL_compcv))
-    SvREFCNT_dec(CvOUTSIDE(PL_compcv));
-
-  CvOUTSIDE(PL_compcv)     = (CV *)SvREFCNT_inc(was_compcv);
-  CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 }
 
 static const struct XSParseKeywordHooks kwhooks_field = {
@@ -516,7 +488,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 520 "lib/Class/Plain.c"
+#line 492 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -660,7 +632,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 664 "lib/Class/Plain.c"
+#line 636 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -685,7 +657,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 513 "lib/Class/Plain.xs"
+#line 485 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -707,7 +679,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   ClassPlain__boot_classes(aTHX);
 
-#line 711 "lib/Class/Plain.c"
+#line 683 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

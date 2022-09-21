@@ -179,9 +179,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
-      croak("Class attributes are not permitted");
-
     int i;
     for(i = 0; i < nattrs; i++) {
       SV *attrname = args[argi]->attr.name;
@@ -193,10 +190,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
       argi++;
     }
-  }
-
-  if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
-    ClassPlain_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
   ClassPlain_class_begin(meta);
@@ -306,9 +299,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_field_attrs)", 0))
-      croak("Field attributes are not permitted");
-
     while(argi < (nattrs+2)) {
       SV *attrname = args[argi]->attr.name;
       SV *attrval  = args[argi]->attr.value;
@@ -325,24 +315,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
   }
 
   return KEYWORD_PLUGIN_STMT;
-}
-
-static void setup_parse_field_initexpr(pTHX_ void *hookdata)
-{
-  CV *was_compcv = PL_compcv;
-  HV *hints = GvHV(PL_hintgv);
-
-  if(!hints || !hv_fetchs(hints, "Class::Plain/experimental(init_expr)", 0))
-    Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-      "field initialiser expression is experimental and may be changed or removed without notice");
-
-  /* Set up this new block as if the current compiler context were its scope */
-
-  if(CvOUTSIDE(PL_compcv))
-    SvREFCNT_dec(CvOUTSIDE(PL_compcv));
-
-  CvOUTSIDE(PL_compcv)     = (CV *)SvREFCNT_inc(was_compcv);
-  CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 }
 
 static const struct XSParseKeywordHooks kwhooks_field = {
