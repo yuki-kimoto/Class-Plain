@@ -11,43 +11,45 @@ use B;
 
 use Class::Plain;
 
-class Point {
-  field x;
-  field y;
-
-  method new : common {
-    my $self = $class->SUPER::new(x => $_[0], y => $_[1]);
-    
-    $self->{x} //= 0;
-    $self->{y} //= 0;
-    
-    return $self;
+{
+  class MyClassField {
+    field x;
+    field y;
+    method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
   }
 
-  method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
+  {
+    my $p = MyClassField->new(x => 10, y => 20);
+    is( $p->where, "(10,20)", '$p->where' );
+  }
+
+  {
+    my $p = MyClassField->new({x => 10, y => 20});
+    is( $p->where, "(10,20)", '$p->where' );
+  }
 }
 
 {
-   my $p = Point->new(10,20);
-   is( $p->where, "(10,20)", '$p->where' );
-}
+  class PointArgs {
+    field x;
+    field y;
 
-my @build;
+    method new : common {
+      my $self = $class->SUPER::new(x => $_[0], y => $_[1]);
+      
+      $self->{x} //= 0;
+      $self->{y} //= 0;
+      
+      return $self;
+    }
 
-{
-  my $newarg_destroyed;
-  my $buildargs_result_destroyed;
-  package DestroyWatch {
-     sub new { bless [ $_[1] ], $_[0] }
-     sub DESTROY { ${ $_[0][0] }++ }
+    method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
   }
 
-  class RefcountTest {
+  {
+     my $p = PointArgs->new(10,20);
+     is( $p->where, "(10,20)", '$p->where' );
   }
-
-  RefcountTest->new( DestroyWatch->new( \$newarg_destroyed ) );
-
-  is( $newarg_destroyed, 1, 'argument to ->new destroyed' );
 }
 
 # The multiple inheritance
