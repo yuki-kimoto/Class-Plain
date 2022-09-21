@@ -324,8 +324,6 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     }
   }
 
-  ClassPlain_field_seal(fieldmeta);
-
   return KEYWORD_PLUGIN_STMT;
 }
 
@@ -532,6 +530,3 @@ BOOT:
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
   ClassPlain__boot_classes(aTHX);
-  ClassPlain__boot_fields(aTHX);
-  
-  
