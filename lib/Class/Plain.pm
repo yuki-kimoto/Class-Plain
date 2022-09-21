@@ -1,11 +1,6 @@
-#  You may distribute under the terms of either the GNU General Public License
-#  or the Artistic License (the same terms as Perl itself)
-#
-#  (C) Paul Evans, 2019-2022 -- leonerd@leonerd.org.uk
-
 package Class::Plain 0.68;
 
-use v5.14;
+use v5.16;
 use warnings;
 
 use Carp;
@@ -41,40 +36,63 @@ sub import {
 
 =head1 Name
 
-C<Class::Plain> - a simple syntax for lexical field-based objects
+C<Class::Plain> -  a class syntax for the hash-based Perl OO.
 
 =head1 Usage
 
   use Class::Plain;
 
   class Point {
-   field x;
-   field y;
-
-   method new : common {
-     my $self = $class->SUPER::new(@_);
-     
-     $self->{x} //= 0;
-     $self->{y} //= 0;
-     
-     return $self;
-   }
-
-    method move ($x, $y) {
-       $self->{x} += $x;
-       $self->{y} += $y;
+    field x;
+    field y;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{x} //= 0;
+      $self->{y} //= 0;
+      
+      return $self;
     }
-
+    
+    method move ($x, $y) {
+      $self->{x} += $x;
+      $self->{y} += $y;
+    }
+    
     method describe () {
-       print "A point at ($self->{x}, $self->{y})\n";
+      print "A point at ($self->{x}, $self->{y})\n";
     }
   }
 
-  Point->new(x => 5, y => 10)->describe;
+  my $point = Point->new(x => 5, y => 10);
+  $point->describe;
+
+  class Point3D : isa(Point) {
+    field z;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{z} //= 0;
+      
+      return $self;
+    }
+    
+    method move ($x, $y, $z) {
+      $self->SUPER::move($x, $y);
+      $self->{z} += $z;
+    }
+    
+    method describe () {
+      print "A point at ($self->{x}, $self->{y}, $self->{z})\n";
+    }
+  }
+
 
 =head1 Description
 
-This module provides a class syntax for hash-based Perl OO.
+This module provides a class syntax for the hash-based Perl OO.
 
 =head1 Keywords
 
@@ -106,7 +124,7 @@ The following class attributes are supported:
  : isa(SUPER_CLASS)
  
  # The multiple inheritance
- : isa(SUPER_CLASS1) isa(SUPER_Class2)
+ : isa(SUPER_CLASS1) isa(SUPER_CLASS2)
  
  # The super class is nothing
  : isa()
@@ -133,31 +151,62 @@ The following field attributes are supported:
 
 =head3 reader Attribute
 
+  : reader
+
 Generates a reader method to return the current value of the field. If no name
 is given, the name of the field is used.
 
-  field x :reader;
+  field x : reader;
 
-  # equivalent to
-  field x;  method x { return $x }
+  # This is the same as the following code.
+  method x {
+    $self->{x};
+  }
 
+The different method name can be specified.
 
-  field x :reader(x_different_name);
+  field x : reader(x_different_name);
 
 =head3 writer Attribute
+
+  : writer
 
 Generates a writer method to set a new value of the field from its arguments.
 If no name is given, the name of the field is used prefixed by C<set_>.
 
-  field x :writer;
+  field x : writer;
 
-  # equivalent to
+  # This is the same as the following code.
   method set_x {
     $self->{x} = shift;
     return $self;
   }
 
-  field x :writer(set_x_different_name);
+The different method name can be specified.
+
+  field x : writer(set_x_different_name);
+
+=head3 rw Attribute
+
+  : rw
+
+Generates a read-write method to set and get the value of the field.
+If no name is given, the name of the field is used.
+
+  field x : rw;
+
+  # This is the same as the following code.
+  method x {
+    if (@_) {
+      $self->{x} = shift;
+      return $self;
+    }
+    $self->{x};
+  }
+
+The different method name can be specified.
+
+  field x : rw(x_different_name);
 
 =head2 method
 
@@ -176,9 +225,28 @@ from the C<@_> array.
 
 The following method attributes are supported.
 
+B<Examples:>
+  
+  # An instance method
+  method to_string {
+    
+    my $string = "($self->{x},$self->{y})";
+    
+    return $string;
+  }
+
 =head3 common Attribute
   
-  # Class method
+  : common
+
+Marks that this method is a class-common method, instead of a regular instance
+method. A class-common method may be invoked on class names instead of
+instances. Within the method body there is a lexical C<$class> available instead of C<$self>.
+It will already have been shifted from the C<@_> array.
+
+B<Examples:>
+
+  # A class method
   method new : common {
     my $self = $class->SUPER::new(@_);
     
@@ -187,10 +255,25 @@ The following method attributes are supported.
     return $self;
   }
 
-Marks that this method is a class-common method, instead of a regular instance
-method. A class-common method may be invoked on class names instead of
-instances. Within the method body there is a lexical C<$class> available instead of C<$self>.
-It will already have been shifted from the C<@_> array.
+=head1 Required Perl Version
+
+Perl 5.16+.
+
+=head1 See Also
+
+=head2 Object::Pad
+
+This module is started from the copy of the source code of L<Object::Pad>.
+
+=head2 Corinna
+
+This module uses the keywords and attributes that are specified in L<Corinna|https://github.com/Ovid/Corinna>.
+
+The keywords: C<class>, C<field>, C<method>.
+
+The attributes: C<isa>, C<reader>, C<writer>, C<common>.
+
+Only the C<rw> attribute is got from L<Raku|https://www.raku.org>, L<Moo>, L<Moose>.
 
 =cut
 

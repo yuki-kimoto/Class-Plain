@@ -18,14 +18,7 @@ if( $Config{ccname} eq "gcc" ) {
 my $build = Module::Build->new(
    module_name => 'Class::Plain',
    requires => {
-      # On perl 5.31.9 onwards we use core's no feature 'indirect',
-      ( $] >= 5.031009 ?
-         () :
-         ( 'indirect' => 0 ) ),
-
-      'perl' => '5.018', # pad_add_name_pvn, pad_add_name_pvs, gv_init_pvn
-         # Technically probably would work on 5.16 but doesn't:
-         #   https://rt.cpan.org/Ticket/Display.html?id=132930
+      'perl' => '5.016',
       'XS::Parse::Keyword' => '0.22',
       'XS::Parse::Sublike' => '0.15',
    },

@@ -85,19 +85,19 @@ OP *ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags)
 }
 
 /* The metadata on the currently-compiling class */
-#define compclassmeta       S_compclassmeta(aTHX)
-static ClassMeta *S_compclassmeta(pTHX)
+#define compclass_meta       S_compclass_meta(aTHX)
+static ClassMeta *S_compclass_meta(pTHX)
 {
-  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", 0);
+  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_meta", 0);
   if(!svp || !*svp || !SvOK(*svp))
     return NULL;
   return (ClassMeta *)SvIV(*svp);
 }
 
-#define have_compclassmeta  S_have_compclassmeta(aTHX)
-static bool S_have_compclassmeta(pTHX)
+#define have_compclass_meta  S_have_compclass_meta(aTHX)
+static bool S_have_compclass_meta(pTHX)
 {
-  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", 0);
+  SV **svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_meta", 0);
   if(!svp || !*svp)
     return false;
 
@@ -107,10 +107,10 @@ static bool S_have_compclassmeta(pTHX)
   return false;
 }
 
-#define compclassmeta_set(meta)  S_compclassmeta_set(aTHX_ meta)
-static void S_compclassmeta_set(pTHX_ ClassMeta *meta)
+#define compclass_meta_set(meta)  S_compclass_meta_set(aTHX_ meta)
+static void S_compclass_meta_set(pTHX_ ClassMeta *meta)
 {
-  SV *sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclassmeta", GV_ADD);
+  SV *sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_meta", GV_ADD);
   sv_setiv(sv, (IV)meta);
 }
 
@@ -182,15 +182,10 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   IV type = (IV)hookdata;
 
-  SV *packagever = args[argi++]->sv;
-
   ClassMeta *meta = ClassPlain_create_class(type, packagename);
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_class_attrs)", 0))
-      croak("Class attributes are not permitted");
-
     int i;
     for(i = 0; i < nattrs; i++) {
       SV *attrname = args[argi]->attr.name;
@@ -202,10 +197,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
       argi++;
     }
-  }
-
-  if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
-    ClassPlain_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
   ClassPlain_class_begin(meta);
@@ -239,19 +230,9 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     PL_parser->copline = NOLINE;
   }
 
-  if(packagever) {
-    /* stolen from op.c because Perl_package_version isn't exported */
-    U32 savehints = PL_hints;
-    PL_hints &= ~HINT_STRICT_VARS;
-
-    sv_setsv(GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), packagever);
-
-    PL_hints = savehints;
-  }
-
   if(is_block) {
     I32 save_ix = block_start(TRUE);
-    compclassmeta_set(meta);
+    compclass_meta_set(meta);
 
     OP *body = parse_stmtseq(0);
     body = block_end(save_ix, body);
@@ -270,7 +251,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   }
   else {
     SAVEHINTS();
-    compclassmeta_set(meta);
+    compclass_meta_set(meta);
 
     *out = newSVOP(OP_CONST, 0, &PL_sv_yes);
     return KEYWORD_PLUGIN_STMT;
@@ -279,7 +260,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
 static const struct XSParseKeywordPieceType pieces_classlike[] = {
   XPK_PACKAGENAME,
-  XPK_VSTRING_OPT,
   /* This should really a repeated (tagged?) choice of a number of things, but
    * right now there's only one thing permitted here anyway
    */
@@ -296,12 +276,12 @@ static void check_field(pTHX_ void *hookdata)
 {
   char *kwname = hookdata;
   
-  if(!have_compclassmeta)
+  if(!have_compclass_meta)
     croak("Cannot '%s' outside of 'class'", kwname);
 
-  if(!sv_eq(PL_curstname, compclassmeta->name))
+  if(!sv_eq(PL_curstname, compclass_meta->name))
     croak("Current package name no longer matches current class (%" SVf " vs %" SVf ")",
-      PL_curstname, compclassmeta->name);
+      PL_curstname, compclass_meta->name);
 }
 
 static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs, void *hookdata)
@@ -310,14 +290,11 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   SV *name = args[argi++]->sv;
 
-  FieldMeta *fieldmeta = ClassPlain_class_add_field(compclassmeta, name);
+  FieldMeta *fieldmeta = ClassPlain_class_add_field(compclass_meta, name);
   SvREFCNT_dec(name);
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
-    if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(no_field_attrs)", 0))
-      croak("Field attributes are not permitted");
-
     while(argi < (nattrs+2)) {
       SV *attrname = args[argi]->attr.name;
       SV *attrval  = args[argi]->attr.value;
@@ -333,27 +310,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     }
   }
 
-  ClassPlain_field_seal(fieldmeta);
-
   return KEYWORD_PLUGIN_STMT;
-}
-
-static void setup_parse_field_initexpr(pTHX_ void *hookdata)
-{
-  CV *was_compcv = PL_compcv;
-  HV *hints = GvHV(PL_hintgv);
-
-  if(!hints || !hv_fetchs(hints, "Class::Plain/experimental(init_expr)", 0))
-    Perl_ck_warner(aTHX_ packWARN(WARN_EXPERIMENTAL),
-      "field initialiser expression is experimental and may be changed or removed without notice");
-
-  /* Set up this new block as if the current compiler context were its scope */
-
-  if(CvOUTSIDE(PL_compcv))
-    SvREFCNT_dec(CvOUTSIDE(PL_compcv));
-
-  CvOUTSIDE(PL_compcv)     = (CV *)SvREFCNT_inc(was_compcv);
-  CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 }
 
 static const struct XSParseKeywordHooks kwhooks_field = {
@@ -370,12 +327,12 @@ static const struct XSParseKeywordHooks kwhooks_field = {
 };
 static bool parse_method_permit(pTHX_ void *hookdata)
 {
-  if(!have_compclassmeta)
+  if(!have_compclass_meta)
     croak("Cannot 'method' outside of 'class'");
 
-  if(!sv_eq(PL_curstname, compclassmeta->name))
+  if(!sv_eq(PL_curstname, compclass_meta->name))
     croak("Current package name no longer matches current class (%" SVf " vs %" SVf ")",
-      PL_curstname, compclassmeta->name);
+      PL_curstname, compclass_meta->name);
 
   return true;
 }
@@ -482,7 +439,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
     CvMETHOD_on(ctx->cv);
 
     if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-      MethodMeta *meta = ClassPlain_class_add_method(compclassmeta, ctx->name);
+      MethodMeta *meta = ClassPlain_class_add_method(compclass_meta, ctx->name);
 
       meta->is_common = compmethodmeta->is_common;
     }
@@ -518,7 +475,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 522 "lib/Class/Plain.c"
+#line 479 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -662,7 +619,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 666 "lib/Class/Plain.c"
+#line 623 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -687,7 +644,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 515 "lib/Class/Plain.xs"
+#line 472 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -708,9 +665,8 @@ XS_EXTERNAL(boot_Class__Plain)
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
   ClassPlain__boot_classes(aTHX);
-  ClassPlain__boot_fields(aTHX);
 
-#line 714 "lib/Class/Plain.c"
+#line 670 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

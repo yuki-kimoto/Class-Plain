@@ -7,14 +7,16 @@ use Test::More;
 
 use Class::Plain;
 
-class Animal 1.23 {
-   field legs;
-   method legs { $self->{legs} };
+class Animal {
+  our $VERSION = 1.23;
+  field legs;
+  method legs { $self->{legs} };
 }
 
 is( $Animal::VERSION, 1.23, 'Versioned class field VERSION' );
 
-class Spider 4.56 :isa(Animal) {
+class Spider : isa(Animal) {
+  our $VERSION = 4.56;
    method new8 : common {
      return $class->SUPER::new(legs => 8);
    }
@@ -32,15 +34,6 @@ is( $Spider::VERSION, 4.56, 'Versioned subclass field VERSION' );
       'Subclassed instances work' );
 }
 
-{
-   ok( !eval <<'EOPERL',
-      class Antelope :isa(Animal 2.34);
-EOPERL
-      ':isa insufficient version fails' );
-   like( $@, qr/^Animal version 2.34 required--this is only version 1.23 /,
-      'message from insufficient version' );
-}
-
 # Extend before base class is sealed (RT133190)
 {
    class BaseClass {
@@ -52,7 +45,7 @@ EOPERL
          return $self;
        }
 
-      class SubClass :isa(BaseClass) {
+      class SubClass : isa(BaseClass) {
          method new : common {
            my $self = $class->SUPER::new(@_);
            

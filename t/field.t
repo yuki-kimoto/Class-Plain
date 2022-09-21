@@ -8,6 +8,8 @@ use Test::Refcount;
 
 use Class::Plain;
 
+use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
+
 class Counter {
    field count;
    
@@ -64,19 +66,10 @@ class Counter {
 }
 
 class Colour {
-   field red : reader   ; # :reader            :writer; # Remove reader writer
-   field green ; # :reader(get_green) :writer; # Remove reader writer
-   field blue  ;
-   field white ;
-   
-   method red  { $self->{red} }
-   method set_red  { $self->{red} = shift; return $self; }
-
-   method get_green { $self->{green} }
-   method set_green { $self->{green} = shift; return $self;  }
-
-   method blue { if (@_) { $self->{blue} = $_[0]; return $self; } else { $self->{blue} } }
-   method white { if (@_) { $self->{white} = $_[0]; return $self;  } else { $self->{white} } }
+   field red : reader writer;
+   field green : reader(get_green) :writer;
+   field blue : rw;
+   field white : rw;
 
    method new : common {
      my $self = $class->SUPER::new(@_);
