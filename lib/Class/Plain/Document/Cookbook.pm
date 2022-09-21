@@ -12,6 +12,42 @@ C<Class::Plain::Document::Cookbook> - Cookbook of Class::Plain
 
 This is the cookbook of the C<Class::Plain>.
 
+=head1 Signatures
+
+Use C<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures>.
+  
+  use v5.36; # Enable signatures and other features.
+  
+  use Class::Plain;
+  
+  class Point {
+    field x;
+    field y;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{x} //= 0;
+      $self->{y} //= 0;
+      
+      return $self;
+    }
+    
+    # Subroutine signatures
+    method move ($x = 0, $y = 0) {
+      
+      $self->{x} += $x;
+      $self->{y} += $y;
+    }
+    
+    method describe {
+      print "A point at ($self->{x}, $self->{y})\n";
+    }
+  }
+  
+  my $point = Point->new(x => 5, y => 10);
+  $point->describe;
+
 =head1 Use Other OO Module With Class::Plain
 
 C<Class::Plain> can be used with other OO modules.
