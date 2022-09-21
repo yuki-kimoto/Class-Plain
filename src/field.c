@@ -94,6 +94,19 @@ void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char
   av_push(fieldmeta->hooks, (SV *)hook);
 }
 
+void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta)
+{
+  // Run hooks
+  {                                                                                       
+    U32 hooki;                                                                            
+    for(hooki = 0; fieldmeta->hooks && hooki < av_count(fieldmeta->hooks); hooki++) {     
+      struct FieldHook *h = (struct FieldHook *)AvARRAY(fieldmeta->hooks)[hooki];         
+      if(*h->funcs->seal)                                                                 
+        (*h->funcs->seal)(aTHX_ fieldmeta, h->hookdata, h->funcdata);        
+    }                                                                                     
+  }
+}
+
 /*******************
  * Attribute hooks *
  *******************/
