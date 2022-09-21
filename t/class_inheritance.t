@@ -81,23 +81,25 @@ use lib "$FindBin::Bin/lib";
 # Embeding Class
 {
   class EmbedBase1 {
-    field ps : rw;
     field b1 : rw;
+    
+    method ps;
     
     method init {
 
-      push @{$self->{ps}}, 2;
+      push @{$self->ps}, 2;
       $self->{b1} = 3;
     }
   }
   
   class EmbedBase2 {
-    field ps : rw;
     field b2 : rw;
+
+    method ps;
     
     method init {
       
-      push @{$self->{ps}}, 3;
+      push @{$self->ps}, 3;
       $self->{b2} = 4;
     }
   }
