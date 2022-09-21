@@ -68,11 +68,8 @@ class Counter {
 class Colour {
    field red : reader writer;
    field green : reader(get_green) :writer;
-   field blue  ;
-   field white ;
-   
-   method blue { if (@_) { $self->{blue} = $_[0]; return $self; } else { $self->{blue} } }
-   method white { if (@_) { $self->{white} = $_[0]; return $self;  } else { $self->{white} } }
+   field blue : rw;
+   field white : rw;
 
    method new : common {
      my $self = $class->SUPER::new(@_);

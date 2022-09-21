@@ -117,6 +117,26 @@ void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *na
       // Generate the writer
       Perl_eval_pv(SvPV_nolen(sv_writer_code), 1);
     }
+    else if (strcmp(name, "rw") == 0) {
+      // The rw code
+      SV* sv_rw_code = sv_2mortal(newSVpv("", 0));
+      sv_catpv(sv_rw_code, "sub Colour::");
+      if (value) {
+        sv_catpv(sv_rw_code, SvPV_nolen(value));
+      }
+      else {
+        sv_catpv(sv_rw_code, SvPV_nolen(fieldmeta->name));
+      }
+      sv_catpv(sv_rw_code,  " {\n  my $self = shift;\n  if (@_) {\n  $self->{");
+      sv_catpv(sv_rw_code, SvPV_nolen(fieldmeta->name));
+      sv_catpv(sv_rw_code, "} = shift;\n  return $self;\n }\n");
+      sv_catpv(sv_rw_code,  "$self->{");
+      sv_catpv(sv_rw_code, SvPV_nolen(fieldmeta->name));
+      sv_catpv(sv_rw_code, "};\n}");
+      
+      // Generate the rw
+      Perl_eval_pv(SvPV_nolen(sv_rw_code), 1);
+    }
     
     LEAVE;
   }
@@ -305,4 +325,5 @@ void ClassPlain__boot_fields(pTHX)
 {
   ClassPlain_register_field_attribute("reader",   &fieldhooks_reader,   NULL);
   ClassPlain_register_field_attribute("writer",   &fieldhooks_writer,   NULL);
+  ClassPlain_register_field_attribute("rw",   &fieldhooks_writer,   NULL);
 }
