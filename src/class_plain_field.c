@@ -123,8 +123,6 @@ static SV *make_accessor_method_name_sv(pTHX_ FieldMeta *fieldmeta, SV *method_n
 
 static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *method_name, int type)
 {
-  warn("GGG %s", SvPV_nolen(method_name));
-   
   ENTER;
 
   ClassMeta *classmeta = fieldmeta->class;
@@ -159,8 +157,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *met
   ops = op_append_list(OP_LINESEQ, ops,
     make_argcheck_ops(req_args, opt_args, slurpy_arg, method_name_fq));
   
-  warn("AAA");
-  
   // Run hooks
   {                                                                                       
     U32 hooki;                                                                            
@@ -190,8 +186,6 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *met
 
   ClassPlain_class_add_method(classmeta, method_name);
   
-  warn("FFF %s", SvPV_nolen(method_name));
-  
   LEAVE;
 }
 
@@ -203,8 +197,6 @@ static bool fieldhook_reader_apply(pTHX_ FieldMeta *fieldmeta, SV *value, SV **h
 
 static void fieldhook_reader_seal(pTHX_ FieldMeta *fieldmeta, SV *hookdata, void *_funcdata)
 {
-  warn("HHH %s", SvPV_nolen(hookdata));
-  
   S_generate_field_accessor_method(aTHX_ fieldmeta, hookdata, ACCESSOR_READER);
 }
 
@@ -217,8 +209,6 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
 
   optype = OP_PADSV;
   
-  warn("EEE");
-  
   ctx->retop = newLISTOP(OP_RETURN, 0,
     newOP(OP_PUSHMARK, 0),
     newBINOP(
@@ -228,9 +218,6 @@ static void fieldhook_gen_reader_ops(pTHX_ FieldMeta *fieldmeta, SV *hookdata, v
       newSVOP(OP_CONST, 0, ctx->fieldmeta->name)
     )
   );
-
-  warn("FFF");
-
 }
 
 static struct FieldHookFuncs fieldhooks_reader = {
