@@ -27,15 +27,6 @@ FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmet
   return fieldmeta;
 }
 
-typedef struct FieldAttributeRegistration FieldAttributeRegistration;
-
-struct FieldAttributeRegistration {
-  FieldAttributeRegistration *next;
-  const char *name;
-  const struct FieldHookFuncs *funcs;
-  void *funcdata;
-};
-
 static FieldAttributeRegistration *fieldattrs = NULL;
 
 static void ClassPlain_register_field_attribute(const char *name, const struct FieldHookFuncs *funcs, void *funcdata)

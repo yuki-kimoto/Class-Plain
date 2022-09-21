@@ -2,6 +2,7 @@
 #define CLASS_PLAIN_FIELD_H
 
 typedef struct FieldMeta FieldMeta;
+typedef struct FieldAttributeRegistration FieldAttributeRegistration;
 
 #include "class_plain_class.h"
 
@@ -50,6 +51,13 @@ struct FieldHookFuncs {
 struct CustomFieldHookData
 {
   SV *apply_cb;
+};
+
+struct FieldAttributeRegistration {
+  FieldAttributeRegistration *next;
+  const char *name;
+  const struct FieldHookFuncs *funcs;
+  void *funcdata;
 };
 
 void ClassPlain__boot_fields(pTHX);
