@@ -122,15 +122,6 @@ ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV *name)
   return meta;
 }
 
-void ClassPlain_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_name)
-{
-  SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
-  SAVEFREESV(isa_name);
-  AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
-
-  av_push(isa, SvREFCNT_inc(super_class_name));
-}
-
 void ClassPlain_class_begin(pTHX_ ClassMeta *meta)
 {
   SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
@@ -245,7 +236,13 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hoo
     if(super_class_version && SvOK(super_class_version))
       ensure_module_version(super_class_name, super_class_version);
     
-    ClassPlain_class_set_superclass(class_meta, super_class_name);
+    // Push the super class to @ISA
+    {
+      SV *isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
+      SAVEFREESV(isa_name);
+      AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
+      av_push(isa, SvREFCNT_inc(super_class_name));
+    }
   }
   else {
     class_meta->isa_empty = 1;
