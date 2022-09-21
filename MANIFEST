@@ -33,6 +33,8 @@ t/class_subclass.t
 t/class_use.t
 t/field.t
 t/keyword.t
+t/keyword_use.t
+t/lib/MyKeyword.pm
 t/method.t
 t/pod.t
 t/use.t

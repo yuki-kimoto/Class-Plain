@@ -7,11 +7,6 @@
  */
 
 #line 1 "lib/Class/Plain.xs"
-/*  You may distribute under the terms of either the GNU General Public License
- *  or the Artistic License (the same terms as Perl itself)
- *
- *  (C) Paul Evans, 2019-2021 -- leonerd@leonerd.org.uk
- */
 #define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"
@@ -478,7 +473,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 482 "lib/Class/Plain.c"
+#line 477 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -622,7 +617,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 626 "lib/Class/Plain.c"
+#line 621 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -647,7 +642,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 475 "lib/Class/Plain.xs"
+#line 470 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -668,7 +663,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
-#line 672 "lib/Class/Plain.c"
+#line 667 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
