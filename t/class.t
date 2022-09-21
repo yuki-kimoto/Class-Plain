@@ -85,18 +85,4 @@ use Class::Plain;
   is($object->z, 3);
 }
 
-{
-  class ModuleClassIsaUse : isa(ModuleClassIsa) {
-    
-  }
-  
-  my $object = ModuleClassIsaUse->new(x => 1);
-  is($object->x, 1);
-  $object->set_y(2);
-  is($object->{y}, 2);
-  $object->z(3);
-  is($object->z, 3);
-}
-
-
 done_testing;

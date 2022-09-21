@@ -7,6 +7,9 @@ use Test::More;
 
 use Class::Plain;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+
 # The multiple inheritance
 {
   class MultiBase1 {
@@ -224,5 +227,19 @@ use Class::Plain;
 
   is( $obj->moremethod, 456, '$obj field methods from ExtendedClassic' );
 }
+
+{
+  class ModuleClassIsaUse : isa(ModuleClassIsa) {
+    
+  }
+  
+  my $object = ModuleClassIsaUse->new(x => 1);
+  is($object->x, 1);
+  $object->set_y(2);
+  is($object->{y}, 2);
+  $object->z(3);
+  is($object->z, 3);
+}
+
 
 done_testing;
