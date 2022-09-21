@@ -94,9 +94,11 @@ Inheritance:
       print "A point at ($self->{x}, $self->{y}, $self->{z})\n";
     }
   }
-
+  
   my $point3d = Point3D->new(x => 5, y => 10, z => 15);
   $point3d->describe;
+
+See also L<Class Plain Cookbook|Class::Plain::Document::Cookbook>.
 
 =head1 Description
 
@@ -272,6 +274,12 @@ B<Examples:>
 =head1 Required Perl Version
 
 Perl 5.16+.
+
+=head1 Cookbook
+
+Exmples of C<Class::Plain>.
+
+L<Class::Plain::Document::Cookbook>
 
 =head1 See Also
 
