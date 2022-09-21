@@ -5,9 +5,14 @@ use warnings;
 
 use Test::More;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+
 use Scalar::Util qw( reftype );
 
 use Class::Plain;
+
+=pod
 
 {
   class MyClassField {
@@ -203,6 +208,19 @@ use Class::Plain;
     is(MyClassPackageVariable->FOO, 1);
     is(MyClassPackageVariable->BAR, 2);
   }
+}
+
+=cut
+
+{
+  use ModuleClass;
+  
+  my $object = ModuleClass->new(x => 1);
+  is($object->x, 1);
+  $object->set_y(2);
+  is($object->{y}, 2);
+  $object->z(3);
+  is($object->z, 3);
 }
 
 done_testing;

@@ -34,7 +34,9 @@ void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *na
     if (strcmp(name, "reader") == 0) {
       // The reader code
       SV* sv_reader_code = sv_2mortal(newSVpv("", 0));
-      sv_catpv(sv_reader_code, "sub Colour::");
+      sv_catpv(sv_reader_code, "sub ");
+      sv_catpv(sv_reader_code, SvPV_nolen(fieldmeta->class->name));
+      sv_catpv(sv_reader_code, "::");
       if (value) {
         sv_catpv(sv_reader_code, SvPV_nolen(value));
       }
@@ -52,7 +54,9 @@ void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *na
     else if (strcmp(name, "writer") == 0) {
       // The writer code
       SV* sv_writer_code = sv_2mortal(newSVpv("", 0));
-      sv_catpv(sv_writer_code, "sub Colour::");
+      sv_catpv(sv_writer_code, "sub ");
+      sv_catpv(sv_writer_code, SvPV_nolen(fieldmeta->class->name));
+      sv_catpv(sv_writer_code, "::");
       if (value) {
         sv_catpv(sv_writer_code, SvPV_nolen(value));
       }
@@ -71,7 +75,9 @@ void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *na
     else if (strcmp(name, "rw") == 0) {
       // The rw code
       SV* sv_rw_code = sv_2mortal(newSVpv("", 0));
-      sv_catpv(sv_rw_code, "sub Colour::");
+      sv_catpv(sv_rw_code, "sub ");
+      sv_catpv(sv_rw_code, SvPV_nolen(fieldmeta->class->name));
+      sv_catpv(sv_rw_code, "::");
       if (value) {
         sv_catpv(sv_rw_code, SvPV_nolen(value));
       }
