@@ -5,7 +5,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "meta.h"
+#include "class_plain_parser.h"
 #include "class.h"
 #include "field.h"
 

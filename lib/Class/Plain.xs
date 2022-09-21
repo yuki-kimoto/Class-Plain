@@ -23,7 +23,7 @@
 #include "optree-additions.c.inc"
 #include "newOP_CUSTOM.c.inc"
 
-#include "meta.h"
+#include "class_plain_parser.h"
 #include "class.h"
 #include "field.h"
 #include "method.h"
