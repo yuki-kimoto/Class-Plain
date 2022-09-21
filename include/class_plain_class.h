@@ -1,5 +1,5 @@
-#ifndef __CLASS_PLAIN__CLASS_H__
-#define __CLASS_PLAIN__CLASS_H__
+#ifndef CLASS_PLAIN_CLASS_H
+#define CLASS_PLAIN_CLASS_H
 
 typedef struct ClassMeta ClassMeta;
 

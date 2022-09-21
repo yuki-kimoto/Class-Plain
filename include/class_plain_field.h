@@ -1,5 +1,5 @@
-#ifndef __CLASS_PLAIN__FIELD_H__
-#define __CLASS_PLAIN__FIELD_H__
+#ifndef CLASS_PLAIN_FIELD_H
+#define CLASS_PLAIN_FIELD_H
 
 typedef struct FieldMeta FieldMeta;
 

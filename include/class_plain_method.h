@@ -1,5 +1,5 @@
-#ifndef __CLASS_PLAIN__METHOD_H__
-#define __CLASS_PLAIN__METHOD_H__
+#ifndef CLASS_PLAIN_METHOD_H
+#define CLASS_PLAIN_METHOD_H
 
 typedef struct MethodMeta MethodMeta;
 
