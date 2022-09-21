@@ -34,15 +34,6 @@ is( $Spider::VERSION, 4.56, 'Versioned subclass field VERSION' );
       'Subclassed instances work' );
 }
 
-{
-   ok( !eval <<'EOPERL',
-      class Antelope : isa(Animal 2.34);
-EOPERL
-      ': isa insufficient version fails' );
-   like( $@, qr/^Animal version 2.34 required--this is only version 1.23 /,
-      'message from insufficient version' );
-}
-
 # Extend before base class is sealed (RT133190)
 {
    class BaseClass {

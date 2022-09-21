@@ -184,17 +184,9 @@ static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgvers
 
 static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hookdata_ptr, void *_funcdata)
 {
-  SV* super_class_name = newSV(0);
-  SV* super_class_version = newSV(0);
-  SAVEFREESV(super_class_name);
-  SAVEFREESV(super_class_version);
+  SV* super_class_name = value;
   
   if (value) {
-    const char *end = split_package_ver(value, super_class_name, super_class_version);
-
-    if(*end)
-      croak("Unexpected characters while parsing :isa() attribute: %s", end);
-
     HV *superstash = gv_stashsv(super_class_name, 0);
     
     IV is_load_module;
@@ -233,9 +225,6 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hoo
     if(!superstash)
       croak("Superclass %" SVf " does not exist", super_class_name);
 
-    if(super_class_version && SvOK(super_class_version))
-      ensure_module_version(super_class_name, super_class_version);
-    
     // Push the super class to @ISA
     {
       SV *isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
