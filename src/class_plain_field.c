@@ -15,7 +15,7 @@
 
 void ClassPlain_need_PLparser(pTHX);
 
-FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *field_name, ClassMeta *classmeta)
+FieldMeta *ClassPlain_create_field(pTHX_ SV *field_name, ClassMeta *classmeta)
 {
   FieldMeta *fieldmeta;
   Newx(fieldmeta, 1, FieldMeta);
@@ -43,7 +43,7 @@ static void ClassPlain_register_field_attribute(const char *name, const struct F
   fieldattrs = reg;
 }
 
-void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value)
+void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value)
 {
   if(value && (!SvPOK(value) || !SvCUR(value)))
     value = NULL;
@@ -82,7 +82,7 @@ void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char
   av_push(fieldmeta->hooks, (SV *)hook);
 }
 
-void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta)
+void ClassPlain_field_seal(pTHX_ FieldMeta *fieldmeta)
 {
   // Run hooks
   {                                                                                       
@@ -182,7 +182,7 @@ static void S_generate_field_accessor_method(pTHX_ FieldMeta *fieldmeta, SV *mna
   CV *cv = newATTRSUB(floor_ix, newSVOP(OP_CONST, 0, mname_fq), NULL, NULL, ops);
   CvMETHOD_on(cv);
 
-  ClassPlain_mop_class_add_method(classmeta, mname);
+  ClassPlain_class_add_method(classmeta, mname);
 
   LEAVE;
 }

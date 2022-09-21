@@ -63,11 +63,11 @@ struct FieldAttributeRegistration {
 void ClassPlain__boot_fields(pTHX);
 
 /* Field API */
-FieldMeta *ClassPlain_mop_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta);
+FieldMeta *ClassPlain_create_field(pTHX_ SV *fieldname, ClassMeta *classmeta);
 
-void ClassPlain_mop_field_seal(pTHX_ FieldMeta *fieldmeta);
+void ClassPlain_field_seal(pTHX_ FieldMeta *fieldmeta);
 
-void ClassPlain_mop_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value);
+void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *name, SV *value);
 
 
 #endif

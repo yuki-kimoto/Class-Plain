@@ -29,7 +29,7 @@ static void Class_Plain_register_class_attribute(const char *name, const struct 
   classattrs = reg;
 }
 
-void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV *value)
+void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV *value)
 {
   if(value && (!SvPOK(value) || !SvCUR(value)))
     value = NULL;
@@ -69,7 +69,7 @@ void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *class_meta, const cha
 
 /* TODO: get attribute */
 
-ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
+ClassMeta *ClassPlain_get_class_for_stash(pTHX_ HV *stash)
 {
   GV **gvp = (GV **)hv_fetchs(stash, "META", 0);
   if(!gvp)
@@ -78,7 +78,7 @@ ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash)
   return NUM2PTR(ClassMeta *, SvUV(SvRV(GvSV(*gvp))));
 }
 
-MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
+MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
 {
   AV *methods = meta->methods;
 
@@ -96,7 +96,7 @@ MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodnam
   return methodmeta;
 }
 
-FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
+FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
 {
   AV *fields = meta->fields;
 
@@ -113,14 +113,14 @@ FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname)
       croak("Cannot add another field named %" SVf, fieldname);
   }
 
-  FieldMeta *fieldmeta = ClassPlain_mop_create_field(fieldname, meta);
+  FieldMeta *fieldmeta = ClassPlain_create_field(fieldname, meta);
 
   av_push(fields, (SV *)fieldmeta);
 
   return fieldmeta;
 }
 
-ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name)
+ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV *name)
 {
   ClassMeta *meta;
   Newx(meta, 1, ClassMeta);
@@ -137,7 +137,7 @@ ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name)
   return meta;
 }
 
-void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_name)
+void ClassPlain_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_name)
 {
   SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
   SAVEFREESV(isa_name);
@@ -146,7 +146,7 @@ void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *meta, SV *super_class_
   av_push(isa, SvREFCNT_inc(super_class_name));
 }
 
-void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta)
+void ClassPlain_class_begin(pTHX_ ClassMeta *meta)
 {
   SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
   SAVEFREESV(isa_name);
@@ -260,7 +260,7 @@ static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hoo
     if(super_class_version && SvOK(super_class_version))
       ensure_module_version(super_class_name, super_class_version);
     
-    ClassPlain_mop_class_set_superclass(class_meta, super_class_name);
+    ClassPlain_class_set_superclass(class_meta, super_class_name);
   }
   else {
     class_meta->isa_empty = 1;

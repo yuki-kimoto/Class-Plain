@@ -43,19 +43,19 @@ struct ClassAttributeRegistration {
 void ClassPlain__boot_classes(pTHX);
 
 /* Class API */
-ClassMeta *ClassPlain_mop_create_class(pTHX_ IV type, SV *name);
+ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV *name);
 
-ClassMeta *ClassPlain_mop_get_class_for_stash(pTHX_ HV *stash);
+ClassMeta *ClassPlain_get_class_for_stash(pTHX_ HV *stash);
 
-void ClassPlain_mop_class_set_superclass(pTHX_ ClassMeta *class, SV *superclassname);
+void ClassPlain_class_set_superclass(pTHX_ ClassMeta *class, SV *superclassname);
 
-void ClassPlain_mop_class_begin(pTHX_ ClassMeta *meta);
+void ClassPlain_class_begin(pTHX_ ClassMeta *meta);
 
-MethodMeta *ClassPlain_mop_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
+MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
 
-FieldMeta *ClassPlain_mop_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);
+FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *fieldname);
 
-void ClassPlain_mop_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value);
+void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *classmeta, const char *name, SV *value);
 
 void ClassPlain_register_class_attribute(pTHX_ const char *name, const struct ClassHookFuncs *funcs, void *funcdata);
 

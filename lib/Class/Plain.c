@@ -184,7 +184,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   SV *packagever = args[argi++]->sv;
 
-  ClassMeta *meta = ClassPlain_mop_create_class(type, packagename);
+  ClassMeta *meta = ClassPlain_create_class(type, packagename);
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
@@ -198,17 +198,17 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
       inplace_trim_whitespace(attrval);
 
-      ClassPlain_mop_class_apply_attribute(meta, SvPVX(attrname), attrval);
+      ClassPlain_class_apply_attribute(meta, SvPVX(attrname), attrval);
 
       argi++;
     }
   }
 
   if(hv_fetchs(GvHV(PL_hintgv), "Class::Plain/configure(always_strict)", 0)) {
-    ClassPlain_mop_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
+    ClassPlain_class_apply_attribute(meta, "strict", sv_2mortal(newSVpvs("params")));
   }
 
-  ClassPlain_mop_class_begin(meta);
+  ClassPlain_class_begin(meta);
 
   /* At this point XS::Parse::Keyword has parsed all it can. From here we will
    * take over to perform the odd "block or statement" behaviour of `class`
@@ -310,7 +310,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   SV *name = args[argi++]->sv;
 
-  FieldMeta *fieldmeta = ClassPlain_mop_class_add_field(compclassmeta, name);
+  FieldMeta *fieldmeta = ClassPlain_class_add_field(compclassmeta, name);
   SvREFCNT_dec(name);
 
   int nattrs = args[argi++]->i;
@@ -324,7 +324,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
       inplace_trim_whitespace(attrval);
 
-      ClassPlain_mop_field_apply_attribute(fieldmeta, SvPVX(attrname), attrval);
+      ClassPlain_field_apply_attribute(fieldmeta, SvPVX(attrname), attrval);
 
       if(attrval)
         SvREFCNT_dec(attrval);
@@ -333,7 +333,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
     }
   }
 
-  ClassPlain_mop_field_seal(fieldmeta);
+  ClassPlain_field_seal(fieldmeta);
 
   return KEYWORD_PLUGIN_STMT;
 }
@@ -482,7 +482,7 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext *ctx, voi
     CvMETHOD_on(ctx->cv);
 
     if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-      MethodMeta *meta = ClassPlain_mop_class_add_method(compclassmeta, ctx->name);
+      MethodMeta *meta = ClassPlain_class_add_method(compclassmeta, ctx->name);
 
       meta->is_common = compmethodmeta->is_common;
     }
