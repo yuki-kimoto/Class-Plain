@@ -8,8 +8,6 @@ use Test::Refcount;
 
 use Class::Plain;
 
-use constant HAVE_DATA_DUMP => defined eval { require Data::Dump; };
-
 class Counter {
    field count;
    
@@ -66,7 +64,7 @@ class Counter {
 }
 
 class Colour {
-   field red ; #: reader   ; # :reader            :writer; # Remove reader writer
+   field red : reader   ; # :reader            :writer; # Remove reader writer
    field green ; # :reader(get_green) :writer; # Remove reader writer
    field blue  ;
    field white ;
