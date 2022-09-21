@@ -12,8 +12,6 @@
 #include "perl-backcompat.c.inc"
 #include "perl-additions.c.inc"
 
-void ClassPlain_need_PLparser(pTHX);
-
 static ClassAttributeRegistration *classattrs = NULL;
 
 static void Class_Plain_register_class_attribute(const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
@@ -131,8 +129,6 @@ ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV *name)
   meta->fields = newAV();
   meta->methods = newAV();
   meta->isa_empty = 0;
-
-  ClassPlain_need_PLparser();
 
   return meta;
 }
