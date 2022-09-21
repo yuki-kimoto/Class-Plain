@@ -47,6 +47,11 @@ struct FieldHookFuncs {
           enum AccessorType type, struct AccessorGenerationCtx *ctx);
 };
 
+struct CustomFieldHookData
+{
+  SV *apply_cb;
+};
+
 void ClassPlain__boot_fields(pTHX);
 
 /* Field API */

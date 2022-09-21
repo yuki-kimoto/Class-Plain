@@ -14,15 +14,6 @@
 
 void ClassPlain_need_PLparser(pTHX);
 
-typedef struct ClassAttributeRegistration ClassAttributeRegistration;
-
-struct ClassAttributeRegistration {
-  ClassAttributeRegistration *next;
-  const char *name;
-  const struct ClassHookFuncs *funcs;
-  void *funcdata;
-};
-
 static ClassAttributeRegistration *classattrs = NULL;
 
 static void Class_Plain_register_class_attribute(const char *name, const struct ClassHookFuncs *funcs, void *funcdata)

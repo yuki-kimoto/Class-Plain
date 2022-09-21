@@ -28,15 +28,6 @@
 #include "class_plain_field.h"
 #include "class_plain_method.h"
 
-typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, void *data);
-
-struct MethodAttributeDefinition {
-  char *attrname;
-  /* TODO: int flags */
-  MethodAttributeHandler *apply;
-  void *applydata;
-};
-
 /**********************************
  * Class and Field Implementation *
  **********************************/
@@ -501,11 +492,6 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .post_blockstart = parse_method_post_blockstart,
   .pre_blockend    = parse_method_pre_blockend,
   .post_newcv      = parse_method_post_newcv,
-};
-
-struct CustomFieldHookData
-{
-  SV *apply_cb;
 };
 
 /* internal function shared by various *.c files */

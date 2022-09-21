@@ -37,15 +37,6 @@
 #include "class_plain_field.h"
 #include "class_plain_method.h"
 
-typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, void *data);
-
-struct MethodAttributeDefinition {
-  char *attrname;
-  /* TODO: int flags */
-  MethodAttributeHandler *apply;
-  void *applydata;
-};
-
 /**********************************
  * Class and Field Implementation *
  **********************************/
@@ -512,11 +503,6 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .post_newcv      = parse_method_post_newcv,
 };
 
-struct CustomFieldHookData
-{
-  SV *apply_cb;
-};
-
 /* internal function shared by various *.c files */
 void ClassPlain_need_PLparser(pTHX)
 {
@@ -532,7 +518,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 536 "lib/Class/Plain.c"
+#line 522 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -676,7 +662,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 680 "lib/Class/Plain.c"
+#line 666 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -701,7 +687,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 529 "lib/Class/Plain.xs"
+#line 515 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -724,7 +710,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 728 "lib/Class/Plain.c"
+#line 714 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

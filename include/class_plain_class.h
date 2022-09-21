@@ -2,6 +2,7 @@
 #define CLASS_PLAIN_CLASS_H
 
 typedef struct ClassMeta ClassMeta;
+typedef struct ClassAttributeRegistration ClassAttributeRegistration;
 
 #include "class_plain_method.h"
 #include "class_plain_field.h"
@@ -13,13 +14,6 @@ struct ClassMeta {
   AV *fields;   /* each elem is a raw pointer directly to a FieldMeta */
   AV *methods;  /* each elem is a raw pointer directly to a MethodMeta */
   IV isa_empty;
-};
-
-struct MethodMeta {
-  SV *name;
-  ClassMeta *class;
-  /* We don't store the method body CV; leave that in the class stash */
-  unsigned int is_common : 1;
 };
 
 struct ClassHookFuncs {
@@ -37,6 +31,14 @@ struct ClassHook {
   void *funcdata;
   SV *hookdata;
 };
+
+struct ClassAttributeRegistration {
+  ClassAttributeRegistration *next;
+  const char *name;
+  const struct ClassHookFuncs *funcs;
+  void *funcdata;
+};
+
 
 void ClassPlain__boot_classes(pTHX);
 
