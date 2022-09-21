@@ -41,7 +41,7 @@ C<Class::Plain> -  a class syntax for the hash-based Perl OO.
 =head1 Usage
 
   use Class::Plain;
-
+  
   class Point {
     field x;
     field y;
@@ -55,18 +55,22 @@ C<Class::Plain> -  a class syntax for the hash-based Perl OO.
       return $self;
     }
     
-    method move ($x, $y) {
+    method move {
+      my ($x, $y) = @_;
+      
       $self->{x} += $x;
       $self->{y} += $y;
     }
     
-    method describe () {
+    method describe {
       print "A point at ($self->{x}, $self->{y})\n";
     }
   }
-
+  
   my $point = Point->new(x => 5, y => 10);
   $point->describe;
+
+Inheritance:
 
   class Point3D : isa(Point) {
     field z;
@@ -79,16 +83,20 @@ C<Class::Plain> -  a class syntax for the hash-based Perl OO.
       return $self;
     }
     
-    method move ($x, $y, $z) {
+    method move {
+      my ($x, $y, $z) = @_;
+      
       $self->SUPER::move($x, $y);
       $self->{z} += $z;
     }
     
-    method describe () {
+    method describe {
       print "A point at ($self->{x}, $self->{y}, $self->{z})\n";
     }
   }
 
+  my $point3d = Point3D->new(x => 5, y => 10, z => 15);
+  $point3d->describe;
 
 =head1 Description
 
@@ -152,6 +160,8 @@ The following field attributes are supported:
 =head3 reader Attribute
 
   : reader
+  
+  : reader(METHOD_NAME)
 
 Generates a reader method to return the current value of the field. If no name
 is given, the name of the field is used.
@@ -171,6 +181,8 @@ The different method name can be specified.
 
   : writer
 
+  : writer(METHOD_NAME)
+
 Generates a writer method to set a new value of the field from its arguments.
 If no name is given, the name of the field is used prefixed by C<set_>.
 
@@ -189,6 +201,8 @@ The different method name can be specified.
 =head3 rw Attribute
 
   : rw
+
+  : rw(METHOD_NAME)
 
 Generates a read-write method to set and get the value of the field.
 If no name is given, the name of the field is used.
