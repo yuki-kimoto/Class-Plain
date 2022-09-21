@@ -182,8 +182,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   IV type = (IV)hookdata;
 
-  SV *packagever = args[argi++]->sv;
-
   ClassMeta *meta = ClassPlain_create_class(type, packagename);
 
   int nattrs = args[argi++]->i;
@@ -232,16 +230,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     PL_parser->copline = NOLINE;
   }
 
-  if(packagever) {
-    /* stolen from op.c because Perl_package_version isn't exported */
-    U32 savehints = PL_hints;
-    PL_hints &= ~HINT_STRICT_VARS;
-
-    sv_setsv(GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), packagever);
-
-    PL_hints = savehints;
-  }
-
   if(is_block) {
     I32 save_ix = block_start(TRUE);
     compclass_meta_set(meta);
@@ -272,7 +260,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
 static const struct XSParseKeywordPieceType pieces_classlike[] = {
   XPK_PACKAGENAME,
-  XPK_VSTRING_OPT,
   /* This should really a repeated (tagged?) choice of a number of things, but
    * right now there's only one thing permitted here anyway
    */
@@ -488,7 +475,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 492 "lib/Class/Plain.c"
+#line 479 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -632,7 +619,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 636 "lib/Class/Plain.c"
+#line 623 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -657,7 +644,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 485 "lib/Class/Plain.xs"
+#line 472 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -679,7 +666,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   ClassPlain__boot_classes(aTHX);
 
-#line 683 "lib/Class/Plain.c"
+#line 670 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

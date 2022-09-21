@@ -173,8 +173,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   IV type = (IV)hookdata;
 
-  SV *packagever = args[argi++]->sv;
-
   ClassMeta *meta = ClassPlain_create_class(type, packagename);
 
   int nattrs = args[argi++]->i;
@@ -223,16 +221,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     PL_parser->copline = NOLINE;
   }
 
-  if(packagever) {
-    /* stolen from op.c because Perl_package_version isn't exported */
-    U32 savehints = PL_hints;
-    PL_hints &= ~HINT_STRICT_VARS;
-
-    sv_setsv(GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), packagever);
-
-    PL_hints = savehints;
-  }
-
   if(is_block) {
     I32 save_ix = block_start(TRUE);
     compclass_meta_set(meta);
@@ -263,7 +251,6 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
 static const struct XSParseKeywordPieceType pieces_classlike[] = {
   XPK_PACKAGENAME,
-  XPK_VSTRING_OPT,
   /* This should really a repeated (tagged?) choice of a number of things, but
    * right now there's only one thing permitted here anyway
    */
