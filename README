@@ -3,7 +3,7 @@ Name
 
 Usage
       use Class::Plain;
-
+  
       class Point {
         field x;
         field y;
@@ -17,18 +17,22 @@ Usage
           return $self;
         }
     
-        method move ($x, $y) {
+        method move {
+          my ($x, $y) = @_;
+      
           $self->{x} += $x;
           $self->{y} += $y;
         }
     
-        method describe () {
+        method describe {
           print "A point at ($self->{x}, $self->{y})\n";
         }
       }
-
+  
       my $point = Point->new(x => 5, y => 10);
       $point->describe;
+
+    Inheritance:
 
       class Point3D : isa(Point) {
         field z;
@@ -41,15 +45,20 @@ Usage
           return $self;
         }
     
-        method move ($x, $y, $z) {
+        method move {
+          my ($x, $y, $z) = @_;
+      
           $self->SUPER::move($x, $y);
           $self->{z} += $z;
         }
     
-        method describe () {
+        method describe {
           print "A point at ($self->{x}, $self->{y}, $self->{z})\n";
         }
       }
+
+      my $point3d = Point3D->new(x => 5, y => 10, z => 15);
+      $point3d->describe;
 
 Description
     This module provides a class syntax for the hash-based Perl OO.
@@ -110,6 +119,8 @@ Keywords
 
    reader Attribute
       : reader
+  
+      : reader(METHOD_NAME)
 
     Generates a reader method to return the current value of the field. If
     no name is given, the name of the field is used.
@@ -127,6 +138,8 @@ Keywords
 
    writer Attribute
       : writer
+
+      : writer(METHOD_NAME)
 
     Generates a writer method to set a new value of the field from its
     arguments. If no name is given, the name of the field is used prefixed
@@ -146,6 +159,8 @@ Keywords
 
    rw Attribute
       : rw
+
+      : rw(METHOD_NAME)
 
     Generates a read-write method to set and get the value of the field. If
     no name is given, the name of the field is used.
@@ -216,10 +231,11 @@ Required Perl Version
 
 See Also
   Object::Pad
-    This module is started from the copy of the source code of Object::Pad.
+    The implementation of the "Class::Plain" module is started from the copy
+    of the source code of Object::Pad.
 
   Corinna
-    This module uses the keywords and attributes that are specified in
+    "Class::Plain" uses the keywords and attributes that are specified in
     Corinna <https://github.com/Ovid/Corinna>.
 
     The keywords: "class", "field", "method".
@@ -228,4 +244,10 @@ See Also
 
     Only the "rw" attribute is got from Raku <https://www.raku.org>, Moo,
     Moose.
+
+  XS::Parse::Keyword
+    The "class" and "field" keywords are parsed by XS::Parse::Keyword.
+
+  XS::Parse::Sublike
+    The "method" keyword is parsed by XS::Parse::Sublike.
 

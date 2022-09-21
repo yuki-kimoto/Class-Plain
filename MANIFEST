@@ -20,6 +20,7 @@ include/class_plain_parser.h
 lib/Class/Plain.pm
 lib/Class/Plain.xs
 lib/Class/Plain/Base.pm
+lib/Class/Plain/Document/Cookbook.pm
 LICENSE
 MANIFEST			This list of files
 META.json
@@ -30,10 +31,11 @@ src/class_plain_field.c
 t/class.t
 t/class_inheritance_clasic.t
 t/class_subclass.t
-t/class_use.t
 t/field.t
 t/keyword.t
 t/keyword_use.t
+t/lib/ModuleClass.pm
+t/lib/ModuleClassIsa.pm
 t/lib/MyKeyword.pm
 t/method.t
 t/pod.t

@@ -21,9 +21,11 @@ name: Class-Plain
 provides:
   Class::Plain:
     file: lib/Class/Plain.pm
-    version: '0.68'
+    version: '0.01'
   Class::Plain::Base:
     file: lib/Class/Plain/Base.pm
+  Class::Plain::Document::Cookbook:
+    file: lib/Class/Plain/Document/Cookbook.pm
 requires:
   XS::Parse::Keyword: '0.22'
   XS::Parse::Sublike: '0.15'
