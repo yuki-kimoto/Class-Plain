@@ -15,7 +15,7 @@ use lib "$FindBin::Bin/lib";
   class MultiBase1 {
     field b1 : rw;
     
-    sub ps;
+    method ps;
     
     method b1_init {
 
@@ -27,7 +27,7 @@ use lib "$FindBin::Bin/lib";
   class MultiBase2 {
     field b2 : rw;
 
-    sub ps;
+    method ps;
     
     method b1_init {
 

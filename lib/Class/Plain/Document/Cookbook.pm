@@ -64,6 +64,12 @@ Weaken a field.
     }
   }
 
+=head1 Inheritance
+
+=head2 Multiple Inheritance
+
+
+
 =head1 Use Other OO Module With Class::Plain
 
 L<Class::Plain> can be used with other OO modules.

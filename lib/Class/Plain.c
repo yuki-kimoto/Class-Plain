@@ -355,7 +355,7 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext *ctx, v
   compmethodmeta->is_common = false;
 
   hv_stores(ctx->moddata, "Class::Plain/compmethodmeta", newSVuv(PTR2UV(compmethodmeta)));
-
+  
   LEAVE;
 }
 
@@ -405,22 +405,24 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext *ctx, v
   /* If we have no ctx->body that means this was a bodyless method
    * declaration; a required method
    */
-  if(compmethodmeta->is_common) {
-    ctx->body = op_append_list(OP_LINESEQ,
-      ClassPlain_newCOMMONMETHSTARTOP(0 |
-        (0)),
-      ctx->body);
-  }
-  else {
-    OP *fieldops = NULL, *methstartop;
-    fieldops = op_append_list(OP_LINESEQ, fieldops,
-      newSTATEOP(0, NULL, NULL));
-    fieldops = op_append_list(OP_LINESEQ, fieldops,
-      (methstartop = ClassPlain_newMETHSTARTOP(0 |
-        (0) |
-        (0))));
+  if (ctx->body) {
+    if(compmethodmeta->is_common) {
+      ctx->body = op_append_list(OP_LINESEQ,
+        ClassPlain_newCOMMONMETHSTARTOP(0 |
+          (0)),
+        ctx->body);
+    }
+    else {
+      OP *fieldops = NULL, *methstartop;
+      fieldops = op_append_list(OP_LINESEQ, fieldops,
+        newSTATEOP(0, NULL, NULL));
+      fieldops = op_append_list(OP_LINESEQ, fieldops,
+        (methstartop = ClassPlain_newMETHSTARTOP(0 |
+          (0) |
+          (0))));
 
-    ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
+      ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
+    }
   }
 }
 
@@ -474,7 +476,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 478 "lib/Class/Plain.c"
+#line 480 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -618,7 +620,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 622 "lib/Class/Plain.c"
+#line 624 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -643,7 +645,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 471 "lib/Class/Plain.xs"
+#line 473 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -664,7 +666,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
-#line 668 "lib/Class/Plain.c"
+#line 670 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
