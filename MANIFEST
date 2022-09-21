@@ -29,8 +29,7 @@ README
 src/class_plain_class.c
 src/class_plain_field.c
 t/class.t
-t/class_inheritance_clasic.t
-t/class_subclass.t
+t/class_inheritance.t
 t/field.t
 t/keyword.t
 t/keyword_use.t
