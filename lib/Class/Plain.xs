@@ -441,6 +441,7 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .flags           = XS_PARSE_SUBLIKE_FLAG_FILTERATTRS |
                      XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS |
                      XS_PARSE_SUBLIKE_FLAG_BODY_OPTIONAL,
+  .permit_hintkey  = "Class::Plain/method",
   .permit          = parse_method_permit,
   .pre_subparse    = parse_method_pre_subparse,
   .filter_attr     = parse_method_filter_attr,

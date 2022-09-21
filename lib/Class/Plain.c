@@ -450,6 +450,7 @@ static struct XSParseSublikeHooks parse_method_hooks = {
   .flags           = XS_PARSE_SUBLIKE_FLAG_FILTERATTRS |
                      XS_PARSE_SUBLIKE_COMPAT_FLAG_DYNAMIC_ACTIONS |
                      XS_PARSE_SUBLIKE_FLAG_BODY_OPTIONAL,
+  .permit_hintkey  = "Class::Plain/method",
   .permit          = parse_method_permit,
   .pre_subparse    = parse_method_pre_subparse,
   .filter_attr     = parse_method_filter_attr,
@@ -473,7 +474,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 477 "lib/Class/Plain.c"
+#line 478 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -617,7 +618,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 621 "lib/Class/Plain.c"
+#line 622 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -642,7 +643,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 470 "lib/Class/Plain.xs"
+#line 471 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -663,7 +664,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
-#line 667 "lib/Class/Plain.c"
+#line 668 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 
