@@ -5,7 +5,7 @@ use Module::Build;
 use XS::Parse::Keyword::Builder;
 use XS::Parse::Sublike::Builder;
 
-my @extra_compiler_flags = qw( -Iinclude -Ihax );
+my @extra_compiler_flags = qw( -Iinclude -Ihax -I.);
 
 push @extra_compiler_flags, qw( -DDEBUGGING=-g ) if $^X =~ m|/debugperl|;
 
