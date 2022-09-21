@@ -1,5 +1,9 @@
-#ifndef __CLASS_PLAIND__FIELD_H__
+#ifndef __CLASS_PLAIN__FIELD_H__
 #define __CLASS_PLAIN__FIELD_H__
+
+typedef struct FieldMeta FieldMeta;
+
+#include "class.h"
 
 enum AccessorType {
   ACCESSOR_READER,
@@ -7,15 +11,13 @@ enum AccessorType {
   ACCESSOR_COMBINED,
 };
 
+
 struct AccessorGenerationCtx {
   FieldMeta* fieldmeta;
   OP *bodyop;       /* OP_SASSIGN for :writer, empty for :reader */
   OP *post_bodyops;
   OP *retop;        /* OP_RETURN */
 };
-
-
-typedef struct FieldMeta FieldMeta;
 
 struct FieldMeta {
   SV *name;

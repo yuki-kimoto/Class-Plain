@@ -24,3 +24,4 @@ core.*
 */*.o
 */*/*.o
 */*/*/*.o
+lib/Class/Plain.c
