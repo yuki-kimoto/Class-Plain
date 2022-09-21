@@ -199,7 +199,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     }
   }
 
-  ClassPlain_class_begin(meta);
+  ClassPlain_begin_class_block(meta);
 
   /* At this point XS::Parse::Keyword has parsed all it can. From here we will
    * take over to perform the odd "block or statement" behaviour of `class`
@@ -664,9 +664,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
   register_xs_parse_sublike("method", &parse_method_hooks, (void *)0);
 
-  ClassPlain__boot_classes(aTHX);
-
-#line 670 "lib/Class/Plain.c"
+#line 668 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

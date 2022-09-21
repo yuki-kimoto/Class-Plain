@@ -49,7 +49,7 @@ ClassMeta *ClassPlain_get_class_for_stash(pTHX_ HV *stash);
 
 void ClassPlain_class_set_superclass(pTHX_ ClassMeta *class, SV *superclassname);
 
-void ClassPlain_class_begin(pTHX_ ClassMeta *meta);
+void ClassPlain_begin_class_block(pTHX_ ClassMeta *meta);
 
 MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname);
 
