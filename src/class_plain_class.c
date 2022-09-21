@@ -139,47 +139,6 @@ void ClassPlain_class_begin(pTHX_ ClassMeta *meta)
  * Attribute hooks *
  *******************/
 
-#ifndef isSPACE_utf8_safe
-   /* this isn't really safe but it's the best we can do */
-#  define isSPACE_utf8_safe(p, e)  (PERL_UNUSED_ARG(e), isSPACE_utf8(p))
-#endif
-
-#define split_package_ver(value, pkgname, pkgversion)  S_split_package_ver(aTHX_ value, pkgname, pkgversion)
-static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgversion)
-{
-  const char *start = SvPVX(value), *p = start, *end = start + SvCUR(value);
-
-  while(*p && !isSPACE_utf8_safe(p, end))
-    p += UTF8SKIP(p);
-
-  sv_setpvn(pkgname, start, p - start);
-  if(SvUTF8(value))
-    SvUTF8_on(pkgname);
-
-  while(*p && isSPACE_utf8_safe(p, end))
-    p += UTF8SKIP(p);
-
-  if(*p) {
-    /* scan_version() gets upset about trailing content. We need to extract
-     * exactly what it wants
-     */
-    start = p;
-    if(*p == 'v')
-      p++;
-    while(*p && strchr("0123456789._", *p))
-      p++;
-    SV *tmpsv = newSVpvn(start, p - start);
-    SAVEFREESV(tmpsv);
-
-    scan_version(SvPVX(tmpsv), pkgversion, FALSE);
-  }
-
-  while(*p && isSPACE_utf8_safe(p, end))
-    p += UTF8SKIP(p);
-
-  return p;
-}
-
 /* :isa */
 
 static bool classhook_isa_apply(pTHX_ ClassMeta *class_meta, SV *value, SV **hookdata_ptr, void *_funcdata)
