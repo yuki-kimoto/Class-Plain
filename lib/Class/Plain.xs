@@ -1,8 +1,3 @@
-/*  You may distribute under the terms of either the GNU General Public License
- *  or the Artistic License (the same terms as Perl itself)
- *
- *  (C) Paul Evans, 2019-2021 -- leonerd@leonerd.org.uk
- */
 #define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"
