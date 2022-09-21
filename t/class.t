@@ -7,8 +7,6 @@ use Test::More;
 
 use Scalar::Util qw( reftype );
 
-use B;
-
 use Class::Plain;
 
 {

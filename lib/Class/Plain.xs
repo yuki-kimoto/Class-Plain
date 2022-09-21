@@ -165,6 +165,7 @@ static struct MethodAttributeDefinition method_attributes[] = {
 static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs, void *hookdata)
 {
   int argi = 0;
+  
 
   SV *packagename = args[argi++]->sv;
   /* Grrr; XPK bug */
@@ -259,6 +260,7 @@ static const struct XSParseKeywordPieceType pieces_classlike[] = {
 };
 
 static const struct XSParseKeywordHooks kwhooks_class = {
+  .permit_hintkey = "Class::Plain/class",
   .pieces = pieces_classlike,
   .build = &build_classlike,
 };
@@ -309,6 +311,7 @@ static const struct XSParseKeywordHooks kwhooks_field = {
 
   .check = &check_field,
 
+  .permit_hintkey = "Class::Plain/field",
   .pieces = (const struct XSParseKeywordPieceType []){
     XPK_IDENT,
     XPK_ATTRIBUTES,
@@ -480,8 +483,9 @@ BOOT:
   Perl_custom_op_register(aTHX_ &pp_commonmethstart, &xop_commonmethstart);
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
-
+  
   register_xs_parse_keyword("class", &kwhooks_class, (void *)0);
+
   register_xs_parse_keyword("field", &kwhooks_field, "field");
 
   boot_xs_parse_sublike(0.15); /* dynamic actions */
