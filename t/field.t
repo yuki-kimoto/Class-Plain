@@ -68,7 +68,7 @@ class AccessorBasic {
    field red : reader writer;
    field green : reader(get_green) :writer(set_green2);
    field blue : rw;
-   field white : rw;
+   field white : rw(get_set_white);
 
    method new : common {
      my $self = $class->SUPER::new(@_);
@@ -88,7 +88,7 @@ class AccessorBasic {
    is( $col->red,       50, '$col->red' );
    is( $col->get_green, 60, '$col->get_green' );
    is( $col->blue,      70, '$col->blue' );
-   is( $col->white,     80, '$col->white' );
+   is( $col->get_set_white,     80, '$col->white' );
 }
 
 # writers
@@ -98,15 +98,15 @@ class AccessorBasic {
    $col->set_red( 80 );
    is( $col->set_green2( 90 ), $col, '->set_* writer returns invocant' );
    $col->blue(100);
-   $col->white( 110 );
+   $col->get_set_white( 110 );
 
    is_deeply( [ $col->rgbw ], [ 80, 90, 100, 110 ],
       '$col->rgbw after writers' );
    
-   $col->set_red(5)->blue(2)->white(7);
+   $col->set_red(5)->blue(2)->get_set_white(7);
    is($col->red, 5);
    is($col->blue, 2);
-   is($col->white, 7);
+   is($col->get_set_white, 7);
 }
 
 
