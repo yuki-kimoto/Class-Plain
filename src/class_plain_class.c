@@ -10,22 +10,6 @@
 #include "class_plain_method.h"
 
 #include "perl-backcompat.c.inc"
-#include "perl-additions.c.inc"
-
-static ClassAttributeRegistration *classattrs = NULL;
-
-static void Class_Plain_register_class_attribute(const char *name, const struct ClassHookFuncs *funcs, void *funcdata)
-{
-  ClassAttributeRegistration *reg;
-  Newx(reg, 1, struct ClassAttributeRegistration);
-
-  reg->name = name;
-  reg->funcs = funcs;
-  reg->funcdata = funcdata;
-
-  reg->next  = classattrs;
-  classattrs = reg;
-}
 
 void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV *value)
 {
@@ -143,7 +127,6 @@ ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV *name)
 
   meta->name = SvREFCNT_inc(name);
 
-  meta->hooks   = NULL;
   meta->fields = newAV();
   meta->methods = newAV();
   meta->isa_empty = 0;
