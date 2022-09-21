@@ -1,6 +1,6 @@
 package Class::Plain 0.68;
 
-use v5.14;
+use v5.16;
 use warnings;
 
 use Carp;
