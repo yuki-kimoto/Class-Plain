@@ -8,6 +8,7 @@
 #include "meta.h"
 #include "class.h"
 #include "field.h"
+#include "method.h"
 
 #include "perl-backcompat.c.inc"
 #include "sv_setrv.c.inc"

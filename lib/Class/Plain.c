@@ -35,6 +35,7 @@
 #include "meta.h"
 #include "class.h"
 #include "field.h"
+#include "method.h"
 
 typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, void *data);
 
@@ -531,7 +532,7 @@ void ClassPlain_need_PLparser(pTHX)
   }
 }
 
-#line 535 "lib/Class/Plain.c"
+#line 536 "lib/Class/Plain.c"
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
@@ -675,7 +676,7 @@ S_croak_xs_usage(const CV *const cv, const char *const params)
 #  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
 #endif
 
-#line 679 "lib/Class/Plain.c"
+#line 680 "lib/Class/Plain.c"
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -700,7 +701,7 @@ XS_EXTERNAL(boot_Class__Plain)
 
     /* Initialisation Section */
 
-#line 528 "lib/Class/Plain.xs"
+#line 529 "lib/Class/Plain.xs"
   XopENTRY_set(&xop_methstart, xop_name, "methstart");
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
@@ -723,7 +724,7 @@ XS_EXTERNAL(boot_Class__Plain)
   ClassPlain__boot_classes(aTHX);
   ClassPlain__boot_fields(aTHX);
 
-#line 727 "lib/Class/Plain.c"
+#line 728 "lib/Class/Plain.c"
 
     /* End of Initialisation Section */
 

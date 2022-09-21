@@ -3,6 +3,7 @@
 
 typedef struct ClassMeta ClassMeta;
 
+#include "method.h"
 #include "field.h"
 
 /* Metadata about a class */

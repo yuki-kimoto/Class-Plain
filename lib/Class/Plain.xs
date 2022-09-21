@@ -26,6 +26,7 @@
 #include "meta.h"
 #include "class.h"
 #include "field.h"
+#include "method.h"
 
 typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, void *data);
 
