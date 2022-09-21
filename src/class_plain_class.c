@@ -29,40 +29,69 @@ static void Class_Plain_register_class_attribute(const char *name, const struct 
 
 void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV *value)
 {
-  if(value && (!SvPOK(value) || !SvCUR(value)))
+  if(value && (!SvPOK(value) || !SvCUR(value))) {
     value = NULL;
-
-  ClassAttributeRegistration *reg;
-  for(reg = classattrs; reg; reg = reg->next) {
-    if(!strEQ(name, reg->name))
-      continue;
-
-    SV *hookdata = value;
-
-    if(reg->funcs->apply) {
-      if(!(*reg->funcs->apply)(aTHX_ class_meta, value, &hookdata, reg->funcdata))
-        return;
-    }
-
-    if(!class_meta->hooks)
-      class_meta->hooks = newAV();
-
-    struct ClassHook *hook;
-    Newx(hook, 1, struct ClassHook);
-
-    hook->funcs = reg->funcs;
-    hook->funcdata = reg->funcdata;
-    hook->hookdata = hookdata;
-
-    av_push(class_meta->hooks, (SV *)hook);
-
-    if(value && value != hookdata)
-      SvREFCNT_dec(value);
-
-    return;
   }
+  
+  // The isa attribute
+  if (strcmp(name, "isa") == 0) {
+    SV* super_class_name = value;
+    
+    if (value) {
+      HV *superstash = gv_stashsv(super_class_name, 0);
+      
+      IV is_load_module;
+      if (superstash) {
+        // The new method
+        SV** new_method = hv_fetchs(superstash, "new", 0);
+        
+        // The length of the classes in @ISA
+        SV* super_class_isa_name = newSVpvf("%" SVf "::ISA", super_class_name);
+        SAVEFREESV(super_class_isa_name);
+        AV* super_class_isa = get_av(SvPV_nolen(super_class_isa_name), GV_ADD | (SvFLAGS(super_class_isa_name) & SVf_UTF8));
+        IV super_class_isa_classes_length = av_count(super_class_isa);
+        
+        if (new_method) {
+          is_load_module = 0;
+        }
+        else if (super_class_isa_classes_length > 0) {
+          is_load_module = 0;
+        }
+        else {
+          is_load_module = 1;
+        }
+      }
+      else {
+        is_load_module = 1;
+      }
+      
+      // Original logic: if(!superstash || !hv_fetchs(superstash, "new", 0)) {
+      if(is_load_module) {
+        /* Try to `require` the module then attempt a second time */
+        /* load_module() will modify the name argument and take ownership of it */
+        load_module(PERL_LOADMOD_NOIMPORT, newSVsv(super_class_name), NULL, NULL);
+        superstash = gv_stashsv(super_class_name, 0);
+      }
 
-  croak("Unrecognised class attribute :%s", name);
+      if(!superstash)
+        croak("Superclass %" SVf " does not exist", super_class_name);
+
+      // Push the super class to @ISA
+      {
+        SV *isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
+        SAVEFREESV(isa_name);
+        AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
+        av_push(isa, SvREFCNT_inc(super_class_name));
+      }
+    }
+    else {
+      class_meta->isa_empty = 1;
+    }
+    
+  }
+  else {
+    croak("Unrecognised class attribute :%s", name);
+  }
 }
 
 MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
@@ -205,5 +234,5 @@ static const struct ClassHookFuncs classhooks_isa = {
 
 void ClassPlain__boot_classes(pTHX)
 {
-  Class_Plain_register_class_attribute("isa",    &classhooks_isa,    NULL);
+  // Class_Plain_register_class_attribute("isa",    &classhooks_isa,    NULL);
 }
