@@ -78,7 +78,31 @@ void ClassPlain_field_apply_attribute(pTHX_ FieldMeta *fieldmeta, const char *na
   hook->funcs = reg->funcs;
   hook->hookdata = hookdata;
   hook->funcdata = reg->funcdata;
-
+  
+  {
+    ENTER;
+    
+    if (strcmp(name, "reader") == 0) {
+      // The reader code
+      SV* sv_reader_code = sv_2mortal(newSVpv("", 0));
+      sv_catpv(sv_reader_code, "sub Colour::");
+      if (value) {
+        sv_catpv(sv_reader_code, SvPV_nolen(value));
+      }
+      else {
+        sv_catpv(sv_reader_code, SvPV_nolen(fieldmeta->name));
+      }
+      sv_catpv(sv_reader_code,  " { my $self = shift; $self->{");
+      sv_catpv(sv_reader_code, SvPV_nolen(fieldmeta->name));
+      sv_catpv(sv_reader_code, "}; }");
+      
+      // Generate the reader
+      Perl_eval_pv(SvPV_nolen(sv_reader_code), 1);
+    }
+    
+    LEAVE;
+  }
+  
   // av_push(fieldmeta->hooks, (SV *)hook);
 }
 
