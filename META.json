@@ -1,7 +1,7 @@
 {
-   "abstract" : "a simple syntax for lexical field-based objects",
+   "abstract" : "a class syntax for the hash-based Perl OO.",
    "author" : [
-      "Paul Evans <leonerd@leonerd.org.uk>"
+      "unknown"
    ],
    "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.4231",
@@ -30,7 +30,7 @@
          "requires" : {
             "XS::Parse::Keyword" : "0.22",
             "XS::Parse::Sublike" : "0.15",
-            "perl" : "5.018"
+            "perl" : "5.016"
          }
       },
       "test" : {
@@ -46,29 +46,8 @@
          "file" : "lib/Class/Plain.pm",
          "version" : "0.68"
       },
-      "Class::Plain::ExtensionBuilder" : {
-         "file" : "lib/Class/Plain/ExtensionBuilder.pm",
-         "version" : "0.68"
-      },
-      "Class::Plain::MOP::Class" : {
-         "file" : "lib/Class/Plain/MOP/Class.pm",
-         "version" : "0.68"
-      },
-      "Class::Plain::MOP::Field" : {
-         "file" : "lib/Class/Plain/MOP/Field.pm",
-         "version" : "0.68"
-      },
-      "Class::Plain::MOP::FieldAttr" : {
-         "file" : "lib/Class/Plain/MOP/FieldAttr.pm",
-         "version" : "0.68"
-      },
-      "Class::Plain::MOP::Method" : {
-         "file" : "lib/Class/Plain/MOP/Method.pm",
-         "version" : "0.68"
-      },
-      "Class::Plain::MetaFunctions" : {
-         "file" : "lib/Class/Plain/MetaFunctions.pm",
-         "version" : "0.68"
+      "Class::Plain::Base" : {
+         "file" : "lib/Class/Plain/Base.pm"
       }
    },
    "release_status" : "stable",
@@ -78,5 +57,5 @@
       ]
    },
    "version" : "0.68",
-   "x_serialization_backend" : "JSON::PP version 4.06"
+   "x_serialization_backend" : "JSON::PP version 4.04"
 }
