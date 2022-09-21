@@ -255,6 +255,10 @@ B<Examples:>
     return $self;
   }
 
+=head1 Required Perl Version
+
+Perl 5.16+.
+
 =head1 See Also
 
 =head2 Object::Pad
