@@ -46,20 +46,40 @@ SKIP: {
 
 {
   class MyClassSignature {
+    field foo : rw;
+    field bar : rw;
+    
     use experimental 'signatures';
     
-    method foo ($foo) {
-      my $ppp = method {
-        1;
-      };
+    method set_fields ($foo, $bar = 3, @) {
+      
+      $self->{foo} = $foo;
+      $self->{bar} = $bar;
+    }
     
-      return $foo;
+    my $outside = 10;
+    
+    method anon {
+      return method ($foo, $bar = 7, @) {
+        
+        $self->{foo} = $foo;
+        $self->{bar} = $bar;
+        
+        return $outside;
+      };
     }
   }
 
-  my $foo = MyClassSignature->new;
+  my $object = MyClassSignature->new;
 
-  is($foo->foo(4), 4);
+  $object->set_fields(4);
+  is($object->foo, 4);
+  is($object->bar, 3);
+
+  my $anon_ret = $object->anon->($object, 5);
+  is($anon_ret, 10);
+  is($object->foo, 5);
+  is($object->bar, 7);
 }
 
 {
