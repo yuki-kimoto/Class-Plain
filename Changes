@@ -3,5 +3,7 @@
     * Add author and repository and copyright.
   [Bug Fix]
     * Fix the bug that Class::Plain can't be compiled on Windows.
+  [Test Improvemetn]
+    * Add tests using Github Action for Linux, Mac, Windows.
 0.01 2022-09-22
   * First release.
