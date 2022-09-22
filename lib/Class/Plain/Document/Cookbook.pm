@@ -125,8 +125,8 @@ A class created by L<Class::Plain> inherits L<Class::Plain::Base>. L<Class::Plai
   
   # Inherit Class::Plain::Base
   class Point {
-    field x : rw;
-    field y : rw;
+    field x;
+    field y;
   }
 
   # (x => 1)
@@ -137,6 +137,9 @@ This can be customize by overriding the C<new> method.
   use Class::Plain;
   
   class Point {
+    field x;
+    field y;
+    
     # Override the new method
     method new : common {
       my $self = $class->SUPER::new(@_);
