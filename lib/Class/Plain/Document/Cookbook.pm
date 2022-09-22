@@ -20,6 +20,41 @@ Use L<Class::Plain> with Existing Classes.
 
 =head2 Array Based Object
 
+An example of the array based object.
+
+  use Class::Plain;
+  
+  class ArrayBased {
+    method new : common {
+      return bless [@_], ref $class || $class;
+    }
+    
+    method push {
+      my ($value) = @_;
+      
+      push @$self, $value;
+    }
+    
+    method get {
+      my ($index) = @_;
+      
+      return $self->[$index];
+    }
+    
+    method to_array {
+      return [@$self];
+    }
+  }
+  
+  my $object = ArrayBased->new;
+  
+  $object->push(3);
+  $object->push(5);
+  
+  $object->get(0) # 3
+  $object->get(1) # 5
+  $object->to_array # [3, 5]
+
 =head2 Scalar Based Object
 
 =head1 Inheritance
