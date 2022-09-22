@@ -1,6 +1,8 @@
 0.03 2022-09-23
   [Document Improvement]
     * Improve the example of Usage.
+  [Test Improvement]
+    * Add the test of the example of Usage.
 0.02 2022-09-22
   [Document Improvement]
     * Add author and repository and copyright.

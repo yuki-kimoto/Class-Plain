@@ -298,5 +298,66 @@ use lib "$FindBin::Bin/lib";
   }
 }
 
+# Exampel of Usage
+{
+  class Point {
+    field x : reader;
+    field y : reader;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{x} //= 0;
+      $self->{y} //= 0;
+      
+      return $self;
+    }
+    
+    method move {
+      my ($x, $y) = @_;
+      
+      $self->{x} += $x;
+      $self->{y} += $y;
+    }
+    
+    method to_string {
+      return "($self->{x},$self->{y})";
+    }
+  }
+  
+  class Point3D : isa(Point) {
+    field z : reader;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{z} //= 0;
+      
+      return $self;
+    }
+    
+    method move {
+      my ($x, $y, $z) = @_;
+      
+      $self->SUPER::move($x, $y);
+      $self->{z} += $z;
+    }
+    
+    method to_string {
+      return "($self->{x},$self->{y},$self->{z})";
+    }
+  }
+
+  my $point = Point->new(x => 5, y => 10);
+  is($point->x, 5);
+  is($point->y, 10);
+  is($point->to_string, "(5,10)");
+  
+  my $point3d = Point3D->new(x => 5, y => 10, z => 15);
+  is($point3d->x, 5);
+  is($point3d->y, 10);
+  is($point3d->z, 15);
+  is($point3d->to_string, "(5,10,15)");
+}
 
 done_testing;
