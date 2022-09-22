@@ -43,8 +43,8 @@ C<Class::Plain> -  a class syntax for the hash-based Perl OO.
   use Class::Plain;
   
   class Point {
-    field x;
-    field y;
+    field x : reader;
+    field y : reader;
     
     method new : common {
       my $self = $class->SUPER::new(@_);
@@ -62,18 +62,20 @@ C<Class::Plain> -  a class syntax for the hash-based Perl OO.
       $self->{y} += $y;
     }
     
-    method describe {
-      print "A point at ($self->{x}, $self->{y})\n";
+    method to_string {
+      return "($self->{x},$self->{y})";
     }
   }
   
   my $point = Point->new(x => 5, y => 10);
-  $point->describe;
+  print $point->x . "\n";
+  print $point->y . "\n";
+  print $point->to_string . "\n";
 
 Inheritance:
 
   class Point3D : isa(Point) {
-    field z;
+    field z : reader;
     
     method new : common {
       my $self = $class->SUPER::new(@_);
@@ -90,13 +92,16 @@ Inheritance:
       $self->{z} += $z;
     }
     
-    method describe {
-      print "A point at ($self->{x}, $self->{y}, $self->{z})\n";
+    method to_string {
+      return "($self->{x},$self->{y},$self->{z})";
     }
   }
-  
+
   my $point3d = Point3D->new(x => 5, y => 10, z => 15);
-  $point3d->describe;
+  print $point3d->x . "\n";
+  print $point3d->y . "\n";
+  print $point3d->z . "\n";
+  print $point3d->to_string . "\n";
 
 See also L<Class Plain Cookbook|Class::Plain::Document::Cookbook>.
 
