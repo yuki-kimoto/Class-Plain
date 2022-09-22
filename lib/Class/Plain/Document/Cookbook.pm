@@ -14,9 +14,110 @@ This is the cookbook of the L<Class::Plain>.
 
 =head1 Use Class::Plain with Existing Classes
 
-Use L<Class::Plain> with Existing Classes.
+Use L<Class::Plain> with existing classes.
 
-=head1 Other Data Structures
+B<Before:>
+
+  package Point;
+  
+  sub new {
+    my $class = shift;
+    
+    my $self = {@_};
+    
+    return bless $self, ref $class || $class;
+  }
+  
+  sub x {
+    my $self = shift;
+    
+    if (@_) {
+      $self->{x} = shift;
+      return $self;
+    }
+    
+    return $self->{x};
+  }
+
+  sub y {
+    my $self = shift;
+    
+    if (@_) {
+      $self->{y} = shift;
+      return $self;
+    }
+    
+    return $self->{y};
+  }
+  
+  my $point = Point->new(x => 1, y => 2);
+  $point->x(3);
+  $point->y(4);
+  
+  print $point->x . "\n";
+  print $point->y . "\n";
+
+B<After>
+
+Use C<class>, C<field>, C<method> keywords.
+  
+  use Class::Plain;
+  
+  class Point {
+    field x;
+    field y;
+    
+    method new : common {
+      my $self = {@_};
+      
+      return bless $self, ref $class || $class;
+    }
+    
+    method x {
+      if (@_) {
+        $self->{x} = shift;
+        return $self;
+      }
+      
+      return $self->{x};
+    }
+
+    method y {
+      if (@_) {
+        $self->{y} = shift;
+        return $self;
+      }
+      
+      return $self->{y};
+    }
+  }
+
+  my $point = Point->new(x => 1, y => 2);
+  $point->x(3);
+  $point->y(4);
+  
+  print $point->x . "\n";
+  print $point->y . "\n";
+
+=head1 Rewite Existing Classes using Class::Plain
+
+If you don't need to take care of the fll backword compatilibity, you can rewrite above code to the following code.
+
+  use Class::Plain;
+  
+  class Point {
+    field x : rw;
+    field y : rw;
+  }
+
+  my $point = Point->new(x => 1, y => 2);
+  $point->x(3);
+  $point->y(4);
+  
+  print $point->x . "\n";
+  print $point->y . "\n";
+
+=head1 Using Other Data Structures
 
 =head2 Array Based Object
 
@@ -48,16 +149,16 @@ An example of the array based object.
   
   my $object = ArrayBased->new(1, 2);
 
-  $object->to_array # [1, 2]
+  $object->to_array; # [1, 2]
   
   $object->push(3);
   $object->push(5);
   
-  $object->get(0) # 1
-  $object->get(1) # 2
-  $object->get(2) # 3
-  $object->get(3) # 5
-  $object->to_array # [1, 2, 3, 5]
+  $object->get(0); # 1
+  $object->get(1); # 2
+  $object->get(2); # 3
+  $object->get(3); # 5
+  $object->to_array; # [1, 2, 3, 5]
 
 =head2 Scalar Based Object
 
@@ -74,20 +175,13 @@ An example of the scalar based object.
     }
     
     method to_value {
-      return $$value;
+      return $$self;
     }
   }
   
-  my $object = ScalarBased->new;
+  my $object = ScalarBased->new(3);
   
-  $object->push(3);
-  $object->push(5);
-  
-  $object->get(0) # 3
-  $object->get(1) # 5
-  $object->to_array # [3, 5]
-
-=head2 Scalar Based Object
+  $object->to_value; # 3;
 
 =head1 Inheritance
 
@@ -155,79 +249,81 @@ An example of single inheritance.
 
 An example of multiple inheritance. It is used for modules using multiple inheritance such as L<DBIx::Class>.
 
+  use Class::Plain;
+  
   # The multiple inheritance
-  {
-    class MultiBase1 {
-      field b1 : rw;
-      
-      method ps;
-      
-      method b1_init {
+  class MultiBase1 {
+    field b1 : rw;
+    
+    method ps;
+    
+    method b1_init {
 
-        push @{$self->ps}, 2;
-        $self->{b1} = 3;
-      }
+      push @{$self->ps}, 2;
+      $self->{b1} = 3;
     }
-    
-    class MultiBase2 {
-      field b2 : rw;
-
-      method ps;
-      
-      method b1_init {
-
-        push @{$self->ps}, 7;
-        $self->{b1} = 8;
-      }
-      
-      method b2_init {
-        
-        push @{$self->ps}, 3;
-        $self->{b2} = 4;
-      }
-    }
-
-    class MultiClass : isa(MultiBase1) isa(MultiBase2) {
-      field ps : rw;
-      
-      method new : common {
-        my $self = $class->SUPER::new(@_);
-        
-        $self->{ps} //= [];
-        
-        $self->init;
-        
-        return $self;
-      }
-      
-      method init {
-        push @{$self->{ps}}, 1;
-        
-        $self->b1_init;
-        $self->b2_init;
-      }
-      
-      method b1_init {
-        $self->next::method;
-      }
-      
-      method b2_init {
-        $self->next::method;
-      }
-    }
-    
-    my $object = MultiClass->new;
-    
-    $object->b1 # 3
-    
-    $object->b2 # 4
-    
-    $object->ps # [1, 2, 3]
   }
+  
+  class MultiBase2 {
+    field b2 : rw;
+
+    method ps;
+    
+    method b1_init {
+
+      push @{$self->ps}, 7;
+      $self->{b1} = 8;
+    }
+    
+    method b2_init {
+      
+      push @{$self->ps}, 3;
+      $self->{b2} = 4;
+    }
+  }
+
+  class MultiClass : isa(MultiBase1) isa(MultiBase2) {
+    field ps : rw;
+    
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{ps} //= [];
+      
+      $self->init;
+      
+      return $self;
+    }
+    
+    method init {
+      push @{$self->{ps}}, 1;
+      
+      $self->b1_init;
+      $self->b2_init;
+    }
+    
+    method b1_init {
+      $self->next::method;
+    }
+    
+    method b2_init {
+      $self->next::method;
+    }
+  }
+  
+  my $object = MultiClass->new;
+  
+  $object->b1; # 3
+  
+  $object->b2; # 4
+  
+  $object->ps; # [1, 2, 3]
 
 =head1 Embeding Class
 
-An example of embeding classes. Embeding class is similar to L<Corinna Role|https://github.com/Ovid/Cor/blob/master/rfc/roles.md> although the methods are embeded manually.
+An example of embeding classes. Embeding class is similar to L<Corinna Role|https://github.com/Ovid/Cor/blob/master/rfc/roles.md> although the methods are embeded manually in the case of using L<Class::Plain>.
+
+  use Class::Plain;
 
   class EmbedBase1 {
     field b1 : rw;
@@ -280,9 +376,9 @@ An example of embeding classes. Embeding class is similar to L<Corinna Role|http
   
   my $object = EmbedClass->new;
   
-  $object->b1 # 3
-  $object->b2 # 4
-  $object->ps # [1, 2, 3]
+  $object->b1; # 3
+  $object->b2; # 4
+  $object->ps; # [1, 2, 3]
 
 =head1 Use Other OO Module With Class::Plain
 
@@ -295,6 +391,8 @@ Use L<Moo> with L<Class::Plain>.
   use Class::Plain;
   
   class Foo : isa() {
+    field x;
+    
     use Moo;
     has "x" => (is => 'rw');
     
@@ -311,6 +409,8 @@ Use L<Class::Accessor::Fast> with L<Class::Plain>.
   use Class::Plain;
   
   class Foo {
+    field x;
+    
     use base 'Class::Accessor::Fast';
     __PACKAGE__->mk_accessors('x');
     method to_string { "String:" . $self->x }
@@ -326,6 +426,8 @@ Use L<Class::Accessor> with L<Class::Plain>.
   use Class::Plain;
   
   class Foo {
+    field x;
+    
     use base 'Class::Accessor::Fast';
     __PACKAGE__->mk_accessors('x');
     method to_string { "String:" . $self->x }
@@ -341,6 +443,8 @@ Use L<Mojo::Base> with L<Class::Plain>.
   use Class::Plain;
   
   class Foo : isa() {
+    field x;
+    
     use Mojo::Base -base;
     has "x";
     

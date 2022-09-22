@@ -123,4 +123,24 @@ use Class::Plain;
   is_deeply($object->to_array, [1, 2, 3, 5]);
 }
 
+# Scalar Based Object
+{
+  class ScalarBased {
+    method new : common {
+      
+      my $value = shift;
+      
+      return bless \$value, ref $class || $class;
+    }
+    
+    method to_value {
+      return $$self;
+    }
+  }
+  
+  my $object = ScalarBased->new(3);
+  
+  is($object->to_value, 3);
+}
+
 done_testing;
