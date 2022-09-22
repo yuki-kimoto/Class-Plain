@@ -1,2 +1,5 @@
+0.02 2022-09-22
+  [Bug Fix]
+    * Fix the bug that Class::Plain can't be compiled on Windows.
 0.01 2022-09-22
   * First release.

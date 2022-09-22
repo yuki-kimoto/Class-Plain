@@ -113,7 +113,7 @@ FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *field_name)
       croak("Cannot add another field named %" SVf, field_name);
   }
 
-  FieldMeta *fieldmeta = ClassPlain_create_field(field_name, meta);
+  FieldMeta *fieldmeta = ClassPlain_create_field(aTHX_ field_name, meta);
 
   av_push(fields, (SV *)fieldmeta);
 
