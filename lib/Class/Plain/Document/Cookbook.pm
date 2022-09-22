@@ -470,6 +470,31 @@ Weaken a field.
     }
   }
 
+=head1 Class Variable
+
+A class variable is represented using a package variable or a lexical variable.
+
+  use Class::Plain;
+  
+  class ClassVariable {
+    # Public
+    our $FOO;
+    
+    # Private
+    my $BAR;
+    
+    BEGIN {
+      $FOO = 1;
+      $BAR = 2;
+    }
+    
+    method FOO : common { $FOO }
+    method BAR : common { $BAR }
+  }
+  
+  ClassVariable->FOO: # 1
+  ClassVariable->BAR; # 2
+
 =head1 Signatures
 
 Use L<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures>.

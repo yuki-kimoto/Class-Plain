@@ -53,13 +53,16 @@ use Class::Plain;
   }
 }
 
-# Package Variable
+# Class Variable
 {
-  class MyClassPackageVariable {
+  class ClassVariable {
+    # Public
     our $FOO;
+    
+    # Private
     my $BAR;
     
-    INIT {
+    BEGIN {
       $FOO = 1;
       $BAR = 2;
     }
@@ -69,8 +72,8 @@ use Class::Plain;
   }
 
   {
-    is(MyClassPackageVariable->FOO, 1);
-    is(MyClassPackageVariable->BAR, 2);
+    is(ClassVariable->FOO, 1);
+    is(ClassVariable->BAR, 2);
   }
 }
 
