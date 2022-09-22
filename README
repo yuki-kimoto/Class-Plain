@@ -258,3 +258,15 @@ See Also
   XS::Parse::Sublike
     The "method" keyword is parsed by XS::Parse::Sublike.
 
+Repository
+    Github <https://github.com/yuki-kimoto/Class-Plain>
+
+Author
+    Yuki Kimoto <kimoto.yuki@gmail.com>
+
+Copyright & LICENSE
+    Copyright 2022-2022 Yuki Kimoto, all rights reserved.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
