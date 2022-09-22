@@ -3,6 +3,9 @@
     * Add author and repository and copyright.
   [Bug Fix]
     * Fix the bug that Class::Plain can't be compiled on Windows.
+  [Test Fix]
+    * Fix the testing bug that the method tests failed on Perl 5.16.
+      This was because Perl 5.16 doesn't have experimental.pm.
   [Test Improvemetn]
     * Add tests using Github Action for Linux, Mac, Windows.
   [Prerequirement Change]

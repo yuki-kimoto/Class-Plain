@@ -40,7 +40,7 @@ SKIP: {
     field foo : rw;
     field bar : rw;
     
-    use experimental 'signatures';
+    use feature 'signatures';
     
     method set_fields ($foo, $bar = 3, @) {
       
