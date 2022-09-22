@@ -9,14 +9,15 @@ BEGIN {
    $] >= 5.026000 or plan skip_all => "No parse_subsignature()";
 }
 
+use feature 'signatures';
+
 use Class::Plain;
 
 {
+    
   class MyClassSignature {
     field foo : rw;
     field bar : rw;
-    
-    use feature 'signatures';
     
     method set_fields ($foo, $bar = 3, @) {
       
