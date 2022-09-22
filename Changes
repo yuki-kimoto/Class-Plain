@@ -1,4 +1,6 @@
 0.02 2022-09-22
+  [Document Improvement]
+    * Add author and repository and copyright.
   [Bug Fix]
     * Fix the bug that Class::Plain can't be compiled on Windows.
 0.01 2022-09-22

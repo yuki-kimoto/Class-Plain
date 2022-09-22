@@ -305,6 +305,21 @@ The C<class> and C<field> keywords are parsed by L<XS::Parse::Keyword>.
 
 The C<method> keyword is parsed by L<XS::Parse::Sublike>.
 
+=head1 Repository
+
+L<Github|https://github.com/yuki-kimoto/Class-Plain>
+
+=head1 Author
+
+Yuki Kimoto E<lt>kimoto.yuki@gmail.comE<gt>
+
+=head1 Copyright & LICENSE
+
+Copyright 2022-2022 Yuki Kimoto, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
 =cut
 
 1;
