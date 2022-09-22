@@ -7,5 +7,10 @@
     * Add tests using Github Action for Linux, Mac, Windows.
   [Prerequirement Change]
     * This module doesn't depend on Test::Refcount.
+  [Internal Changes]
+    * Remove the following options from Module::Build->new.
+      create_license => 1,
+      create_readme  => 1,
+
 0.01 2022-09-22
   * First release.

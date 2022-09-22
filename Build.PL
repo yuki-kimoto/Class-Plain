@@ -31,8 +31,6 @@ my $build = Module::Build->new(
       'XS::Parse::Sublike::Builder' => '0.15',
    },
    license => 'perl',
-   create_license => 1,
-   create_readme  => 1,
 
    extra_compiler_flags => \@extra_compiler_flags,
    c_source => [ "src/" ],
