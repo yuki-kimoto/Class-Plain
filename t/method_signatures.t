@@ -48,3 +48,5 @@ use Class::Plain;
   is($object->foo, 5);
   is($object->bar, 7);
 }
+
+done_testing;
