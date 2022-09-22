@@ -85,4 +85,38 @@ use Class::Plain;
   is($object->z, 3);
 }
 
+# Array Based Object
+{
+  class ArrayBased {
+    method new : common {
+      return bless [@_], ref $class || $class;
+    }
+    
+    method push {
+      my ($value) = @_;
+      
+      push @$self, $value;
+    }
+    
+    method get {
+      my ($index) = @_;
+      
+      return $self->[$index];
+    }
+    
+    method to_array {
+      return [@$self];
+    }
+  }
+  
+  my $object = ArrayBased->new;
+  
+  $object->push(3);
+  $object->push(5);
+  
+  is($object->get(0), 3);
+  is($object->get(1), 5);
+  is_deeply($object->to_array, [3, 5]);
+}
+
 done_testing;

@@ -12,6 +12,16 @@ C<Class::Plain::Document::Cookbook> - Cookbook of Class::Plain
 
 This is the cookbook of the L<Class::Plain>.
 
+=head1 Use Class::Plain with Existing Classes
+
+Use L<Class::Plain> with Existing Classes.
+
+=head1 Other Data Structures
+
+=head2 Array Based Object
+
+=head2 Scalar Based Object
+
 =head1 Inheritance
 
 =head2 Single Inheritance
