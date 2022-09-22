@@ -1,4 +1,4 @@
-name: linux-ubuntu-latest-perl-5.8.9
+name: linux-ubuntu-latest-perl-5.16.3
 
 on:
   push:
