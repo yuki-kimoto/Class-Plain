@@ -497,7 +497,7 @@ A class variable is represented using a package variable or a lexical variable.
 
 =head1 Signatures
 
-Use L<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures>.
+Use L<Class::Plain> with L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures> from C<Perl 5.26+>.
   
   use v5.36; # Enable signatures and other features.
   

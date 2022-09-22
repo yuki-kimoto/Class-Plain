@@ -275,6 +275,30 @@ B<Examples:>
 
 Perl 5.16+.
 
+=head1 Subroutine Signatures Support
+
+C<C<Class::Plain>> supports the L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures> from C<Perl 5.26>.
+
+The L<subroutine signatures|https://perldoc.perl.org/perlsub#Signatures> was supported from C<Perl 5.20>,
+but the parser L<XS::Parse::Sublike> used in C<Class::Plain> can parse only the subroutine signatures after C<Perl 5.26>.
+
+  use feature 'signatures';
+  
+  use Class::Plain;
+  
+  Class Point {
+    
+    # ...
+    
+    method move($x = 0, $y = 0) {
+      $self->{x} += $x;
+      $self->{y} += $y;
+    }
+    
+    # ...
+    
+  }
+
 =head1 Cookbook
 
 Exmples of C<Class::Plain>.
@@ -307,7 +331,7 @@ The C<method> keyword is parsed by L<XS::Parse::Sublike>.
 
 =head1 Repository
 
-L<Github|https://github.com/yuki-kimoto/Class-Plain>
+L<Class::Plain - Github|https://github.com/yuki-kimoto/Class-Plain>
 
 =head1 Author
 

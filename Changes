@@ -1,6 +1,7 @@
 0.02 2022-09-22
   [Document Improvement]
     * Add author and repository and copyright.
+    * Add the headding "Subroutine Signatures Support".
   [Bug Fix]
     * Fix the bug that Class::Plain can't be compiled on Windows.
   [Test Fix]
