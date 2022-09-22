@@ -1,5 +1,6 @@
 Build.PL
 Changes
+describe
 hax/cv_copy_flags.c.inc
 hax/dumpers.c.inc
 hax/forbid_outofblock_ops.c.inc
@@ -35,8 +36,9 @@ t/keyword.t
 t/lib/ModuleClass.pm
 t/lib/ModuleClassIsa.pm
 t/lib/MyKeyword.pm
+t/lib/SymbolExist.pm
+t/lib/SymbolExistHasISASuper.pm
 t/method.t
-t/pod.t
 t/use.t
 XSParseKeyword.h
 XSParseSublike.h

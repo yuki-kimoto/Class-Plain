@@ -56,9 +56,11 @@ Usage
           print "A point at ($self->{x}, $self->{y}, $self->{z})\n";
         }
       }
-
+  
       my $point3d = Point3D->new(x => 5, y => 10, z => 15);
       $point3d->describe;
+
+    See also Class Plain Cookbook.
 
 Description
     This module provides a class syntax for the hash-based Perl OO.
@@ -228,6 +230,11 @@ Keywords
 
 Required Perl Version
     Perl 5.16+.
+
+Cookbook
+    Exmples of "Class::Plain".
+
+    Class::Plain::Document::Cookbook
 
 See Also
   Object::Pad
