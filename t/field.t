@@ -4,7 +4,6 @@ use v5.14;
 use warnings;
 
 use Test::More;
-use Test::Refcount;
 
 use Class::Plain;
 

@@ -8,8 +8,6 @@ use Test::More;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 
-use Scalar::Util qw( reftype );
-
 use Class::Plain;
 
 {

@@ -4,7 +4,6 @@ use v5.14;
 use warnings;
 
 use Test::More;
-use Test::Refcount;
 
 use Class::Plain;
 
@@ -13,14 +12,6 @@ class Point {
    field y;
    
    method where { sprintf "(%d,%d)", $self->{x}, $self->{y} }
-}
-
-{
-   my $p = Point->new(x => 10, y => 20 );
-   is_oneref( $p, '$p field refcount 1 initially' );
-
-   is( $p->where, "(10,20)", '$p->where' );
-   is_oneref( $p, '$p field refcount 1 after method' );
 }
 
 # nested anon method (RT132321)

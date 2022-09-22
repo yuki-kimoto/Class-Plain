@@ -23,9 +23,7 @@ my $build = Module::Build->new(
       'XS::Parse::Sublike' => '0.15',
    },
    test_requires => {
-      'Test::Fatal' => 0,
       'Test::More' => '0.88', # done_testing
-      'Test::Refcount' => 0,
    },
    configure_requires => {
       'Module::Build' => '0.4004', # test_requires

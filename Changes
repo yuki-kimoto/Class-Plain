@@ -5,5 +5,7 @@
     * Fix the bug that Class::Plain can't be compiled on Windows.
   [Test Improvemetn]
     * Add tests using Github Action for Linux, Mac, Windows.
+  [Prerequirement Change]
+    * This module doesn't depend on Test::Refcount.
 0.01 2022-09-22
   * First release.
