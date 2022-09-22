@@ -6,6 +6,7 @@
   [Test Fix]
     * Fix the testing bug that the method tests failed on Perl 5.16.
       This was because Perl 5.16 doesn't have experimental.pm.
+    * Tests of subroutine signatures are enable only in Perl 5.26+.
   [Test Improvemetn]
     * Add tests using Github Action for Linux, Mac, Windows.
   [Prerequirement Change]
