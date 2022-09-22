@@ -1,4 +1,7 @@
 0.03 2022-09-23
+  [Distribution Fix]
+    * Add cpanm to MANIFEST.SKIP,
+      Fix https://github.com/yuki-kimoto/Class-Plain/issues/1
   [Document Improvement]
     * Improve the example of Usage.
     * Add the topic "Customizing Object Initialization" to Cookbook.

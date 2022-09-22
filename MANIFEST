@@ -1,6 +1,5 @@
 Build.PL
 Changes
-cpanm
 describe
 hax/cv_copy_flags.c.inc
 hax/dumpers.c.inc

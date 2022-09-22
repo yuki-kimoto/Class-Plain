@@ -35,3 +35,4 @@ Class-Plain-.*
 ^tmp/
 ^core$
 lib/Class/Plain.c
+cpanm
