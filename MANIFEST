@@ -1,5 +1,6 @@
 Build.PL
 Changes
+cpanm
 describe
 hax/cv_copy_flags.c.inc
 hax/dumpers.c.inc
@@ -40,6 +41,7 @@ t/lib/MyKeyword.pm
 t/lib/SymbolExist.pm
 t/lib/SymbolExistHasISASuper.pm
 t/method.t
+t/method_signatures.t
 t/use.t
 XSParseKeyword.h
 XSParseSublike.h
