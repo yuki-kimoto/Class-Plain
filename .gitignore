@@ -26,3 +26,4 @@ core.*
 */*/*/*.o
 lib/Class/Plain.c
 Class-Plain-*
+META.json

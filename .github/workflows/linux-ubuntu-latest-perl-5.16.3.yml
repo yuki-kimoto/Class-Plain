@@ -21,6 +21,6 @@ jobs:
       - run: perl cpanm ExtUtils::CBuilder
       - run: perl cpanm -L ~/mylib -n XS::Parse::Sublike XS::Parse::Keyword
       - run: echo "PERL5LIB=$HOME/mylib/lib/perl5:$HOME/mylib/lib/perl5/"$(perl -MConfig -e 'print $Config{archname}') >> $GITHUB_ENV
-      - run: perl Makefile.PL
-      - run: make
-      - run: make disttest
+      - run: perl Build.PL
+      - run: ./Build
+      - run: ./Build disttest
