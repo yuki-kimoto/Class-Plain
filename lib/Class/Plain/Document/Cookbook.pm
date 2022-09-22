@@ -46,7 +46,39 @@ An example of the array based object.
     }
   }
   
-  my $object = ArrayBased->new;
+  my $object = ArrayBased->new(1, 2);
+
+  $object->to_array # [1, 2]
+  
+  $object->push(3);
+  $object->push(5);
+  
+  $object->get(0) # 1
+  $object->get(1) # 2
+  $object->get(2) # 3
+  $object->get(3) # 5
+  $object->to_array # [1, 2, 3, 5]
+
+=head2 Scalar Based Object
+
+An example of the scalar based object.
+
+  use Class::Plain;
+  
+  class ScalarBased {
+    method new : common {
+      
+      my $value = shift;
+      
+      return bless \$value, ref $class || $class;
+    }
+    
+    method to_value {
+      return $$value;
+    }
+  }
+  
+  my $object = ScalarBased->new;
   
   $object->push(3);
   $object->push(5);

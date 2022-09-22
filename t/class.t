@@ -109,14 +109,18 @@ use Class::Plain;
     }
   }
   
-  my $object = ArrayBased->new;
+  my $object = ArrayBased->new(1, 2);
+
+  is_deeply($object->to_array, [1, 2]);
   
   $object->push(3);
   $object->push(5);
   
-  is($object->get(0), 3);
-  is($object->get(1), 5);
-  is_deeply($object->to_array, [3, 5]);
+  is($object->get(0), 1);
+  is($object->get(1), 2);
+  is($object->get(2), 3);
+  is($object->get(3), 5);
+  is_deeply($object->to_array, [1, 2, 3, 5]);
 }
 
 done_testing;
