@@ -1,6 +1,7 @@
 0.03 2022-09-23
   [Document Improvement]
     * Improve the example of Usage.
+    * Add the topic "Customizing Object Initialization" to Cookbook.
   [Test Improvement]
     * Add the test of the example of Usage.
 0.02 2022-09-22

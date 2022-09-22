@@ -117,6 +117,40 @@ If you don't need to take care of the fll backword compatilibity, you can rewrit
   print $point->x . "\n";
   print $point->y . "\n";
 
+=head1 Customizing Object Initialization
+
+A class created by L<Class::Plain> inherits L<Class::Plain::Base>. L<Class::Plain::Base> has the L<new|Class::Plain::Base/"new"> method.
+
+  use Class::Plain;
+  
+  # Inherit Class::Plain::Base
+  class Point {
+    field x : rw;
+    field y : rw;
+  }
+
+  # (x => 1)
+  my $point = Point->new(x => 1);
+
+This can be customize by overriding the C<new> method.
+
+  use Class::Plain;
+  
+  class Point {
+    # Override the new method
+    method new : common {
+      my $self = $class->SUPER::new(@_);
+      
+      $self->{x} //= 0;
+      $self->{y} //= 0;
+      
+      return $self;
+    }
+  }
+  
+  # (x => 1, y => 0)
+  my $point = Point->new(x => 1);
+
 =head1 Using Other Data Structures
 
 =head2 Array Based Object
