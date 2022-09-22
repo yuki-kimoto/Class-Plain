@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@master
       - run: perl -V
       - run: perl -MConfig -MData::Dumper -e 'local $Data::Dumper::Sortkeys = 1;warn Dumper \%Config;'
-      - run: perl cpanm -n XS::Parse::Sublike XS::Parse::Keyword
+      - run: perl cpanm -n Module::Build XS::Parse::Sublike XS::Parse::Keyword
       - run: perl Build.PL
       - run: ./Build
       - run: ./Build disttest
