@@ -26,7 +26,7 @@ LICENSE
 MANIFEST			This list of files
 META.json
 META.yml
-README
+README.md
 src/class_plain_class.c
 src/class_plain_field.c
 t/class.t
@@ -42,3 +42,4 @@ t/method.t
 t/use.t
 XSParseKeyword.h
 XSParseSublike.h
+README
