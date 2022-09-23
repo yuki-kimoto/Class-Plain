@@ -144,4 +144,48 @@ use Class::Plain;
   is($object->to_value, 3);
 }
 
+# Conflicting Keyword
+{
+  class MyConflictKeyword {
+    method class {
+      return "class";
+    }
+    
+    method method {
+      return "method";
+    }
+    
+    method field {
+      return "field";
+    }
+  }
+  
+  my $object = MyConflictKeyword->new;
+  is($object->class, "class");
+  is($object->method, "method");
+  is($object->field, "field");
+}
+
+# Conflicting Keyword
+{
+  class MyConflictKeyword {
+    method class {
+      return "class";
+    }
+    
+    method method {
+      return "method";
+    }
+    
+    method field {
+      return "field";
+    }
+  }
+  
+  my $object = MyConflictKeyword->new;
+  is($object->class, "class");
+  is($object->method, "method");
+  is($object->field, "field");
+}
+
 done_testing;
