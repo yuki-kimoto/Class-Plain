@@ -27,6 +27,8 @@
  * Class and Field Implementation *
  **********************************/
 
+#define METATYPE_ROLE 1
+
 static XOP xop_methstart;
 static OP *pp_methstart(pTHX)
 {
@@ -483,6 +485,7 @@ BOOT:
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
   
   register_xs_parse_keyword("class", &kwhooks_class, (void *)0);
+  register_xs_parse_keyword("role",  &kwhooks_class,  (void *)METATYPE_ROLE);
 
   register_xs_parse_keyword("field", &kwhooks_field, "field");
   
