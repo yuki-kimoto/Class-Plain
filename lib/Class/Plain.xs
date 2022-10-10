@@ -332,11 +332,9 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext* ctx, v
   intro_my();
 
   MethodMeta* comp_method_class;
-  Newx(comp_method_class, 1, MethodMeta);
+  Newxz(comp_method_class, 1, MethodMeta);
 
   comp_method_class->name = SvREFCNT_inc(ctx->name);
-  comp_method_class->class = NULL;
-  comp_method_class->is_common = false;
 
   hv_stores(ctx->moddata, "Class::Plain/comp_method_class", newSVuv(PTR2UV(comp_method_class)));
   
