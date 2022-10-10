@@ -13,14 +13,13 @@
 
 ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV* name) {
   ClassMeta *class;
-  Newx(class, 1, ClassMeta);
+  Newxz(class, 1, ClassMeta);
 
   class->name = SvREFCNT_inc(name);
 
   class->role_names = newAV();
   class->fields = newAV();
   class->methods = newAV();
-  class->isa_empty = 0;
 
   return class;
 }
@@ -113,6 +112,20 @@ void ClassPlain_begin_class_block(pTHX_ ClassMeta* class) {
     if(!av_count(isa)) {
       av_push(isa, newSVpvs("Class::Plain::Base"));
     }
+  }
+  
+  if (class->is_role) {
+    // The source code of Role::Tiny->import
+    SV* sv_source_code = sv_2mortal(newSVpv("", 0));
+    sv_catpv(sv_source_code, "{\n");
+    sv_catpv(sv_source_code, "  package ");
+    sv_catpv(sv_source_code, SvPV_nolen(class->name));
+    sv_catpv(sv_source_code, ";\n");
+    sv_catpv(sv_source_code, "  Role::Tiny->import;\n");
+    sv_catpv(sv_source_code, "}\n");
+    
+    // Role::Tiny->import
+    Perl_eval_pv(aTHX_ SvPV_nolen(sv_source_code), 1);
   }
 }
 

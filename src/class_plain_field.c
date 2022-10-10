@@ -13,7 +13,7 @@ void ClassPlain_need_PLparser(pTHX);
 FieldMeta *ClassPlain_create_field(pTHX_ SV *field_name, ClassMeta *class)
 {
   FieldMeta *field;
-  Newx(field, 1, FieldMeta);
+  Newxz(field, 1, FieldMeta);
 
   field->name = SvREFCNT_inc(field_name);
   field->class = class;

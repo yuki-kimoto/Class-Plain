@@ -10,14 +10,10 @@ use lib "$FindBin::Bin/lib";
 
 use Class::Plain;
 
-{
-  role MyRoleDeclaration {
-    
-  }
-}
+use RoleMinimal;
 
 {
-  class MyClassForMyRoleDeclaration : does(MyRoleDeclaration) {
+  class MyClassForMyRoleDeclaration : does(RoleMinimal) {
     
   }
 }
