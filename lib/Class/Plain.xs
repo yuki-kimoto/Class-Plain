@@ -422,9 +422,9 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, voi
     CvMETHOD_on(ctx->cv);
 
     if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-      MethodMeta* meta = ClassPlain_class_add_method(aTHX_ compclass_meta, ctx->name);
+      MethodMeta* method_meta = ClassPlain_class_add_method(aTHX_ compclass_meta, ctx->name);
 
-      meta->is_common = compmethodmeta->is_common;
+      method_meta->is_common = compmethodmeta->is_common;
     }
 
   SvREFCNT_dec(compmethodmeta->name);
