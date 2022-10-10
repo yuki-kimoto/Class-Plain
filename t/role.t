@@ -30,6 +30,7 @@ use Class::Plain;
   is($object->role_bar, "cur_bar");
   is($object->role_bar_role, "role_bar");
   is($object->role_minimal2_foo_method, "role_minimal2_foo_method");
+  ok($object->does('RoleMinimal'));
 }
 
 {
