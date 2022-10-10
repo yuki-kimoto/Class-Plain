@@ -12,20 +12,20 @@
 #include "perl-backcompat.c.inc"
 
 ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV* name) {
-  ClassMeta *class_meta;
-  Newx(class_meta, 1, ClassMeta);
+  ClassMeta *class;
+  Newx(class, 1, ClassMeta);
 
-  class_meta->name = SvREFCNT_inc(name);
+  class->name = SvREFCNT_inc(name);
 
-  class_meta->role_names = newAV();
-  class_meta->fields = newAV();
-  class_meta->methods = newAV();
-  class_meta->isa_empty = 0;
+  class->role_names = newAV();
+  class->fields = newAV();
+  class->methods = newAV();
+  class->isa_empty = 0;
 
-  return class_meta;
+  return class;
 }
 
-void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV* value) {
+void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class, const char *name, SV* value) {
   if(value && (!SvPOK(value) || !SvCUR(value))) {
     value = NULL;
   }
@@ -75,83 +75,83 @@ void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *n
 
       // Push the super class to @ISA
       {
-        SV* isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
+        SV* isa_name = newSVpvf("%" SVf "::ISA", class->name);
         SAVEFREESV(isa_name);
         AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
         av_push(isa, SvREFCNT_inc(super_class_name));
       }
     }
     else {
-      class_meta->isa_empty = 1;
+      class->isa_empty = 1;
     }
     
   }
   // The isa attribute
   else if (strcmp(name, "does") == 0) {
     SV* role_name = value;
-    ClassPlain_add_role_name(aTHX_ class_meta, role_name);
+    ClassPlain_add_role_name(aTHX_ class, role_name);
   }
   else {
     croak("Unrecognised class attribute :%s", name);
   }
 }
 
-void ClassPlain_add_role_name(pTHX_ ClassMeta* class_meta, SV* role_name) {
-  AV *role_names = class_meta->role_names;
+void ClassPlain_add_role_name(pTHX_ ClassMeta* class, SV* role_name) {
+  AV *role_names = class->role_names;
   
   if (role_name) {
     av_push(role_names, SvREFCNT_inc(role_name));
   }
 }
 
-void ClassPlain_begin_class_block(pTHX_ ClassMeta* class_meta) {
-  SV* isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
+void ClassPlain_begin_class_block(pTHX_ ClassMeta* class) {
+  SV* isa_name = newSVpvf("%" SVf "::ISA", class->name);
   SAVEFREESV(isa_name);
   AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
   
-  if (!class_meta->isa_empty) {
+  if (!class->isa_empty) {
     if(!av_count(isa)) {
       av_push(isa, newSVpvs("Class::Plain::Base"));
     }
   }
 }
 
-MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* class_meta, SV* method_name) {
-  AV *methods = class_meta->methods;
+MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* class, SV* method_name) {
+  AV *methods = class->methods;
 
   if(!method_name || !SvOK(method_name) || !SvCUR(method_name))
     croak("method_name must not be undefined or empty");
 
-  MethodMeta* method_meta;
-  Newx(method_meta, 1, MethodMeta);
+  MethodMeta* method;
+  Newx(method, 1, MethodMeta);
 
-  method_meta->name = SvREFCNT_inc(method_name);
-  method_meta->class = class_meta;
+  method->name = SvREFCNT_inc(method_name);
+  method->class = class;
 
-  av_push(methods, (SV*)method_meta);
+  av_push(methods, (SV*)method);
 
-  return method_meta;
+  return method;
 }
 
-FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* class_meta, SV* field_name) {
-  AV *fields = class_meta->fields;
+FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* class, SV* field_name) {
+  AV *fields = class->fields;
 
   if(!field_name || !SvOK(field_name) || !SvCUR(field_name))
     croak("field_name must not be undefined or empty");
 
   U32 i;
   for(i = 0; i < av_count(fields); i++) {
-    FieldMeta* field_meta = (FieldMeta* )AvARRAY(fields)[i];
-    if(SvCUR(field_meta->name) < 2)
+    FieldMeta* field = (FieldMeta* )AvARRAY(fields)[i];
+    if(SvCUR(field->name) < 2)
       continue;
 
-    if(sv_eq(field_meta->name, field_name))
+    if(sv_eq(field->name, field_name))
       croak("Cannot add another field named %" SVf, field_name);
   }
 
-  FieldMeta* field_meta = ClassPlain_create_field(aTHX_ field_name, class_meta);
+  FieldMeta* field = ClassPlain_create_field(aTHX_ field_name, class);
 
-  av_push(fields, (SV*)field_meta);
+  av_push(fields, (SV*)field);
 
-  return field_meta;
+  return field;
 }
