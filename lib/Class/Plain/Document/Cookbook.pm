@@ -419,7 +419,7 @@ An example of embeding classes. Embeding class is similar to L<Corinna Role|http
 
 =head1 Role
 
-An example of the role. The above example is rewritten by L<Class::Plain/"role">.
+An example of the role. The L<above example|/"Embeding Class"> is rewritten by L<Class::Plain/"role">.
 
   use Class::Plain;
 
