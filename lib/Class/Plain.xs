@@ -405,6 +405,9 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext* ctx, v
       ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
     }
   }
+  else {
+    comp_method->is_required = 1;
+  }
 }
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {

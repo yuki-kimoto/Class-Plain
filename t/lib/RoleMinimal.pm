@@ -7,4 +7,6 @@ role RoleMinimal {
   method role_foo {
     return 1;
   }
+  
+  method required_method1;
 }
