@@ -115,6 +115,8 @@ This module provides a class syntax for the hash-based Perl OO.
 
 =head2 class
 
+A class is defined by the C<class> keyword.
+
   class NAME { ... }
 
   class NAME : ATTRS... {
@@ -292,6 +294,8 @@ B<Examples:>
 
 =head2 role
 
+A role is defined by the C<role> keyword.
+
   role NAME { ... }
 
   role NAME : ATTRS... {
@@ -302,7 +306,11 @@ B<Examples:>
 
   role NAME : ATTRS...;
 
-C<Class::Plain> can define roles of L<Role::Tiny>. The SYNOPSYS of L<Role::Tiny> is rewritten to the following codes.
+C<Class::Plain> adopts the role features of L<Role::Tiny>. All features of L<Role::Tiny> can be used.
+
+B<Examples:>
+
+The SYNOPSYS of L<Role::Tiny> is rewritten to the following codes.
 
   use Class::Plain;
    
@@ -329,7 +337,13 @@ In roles, the required method for the composed class can be defined by omitting 
 This is alias for L<Role::Tiny/"requires">.
 
   requires "required_method";
-  
+
+=head3 does Method
+
+  $object->does('Some::Role');
+
+Checks if the object does the role.
+
 =head1 Required Perl Version
 
 Perl 5.16+.
