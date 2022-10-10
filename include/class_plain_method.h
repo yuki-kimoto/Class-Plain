@@ -7,15 +7,7 @@ typedef void MethodAttributeHandler(pTHX_ MethodMeta *meta, const char *value, v
 struct MethodMeta {
   SV *name;
   ClassMeta *class;
-  /* We don't store the method body CV; leave that in the class stash */
-  unsigned int is_common : 1;
-};
-
-struct MethodAttributeDefinition {
-  char *attrname;
-  /* TODO: int flags */
-  MethodAttributeHandler *apply;
-  void *applydata;
+  int32_t is_common : 1;
 };
 
 #endif
