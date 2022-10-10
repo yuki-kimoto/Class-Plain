@@ -272,6 +272,12 @@ static const struct XSParseKeywordHooks kwhooks_class = {
   .build = &build_classlike,
 };
 
+static const struct XSParseKeywordHooks kwhooks_role = {
+  .permit_hintkey = "Class::Plain/role",
+  .pieces = pieces_classlike,
+  .build = &build_classlike,
+};
+
 static void check_field(pTHX_ void* hookdata) {
   char *kwname = hookdata;
   
