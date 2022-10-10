@@ -27,7 +27,9 @@
  * Class and Field Implementation *
  **********************************/
 
-#define METATYPE_ROLE 1
+enum {
+  METATYPE_ROLE = 1,
+};
 
 static XOP xop_methstart;
 static OP* pp_methstart(pTHX) {
