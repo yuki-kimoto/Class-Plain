@@ -24,4 +24,9 @@ use Class::Plain;
   is($object->foo, 1);
 }
 
+{
+  eval "use ClassRequired;";
+  like($@, qr/required_method1/);
+}
+
 done_testing;
