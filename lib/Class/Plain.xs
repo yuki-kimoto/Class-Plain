@@ -78,7 +78,6 @@ static ClassMeta *S_comp_class_class(pTHX) {
   return (ClassMeta *)(intptr_t)SvIV(*svp);
 }
 
-#define have_comp_class_class  S_have_comp_class_class(aTHX)
 static bool S_have_comp_class_class(pTHX) {
   SV** svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/comp_class_class", 0);
   if(!svp || !*svp)
@@ -261,7 +260,7 @@ static const struct XSParseKeywordHooks kwhooks_class = {
 static void check_field(pTHX_ void* hookdata) {
   char *kwname = hookdata;
   
-  if(!have_comp_class_class)
+  if(!S_have_comp_class_class(aTHX))
     croak("Cannot '%s' outside of 'class'", kwname);
 
   if(!sv_eq(PL_curstname, comp_class_class->name))
@@ -312,7 +311,7 @@ static const struct XSParseKeywordHooks kwhooks_field = {
 };
 static bool parse_method_permit(pTHX_ void* hookdata)
 {
-  if(!have_comp_class_class)
+  if(!S_have_comp_class_class(aTHX))
     croak("Cannot 'method' outside of 'class'");
 
   if(!sv_eq(PL_curstname, comp_class_class->name))
