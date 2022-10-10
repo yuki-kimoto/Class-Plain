@@ -171,10 +171,10 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   IV type = (IV)(intptr_t)hookdata;
 
-  ClassMeta *meta = ClassPlain_create_class(aTHX_ type, packagename);
+  ClassMeta* class_meta = ClassPlain_create_class(aTHX_ type, packagename);
   
   if (type == 1) {
-    meta->is_role = 1;
+    class_meta->is_role = 1;
   }
 
   int nattrs = args[argi++]->i;
@@ -186,13 +186,13 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
       inplace_trim_whitespace(attrval);
 
-      ClassPlain_class_apply_attribute(aTHX_ meta, SvPVX(attrname), attrval);
+      ClassPlain_class_apply_attribute(aTHX_ class_meta, SvPVX(attrname), attrval);
 
       argi++;
     }
   }
 
-  ClassPlain_begin_class_block(aTHX_ meta);
+  ClassPlain_begin_class_block(aTHX_ class_meta);
 
   /* At this point XS::Parse::Keyword has parsed all it can. From here we will
    * take over to perform the odd "block or statement" behaviour of `class`
@@ -216,7 +216,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     SAVEGENERICSV(PL_curstash);
     save_item(PL_curstname);
 
-    PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(meta->name, GV_ADD));
+    PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(class_meta->name, GV_ADD));
     sv_setsv(PL_curstname, packagename);
 
     PL_hints |= HINT_BLOCK_SCOPE;
@@ -225,7 +225,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
   if(is_block) {
     I32 save_ix = block_start(TRUE);
-    compclass_meta_set(meta);
+    compclass_meta_set(class_meta);
 
     OP *body = parse_stmtseq(0);
     body = block_end(save_ix, body);
@@ -244,7 +244,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   }
   else {
     SAVEHINTS();
-    compclass_meta_set(meta);
+    compclass_meta_set(class_meta);
 
     *out = newSVOP(OP_CONST, 0, &PL_sv_yes);
     return KEYWORD_PLUGIN_STMT;
