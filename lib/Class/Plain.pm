@@ -6,8 +6,8 @@ use warnings;
 use Carp;
 
 use mro;
-use Role::Tiny;
-use Role::Tiny::With();
+use Role::Tiny ();
+use Role::Tiny::With ();
 
 sub dl_load_flags { 0x01 }
 
