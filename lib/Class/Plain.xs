@@ -170,7 +170,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     croak("Expected a class name after 'class'");
 
   IV type = (IV)(intptr_t)hookdata;
-
+  
   ClassMeta* class_meta = ClassPlain_create_class(aTHX_ type, packagename);
   
   if (type == 1) {

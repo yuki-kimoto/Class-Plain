@@ -26,4 +26,6 @@ MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* class_meta, SV* method_
 
 FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* class_meta, SV* field_name);
 
+void ClassPlain_class_add_role_name(pTHX_ ClassMeta *class_meta, SV* role_name);
+
 #endif

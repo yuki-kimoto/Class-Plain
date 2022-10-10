@@ -11,8 +11,21 @@
 
 #include "perl-backcompat.c.inc"
 
-void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV *value)
-{
+ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV* name) {
+  ClassMeta *class_meta;
+  Newx(class_meta, 1, ClassMeta);
+
+  class_meta->name = SvREFCNT_inc(name);
+
+  class_meta->role_names = newAV();
+  class_meta->fields = newAV();
+  class_meta->methods = newAV();
+  class_meta->isa_empty = 0;
+
+  return class_meta;
+}
+
+void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *name, SV* value) {
   if(value && (!SvPOK(value) || !SvCUR(value))) {
     value = NULL;
   }
@@ -62,7 +75,7 @@ void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *n
 
       // Push the super class to @ISA
       {
-        SV *isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
+        SV* isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
         SAVEFREESV(isa_name);
         AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
         av_push(isa, SvREFCNT_inc(super_class_name));
@@ -78,26 +91,44 @@ void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *n
   }
 }
 
-MethodMeta *ClassPlain_class_add_method(pTHX_ ClassMeta *meta, SV *methodname)
-{
-  AV *methods = meta->methods;
-
-  if(!methodname || !SvOK(methodname) || !SvCUR(methodname))
-    croak("methodname must not be undefined or empty");
-
-  MethodMeta *methodmeta;
-  Newx(methodmeta, 1, MethodMeta);
-
-  methodmeta->name = SvREFCNT_inc(methodname);
-  methodmeta->class = meta;
-
-  av_push(methods, (SV *)methodmeta);
-
-  return methodmeta;
+void ClassPlain_add_role_name(pTHX_ ClassMeta* class_meta, SV* role_name) {
+  AV *role_names = class_meta->role_names;
+  
+  if (role_name) {
+    av_push(role_names, SvREFCNT_inc(role_name));
+  }
 }
 
-FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *field_name)
-{
+void ClassPlain_begin_class_block(pTHX_ ClassMeta* class_meta) {
+  SV* isa_name = newSVpvf("%" SVf "::ISA", class_meta->name);
+  SAVEFREESV(isa_name);
+  AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
+  
+  if (!class_meta->isa_empty) {
+    if(!av_count(isa)) {
+      av_push(isa, newSVpvs("Class::Plain::Base"));
+    }
+  }
+}
+
+MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* meta, SV* method_name) {
+  AV *methods = meta->methods;
+
+  if(!method_name || !SvOK(method_name) || !SvCUR(method_name))
+    croak("method_name must not be undefined or empty");
+
+  MethodMeta* method_meta;
+  Newx(method_meta, 1, MethodMeta);
+
+  method_meta->name = SvREFCNT_inc(method_name);
+  method_meta->class = meta;
+
+  av_push(methods, (SV*)method_meta);
+
+  return method_meta;
+}
+
+FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* meta, SV* field_name) {
   AV *fields = meta->fields;
 
   if(!field_name || !SvOK(field_name) || !SvCUR(field_name))
@@ -105,44 +136,17 @@ FieldMeta *ClassPlain_class_add_field(pTHX_ ClassMeta *meta, SV *field_name)
 
   U32 i;
   for(i = 0; i < av_count(fields); i++) {
-    FieldMeta *fieldmeta = (FieldMeta *)AvARRAY(fields)[i];
-    if(SvCUR(fieldmeta->name) < 2)
+    FieldMeta* field_meta = (FieldMeta* )AvARRAY(fields)[i];
+    if(SvCUR(field_meta->name) < 2)
       continue;
 
-    if(sv_eq(fieldmeta->name, field_name))
+    if(sv_eq(field_meta->name, field_name))
       croak("Cannot add another field named %" SVf, field_name);
   }
 
-  FieldMeta *fieldmeta = ClassPlain_create_field(aTHX_ field_name, meta);
+  FieldMeta* field_meta = ClassPlain_create_field(aTHX_ field_name, meta);
 
-  av_push(fields, (SV *)fieldmeta);
+  av_push(fields, (SV*)field_meta);
 
-  return fieldmeta;
-}
-
-ClassMeta *ClassPlain_create_class(pTHX_ IV type, SV *name)
-{
-  ClassMeta *meta;
-  Newx(meta, 1, ClassMeta);
-
-  meta->name = SvREFCNT_inc(name);
-
-  meta->fields = newAV();
-  meta->methods = newAV();
-  meta->isa_empty = 0;
-
-  return meta;
-}
-
-void ClassPlain_begin_class_block(pTHX_ ClassMeta *meta)
-{
-  SV *isa_name = newSVpvf("%" SVf "::ISA", meta->name);
-  SAVEFREESV(isa_name);
-  AV *isa = get_av(SvPV_nolen(isa_name), GV_ADD | (SvFLAGS(isa_name) & SVf_UTF8));
-  
-  if (!meta->isa_empty) {
-    if(!av_count(isa)) {
-      av_push(isa, newSVpvs("Class::Plain::Base"));
-    }
-  }
+  return field_meta;
 }
