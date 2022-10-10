@@ -93,7 +93,6 @@ static void S_comp_class_class_set(pTHX_ ClassMeta *class) {
   sv_setiv(sv, (IV)(intptr_t)class);
 }
 
-#define is_valid_ident_utf8(s)  S_is_valid_ident_utf8(aTHX_ s)
 static bool S_is_valid_ident_utf8(pTHX_ const U8* s) {
   const U8* e = s + strlen((char *)s);
 
