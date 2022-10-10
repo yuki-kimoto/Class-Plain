@@ -1,4 +1,4 @@
-package Class::Plain 0.04;
+package Class::Plain 0.05;
 
 use v5.16;
 use warnings;
