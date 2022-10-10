@@ -222,6 +222,29 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
       croak("Expected }");
     
     // the end of the class block
+
+    AV* role_names = class->role_names;
+    for (int32_t i = 0; i < av_count(role_names); i++) {
+      SV* role_name = AvARRAY(role_names)[i];
+      if (role_name) {
+        warn("AAA");
+        
+        // The source code of Role::Tiny->import
+        SV* sv_source_code = sv_2mortal(newSVpv("", 0));
+        sv_catpv(sv_source_code, "{\n");
+        sv_catpv(sv_source_code, "  package ");
+        sv_catpv(sv_source_code, SvPV_nolen(class->name));
+        sv_catpv(sv_source_code, ";\n");
+        sv_catpv(sv_source_code, "  Role::Tiny::With::with(");
+        sv_catpv(sv_source_code, SvPV_nolen(role_name));
+        sv_catpv(sv_source_code, ");\n");
+        sv_catpv(sv_source_code, "}\n");
+        
+        // Role::Tiny->import
+        Perl_eval_pv(aTHX_ SvPV_nolen(sv_source_code), 1);
+      }
+    }
+  
     
     LEAVE;
 
@@ -405,9 +428,6 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext* ctx, v
       ctx->body = op_append_list(OP_LINESEQ, fieldops, ctx->body);
     }
   }
-  else {
-    comp_method->is_required = 1;
-  }
 }
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
@@ -418,14 +438,37 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, voi
     sv_setuv(tmpsv, 0);
   }
 
-  if(ctx->cv)
+  if(ctx->cv) {
     CvMETHOD_on(ctx->cv);
+  }
+  
+  if(ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
+    MethodMeta* method = ClassPlain_class_add_method(aTHX_ S_comp_class(aTHX), ctx->name);
+    method->is_common = comp_method->is_common;
+    
+    // "sub foo;" means requred method in roles.
+    if (!ctx->body) {
+      method->is_required = 1;
 
-    if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-      MethodMeta* method_class = ClassPlain_class_add_method(aTHX_ S_comp_class(aTHX), ctx->name);
-
-      method_class->is_common = comp_method->is_common;
+      if (method->class->is_role) {
+        if (method->is_required) {
+          // The source code of Role::Tiny->import
+          SV* sv_source_code = sv_2mortal(newSVpv("", 0));
+          sv_catpv(sv_source_code, "{\n");
+          sv_catpv(sv_source_code, "  package ");
+          sv_catpv(sv_source_code, SvPV_nolen(method->class->name));
+          sv_catpv(sv_source_code, ";\n");
+          sv_catpv(sv_source_code, "  requires('");
+          sv_catpv(sv_source_code, SvPV_nolen(method->name));
+          sv_catpv(sv_source_code, "');\n");
+          sv_catpv(sv_source_code, "}\n");
+          
+          // Role::Tiny->import
+          Perl_eval_pv(aTHX_ SvPV_nolen(sv_source_code), 1);
+        }
+      }
     }
+  }
 
   SvREFCNT_dec(comp_method->name);
   Safefree(comp_method);

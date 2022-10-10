@@ -85,26 +85,10 @@ void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class, const char *name, 
     }
     
   }
-  // The isa attribute
+  // The does attribute
   else if (strcmp(name, "does") == 0) {
     SV* role_name = value;
     ClassPlain_add_role_name(aTHX_ class, role_name);
-    
-    if (role_name) {
-      // The source code of Role::Tiny->import
-      SV* sv_source_code = sv_2mortal(newSVpv("", 0));
-      sv_catpv(sv_source_code, "{\n");
-      sv_catpv(sv_source_code, "  package ");
-      sv_catpv(sv_source_code, SvPV_nolen(class->name));
-      sv_catpv(sv_source_code, ";\n");
-      sv_catpv(sv_source_code, "  Role::Tiny::With::with(");
-      sv_catpv(sv_source_code, SvPV_nolen(role_name));
-      sv_catpv(sv_source_code, ");\n");
-      sv_catpv(sv_source_code, "}\n");
-      
-      // Role::Tiny->import
-      Perl_eval_pv(aTHX_ SvPV_nolen(sv_source_code), 1);
-    }
   }
   else {
     croak("Unrecognised class attribute :%s", name);
@@ -129,7 +113,7 @@ void ClassPlain_begin_class_block(pTHX_ ClassMeta* class) {
       av_push(isa, newSVpvs("Class::Plain::Base"));
     }
   }
-  
+
   if (class->is_role) {
     // The source code of Role::Tiny->import
     SV* sv_source_code = sv_2mortal(newSVpv("", 0));
@@ -158,7 +142,7 @@ MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* class, SV* method_name)
   method->class = class;
 
   av_push(methods, (SV*)method);
-
+  
   return method;
 }
 

@@ -8,5 +8,5 @@ role RoleMinimal {
     return 1;
   }
   
-  method required_method1;
+  method bar;
 }

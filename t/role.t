@@ -15,6 +15,13 @@ use Class::Plain;
     method foo {
       return $self->role_foo;
     }
+    method required_method1 {
+      return 2;
+    }
+    
+    method bar {
+    
+    }
   }
   
   my $object = MyClassForMyRoleDeclaration->new;
