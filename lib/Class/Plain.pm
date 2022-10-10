@@ -302,7 +302,7 @@ B<Examples:>
 
   role NAME : ATTRS...;
 
-C<Class::Plain> can define roles of L<Role::Tiny>. The SYNOPSYS of L<Role::Tiny> is rewrited to the following codes.
+C<Class::Plain> can define roles of L<Role::Tiny>. The SYNOPSYS of L<Role::Tiny> is rewritten to the following codes.
 
   use Class::Plain;
    
