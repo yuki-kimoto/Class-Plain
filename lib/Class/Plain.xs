@@ -331,18 +331,18 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext* ctx, v
 
   intro_my();
 
-  MethodMeta* comp_method_class;
-  Newxz(comp_method_class, 1, MethodMeta);
+  MethodMeta* comp_method;
+  Newxz(comp_method, 1, MethodMeta);
 
-  comp_method_class->name = SvREFCNT_inc(ctx->name);
-
-  hv_stores(ctx->moddata, "Class::Plain/comp_method_class", newSVuv(PTR2UV(comp_method_class)));
+  comp_method->name = SvREFCNT_inc(ctx->name);
+  
+  hv_stores(ctx->moddata, "Class::Plain/comp_method", newSVuv(PTR2UV(comp_method)));
   
   LEAVE;
 }
 
 static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext* ctx, SV* attr, SV* val, void* hookdata) {
-  MethodMeta* comp_method_class = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/comp_method_class", 0)));
+  MethodMeta* comp_method = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/comp_method", 0)));
 
   struct MethodAttributeDefinition *def;
   for(def = method_attributes; def->attrname; def++) {
@@ -351,7 +351,7 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext* ctx, SV
 
     /* TODO: We might want to wrap the CV in some sort of MethodMeta struct
      * but for now we'll just pass the XSParseSublikeContext context */
-    (*def->apply)(aTHX_ comp_method_class, SvPOK(val) ? SvPVX(val) : NULL, def->applydata);
+    (*def->apply)(aTHX_ comp_method, SvPOK(val) ? SvPVX(val) : NULL, def->applydata);
 
     return true;
   }
@@ -361,8 +361,9 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext* ctx, SV
 }
 
 static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
-  MethodMeta* comp_method_class = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/comp_method_class", 0)));
-  if(comp_method_class->is_common) {
+
+  MethodMeta* comp_method = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/comp_method", 0)));
+  if(comp_method->is_common) {
     IV var_index = pad_add_name_pvs("$class", 0, NULL, NULL);
     if (!(var_index == 1)) {
       croak("[Unexpected]Invalid index of the $class variable:%d", (int)var_index);
@@ -379,13 +380,14 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext* ctx
 }
 
 static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
-  MethodMeta* comp_method_class = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/comp_method_class", 0)));
+
+  MethodMeta* comp_method = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/comp_method", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
    * declaration; a required method
    */
   if (ctx->body) {
-    if(comp_method_class->is_common) {
+    if(comp_method->is_common) {
       ctx->body = op_append_list(OP_LINESEQ,
         ClassPlain_newCOMMONMETHSTARTOP(aTHX_ 0 |
           (0)),
@@ -406,10 +408,10 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext* ctx, v
 }
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
-  MethodMeta* comp_method_class;
+  MethodMeta* comp_method;
   {
-    SV* tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/comp_method_class", 0);
-    comp_method_class = NUM2PTR(MethodMeta* , SvUV(tmpsv));
+    SV* tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/comp_method", 0);
+    comp_method = NUM2PTR(MethodMeta* , SvUV(tmpsv));
     sv_setuv(tmpsv, 0);
   }
 
@@ -419,11 +421,11 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, voi
     if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
       MethodMeta* method_class = ClassPlain_class_add_method(aTHX_ S_comp_class(aTHX), ctx->name);
 
-      method_class->is_common = comp_method_class->is_common;
+      method_class->is_common = comp_method->is_common;
     }
 
-  SvREFCNT_dec(comp_method_class->name);
-  Safefree(comp_method_class);
+  SvREFCNT_dec(comp_method->name);
+  Safefree(comp_method);
 }
 
 static struct XSParseSublikeHooks parse_method_hooks = {
