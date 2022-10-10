@@ -152,14 +152,14 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
   int argi = 0;
   
 
-  SV* packagename = args[argi++]->sv;
+  SV* package_name = args[argi++]->sv;
   /* Grrr; XPK bug */
-  if(!packagename)
+  if(!package_name)
     croak("Expected a class name after 'class'");
 
   IV type = (IV)(intptr_t)hookdata;
   
-  ClassMeta* class = ClassPlain_create_class(aTHX_ type, packagename);
+  ClassMeta* class = ClassPlain_create_class(aTHX_ type, package_name);
   
   if (type == 1) {
     class->is_role = 1;
@@ -205,7 +205,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
     save_item(PL_curstname);
 
     PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(class->name, GV_ADD));
-    sv_setsv(PL_curstname, packagename);
+    sv_setsv(PL_curstname, package_name);
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_parser->copline = NOLINE;
@@ -242,7 +242,6 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
         Perl_eval_pv(aTHX_ SvPV_nolen(sv_source_code), 1);
       }
     }
-  
     
     LEAVE;
 
