@@ -146,7 +146,7 @@ The following class attributes are supported:
  # The super class is nothing
  : isa()
 
-Define a supper classes that this class extends.
+Specifies a supper classes that this class extends.
 
 If the supper class is not specified by C<isa> attribute, the class inherits L<Class::Plain::Base>.
 
@@ -155,6 +155,18 @@ The super class is added to the end of C<@ISA>.
 If the the super class name doesn't exists in the Perl's symbol table, the super class is loaded.
 
 Otherwise if the super class doesn't have the C<new> method and doesn't have the class names in C<@ISA>, the super class is loaded.
+
+=head3 does Attribute
+ 
+ # The single inheritance
+ : does(ROLE)
+ 
+ # The multiple inheritance
+ : does(ROLE1) does(ROLE2)
+ 
+Specifies roles that this class does. This is the alias for L<Role::Tiny/"with">.
+
+See also L</"role">.
 
 =head2 field
   
@@ -278,6 +290,46 @@ B<Examples:>
     return $self;
   }
 
+=head2 role
+
+  role NAME { ... }
+
+  role NAME : ATTRS... {
+    ...
+  }
+
+  role NAME;
+
+  role NAME : ATTRS...;
+
+C<Class::Plain> can define roles of L<Role::Tiny>. The SYNOPSYS of L<Role::Tiny> is rewrited to the following codes.
+
+  use Class::Plain;
+   
+  role Some::Role {
+   
+    method foo { ... }
+     
+    method bar { ... }
+  }
+  
+  class Some::Class : does(Some::Role) {
+    method foo { ... }
+     
+    # baz is wrapped in the around modifier by Class::Method::Modifiers
+    method baz { ... }
+  }
+
+=head3 Required Method
+
+In roles, the required method for the composed class can be defined by omitting its method block.
+
+  method required_method;
+
+This is alias for L<Role::Tiny/"requires">.
+
+  requires "required_method";
+  
 =head1 Required Perl Version
 
 Perl 5.16+.
