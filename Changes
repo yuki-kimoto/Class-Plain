@@ -1,3 +1,7 @@
+0.06 2022-10-11
+  [Document Improvement]
+    * Improved the layout of the document.
+
 0.05 2022-10-10
   [New Features]
     * Support role syntax using Role::Tiny.
