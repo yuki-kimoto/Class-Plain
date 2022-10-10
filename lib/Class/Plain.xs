@@ -199,14 +199,14 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
    * keywords
    */
 
-  bool is_block;
+  bool exists_class_block;
 
   if(lex_consume_unichar('{')) {
-    is_block = true;
+    exists_class_block = true;
     ENTER;
   }
   else if(lex_consume_unichar(';')) {
-    is_block = false;
+    exists_class_block = false;
   }
   else
     croak("Expected a block or ';'");
@@ -223,7 +223,7 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
     PL_parser->copline = NOLINE;
   }
 
-  if(is_block) {
+  if (exists_class_block) {
     I32 save_ix = block_start(TRUE);
     compclass_meta_set(class_meta);
 
@@ -232,7 +232,9 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
 
     if(!lex_consume_unichar('}'))
       croak("Expected }");
-
+    
+    // the end of the class block
+    
     LEAVE;
 
     /* CARGOCULT from perl/perly.y:PACKAGE BAREWORD BAREWORD '{' */
