@@ -51,7 +51,6 @@ OP* ClassPlain_newMETHSTARTOP(pTHX_ U32 flags)
   return op;
 }
 
-static XOP xop_common_methstart;
 static OP* pp_common_methstart(pTHX) {
   SV* self = av_shift(GvAV(PL_defgv));
 
@@ -464,11 +463,6 @@ BOOT:
   XopENTRY_set(&xop_methstart, xop_desc, "enter method");
   XopENTRY_set(&xop_methstart, xop_class, OA_BASEOP);
   Perl_custom_op_register(aTHX_ &pp_methstart, &xop_methstart);
-
-  XopENTRY_set(&xop_common_methstart, xop_name, "common_methstart");
-  XopENTRY_set(&xop_common_methstart, xop_desc, "enter method :common");
-  XopENTRY_set(&xop_common_methstart, xop_class, OA_BASEOP);
-  Perl_custom_op_register(aTHX_ &pp_common_methstart, &xop_common_methstart);
 
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
   
