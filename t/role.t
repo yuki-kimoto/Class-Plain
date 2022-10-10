@@ -18,10 +18,6 @@ use Class::Plain;
     method required_method1 {
       return 2;
     }
-    
-    method bar {
-    
-    }
   }
   
   my $object = MyClassForMyRoleDeclaration->new;

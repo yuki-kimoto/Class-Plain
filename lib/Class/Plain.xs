@@ -227,8 +227,6 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
     for (int32_t i = 0; i < av_count(role_names); i++) {
       SV* role_name = AvARRAY(role_names)[i];
       if (role_name) {
-        warn("AAA");
-        
         // The source code of Role::Tiny->import
         SV* sv_source_code = sv_2mortal(newSVpv("", 0));
         sv_catpv(sv_source_code, "{\n");
