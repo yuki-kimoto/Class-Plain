@@ -57,4 +57,9 @@ use Class::Plain;
   like($@, qr/required_method1/);
 }
 
+{
+  eval "use Class::Plain; role RoleHasIsa : isa(Foo) {}";
+  like($@, qr/The role can't have the isa attribute/);
+}
+
 done_testing;
