@@ -119,13 +119,7 @@ A class is defined by the C<class> keyword.
 
   class NAME { ... }
 
-  class NAME : ATTRS... {
-    ...
-  }
-
-  class NAME;
-
-  class NAME : ATTRS...;
+  class NAME : ATTRS... { ... }
 
 Behaves similarly to the C<package> keyword, but provides a package that
 defines a new class.
@@ -308,13 +302,7 @@ A role is defined by the C<role> keyword.
 
   role NAME { ... }
 
-  role NAME : ATTRS... {
-    ...
-  }
-
-  role NAME;
-
-  role NAME : ATTRS...;
+  role NAME : ATTRS... { ... }
 
 C<Class::Plain> adopts the role features of L<Role::Tiny>. All features of L<Role::Tiny> can be used.
 

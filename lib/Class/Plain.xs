@@ -254,11 +254,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
     return KEYWORD_PLUGIN_STMT;
   }
   else {
-    SAVEHINTS();
-    S_comp_class_set(aTHX_ class);
-
-    *out = newSVOP(OP_CONST, 0, &PL_sv_yes);
-    return KEYWORD_PLUGIN_STMT;
+    croak("The %s class must have its block", SvPV_nolen(class->name));
   }
 }
 
