@@ -86,6 +86,11 @@ void ClassPlain_class_apply_attribute(pTHX_ ClassMeta *class_meta, const char *n
     }
     
   }
+  // The isa attribute
+  else if (strcmp(name, "does") == 0) {
+    SV* role_name = value;
+    ClassPlain_add_role_name(aTHX_ class_meta, role_name);
+  }
   else {
     croak("Unrecognised class attribute :%s", name);
   }
@@ -111,8 +116,8 @@ void ClassPlain_begin_class_block(pTHX_ ClassMeta* class_meta) {
   }
 }
 
-MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* meta, SV* method_name) {
-  AV *methods = meta->methods;
+MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* class_meta, SV* method_name) {
+  AV *methods = class_meta->methods;
 
   if(!method_name || !SvOK(method_name) || !SvCUR(method_name))
     croak("method_name must not be undefined or empty");
@@ -121,15 +126,15 @@ MethodMeta* ClassPlain_class_add_method(pTHX_ ClassMeta* meta, SV* method_name) 
   Newx(method_meta, 1, MethodMeta);
 
   method_meta->name = SvREFCNT_inc(method_name);
-  method_meta->class = meta;
+  method_meta->class = class_meta;
 
   av_push(methods, (SV*)method_meta);
 
   return method_meta;
 }
 
-FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* meta, SV* field_name) {
-  AV *fields = meta->fields;
+FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* class_meta, SV* field_name) {
+  AV *fields = class_meta->fields;
 
   if(!field_name || !SvOK(field_name) || !SvCUR(field_name))
     croak("field_name must not be undefined or empty");
@@ -144,7 +149,7 @@ FieldMeta* ClassPlain_class_add_field(pTHX_ ClassMeta* meta, SV* field_name) {
       croak("Cannot add another field named %" SVf, field_name);
   }
 
-  FieldMeta* field_meta = ClassPlain_create_field(aTHX_ field_name, meta);
+  FieldMeta* field_meta = ClassPlain_create_field(aTHX_ field_name, class_meta);
 
   av_push(fields, (SV*)field_meta);
 
