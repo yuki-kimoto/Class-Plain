@@ -10,14 +10,15 @@ use lib "$FindBin::Bin/lib";
 
 use Class::Plain;
 
-use RoleMinimal;
-
 {
   class MyClassForMyRoleDeclaration : does(RoleMinimal) {
-    
+    method foo {
+      return $self->role_foo;
+    }
   }
+  
+  my $object = MyClassForMyRoleDeclaration->new;
+  is($object->foo, 1);
 }
-
-ok(1);
 
 done_testing;
