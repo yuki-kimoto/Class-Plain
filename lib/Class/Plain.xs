@@ -512,6 +512,8 @@ BOOT:
   boot_xs_parse_keyword(0.22); /* XPK_AUTOSEMI */
   
   register_xs_parse_keyword("class", &kwhooks_class, (void*)0);
+  
+  // Note: Using kwhooks_role is maybe correct, but it doesn't work well
   register_xs_parse_keyword("role",  &kwhooks_class,  (void*)METATYPE_ROLE);
 
   register_xs_parse_keyword("field", &kwhooks_field, "field");
