@@ -69,18 +69,18 @@ OP* ClassPlain_newCOMMONMETHSTARTOP(pTHX_ U32 flags) {
   return op;
 }
 
-/* The class_metadata on the currently-compiling class */
-#define compclass_class_meta       S_compclass_class_meta(aTHX)
-static ClassMeta *S_compclass_class_meta(pTHX) {
-  SV** svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_class_meta", 0);
+/* The classdata on the currently-compiling class */
+#define compclass_class       S_compclass_class(aTHX)
+static ClassMeta *S_compclass_class(pTHX) {
+  SV** svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_class", 0);
   if(!svp || !*svp || !SvOK(*svp))
     return NULL;
   return (ClassMeta *)(intptr_t)SvIV(*svp);
 }
 
-#define have_compclass_class_meta  S_have_compclass_class_meta(aTHX)
-static bool S_have_compclass_class_meta(pTHX) {
-  SV** svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_class_meta", 0);
+#define have_compclass_class  S_have_compclass_class(aTHX)
+static bool S_have_compclass_class(pTHX) {
+  SV** svp = hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_class", 0);
   if(!svp || !*svp)
     return false;
 
@@ -90,10 +90,10 @@ static bool S_have_compclass_class_meta(pTHX) {
   return false;
 }
 
-#define compclass_class_meta_set(class_meta)  S_compclass_class_meta_set(aTHX_ class_meta)
-static void S_compclass_class_meta_set(pTHX_ ClassMeta *class_meta) {
-  SV* sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_class_meta", GV_ADD);
-  sv_setiv(sv, (IV)(intptr_t)class_meta);
+#define compclass_class_set(class)  S_compclass_class_set(aTHX_ class)
+static void S_compclass_class_set(pTHX_ ClassMeta *class) {
+  SV* sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/compclass_class", GV_ADD);
+  sv_setiv(sv, (IV)(intptr_t)class);
 }
 
 #define is_valid_ident_utf8(s)  S_is_valid_ident_utf8(aTHX_ s)
@@ -138,8 +138,8 @@ static void inplace_trim_whitespace(SV* sv)
   dst[SvCUR(sv)] = 0;
 }
 
-static void S_apply_method_common(pTHX_ MethodMeta* class_meta, const char *val, void* _data) {
-  class_meta->is_common = true;
+static void S_apply_method_common(pTHX_ MethodMeta* class, const char *val, void* _data) {
+  class->is_common = true;
 }
 
 static struct MethodAttributeDefinition method_attributes[] = {
@@ -162,10 +162,10 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
 
   IV type = (IV)(intptr_t)hookdata;
   
-  ClassMeta* class_class_meta = ClassPlain_create_class(aTHX_ type, packagename);
+  ClassMeta* class_class = ClassPlain_create_class(aTHX_ type, packagename);
   
   if (type == 1) {
-    class_class_meta->is_role = 1;
+    class_class->is_role = 1;
   }
 
   int nattrs = args[argi++]->i;
@@ -177,13 +177,13 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
 
       inplace_trim_whitespace(attrval);
 
-      ClassPlain_class_apply_attribute(aTHX_ class_class_meta, SvPVX(attrname), attrval);
+      ClassPlain_class_apply_attribute(aTHX_ class_class, SvPVX(attrname), attrval);
 
       argi++;
     }
   }
 
-  ClassPlain_begin_class_block(aTHX_ class_class_meta);
+  ClassPlain_begin_class_block(aTHX_ class_class);
 
   /* At this point XS::Parse::Keyword has parsed all it can. From here we will
    * take over to perform the odd "block or statement" behaviour of `class`
@@ -207,7 +207,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
     SAVEGENERICSV(PL_curstash);
     save_item(PL_curstname);
 
-    PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(class_class_meta->name, GV_ADD));
+    PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(class_class->name, GV_ADD));
     sv_setsv(PL_curstname, packagename);
 
     PL_hints |= HINT_BLOCK_SCOPE;
@@ -216,7 +216,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
 
   if (exists_class_block) {
     I32 save_ix = block_start(TRUE);
-    compclass_class_meta_set(class_class_meta);
+    compclass_class_set(class_class);
 
     OP* body = parse_stmtseq(0);
     body = block_end(save_ix, body);
@@ -237,7 +237,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
   }
   else {
     SAVEHINTS();
-    compclass_class_meta_set(class_class_meta);
+    compclass_class_set(class_class);
 
     *out = newSVOP(OP_CONST, 0, &PL_sv_yes);
     return KEYWORD_PLUGIN_STMT;
@@ -262,12 +262,12 @@ static const struct XSParseKeywordHooks kwhooks_class = {
 static void check_field(pTHX_ void* hookdata) {
   char *kwname = hookdata;
   
-  if(!have_compclass_class_meta)
+  if(!have_compclass_class)
     croak("Cannot '%s' outside of 'class'", kwname);
 
-  if(!sv_eq(PL_curstname, compclass_class_meta->name))
+  if(!sv_eq(PL_curstname, compclass_class->name))
     croak("Current package name no longer matches current class (%" SVf " vs %" SVf ")",
-      PL_curstname, compclass_class_meta->name);
+      PL_curstname, compclass_class->name);
 }
 
 static int build_field(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t nargs, void* hookdata) {
@@ -275,7 +275,7 @@ static int build_field(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t nargs
 
   SV* name = args[argi++]->sv;
 
-  FieldMeta *field_class_meta = ClassPlain_class_add_field(aTHX_ compclass_class_meta, name);
+  FieldMeta *field_class = ClassPlain_class_add_field(aTHX_ compclass_class, name);
   SvREFCNT_dec(name);
 
   int nattrs = args[argi++]->i;
@@ -286,7 +286,7 @@ static int build_field(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t nargs
 
       inplace_trim_whitespace(attrval);
 
-      ClassPlain_field_apply_attribute(aTHX_ field_class_meta, SvPVX(attrname), attrval);
+      ClassPlain_field_apply_attribute(aTHX_ field_class, SvPVX(attrname), attrval);
 
       if(attrval)
         SvREFCNT_dec(attrval);
@@ -313,12 +313,12 @@ static const struct XSParseKeywordHooks kwhooks_field = {
 };
 static bool parse_method_permit(pTHX_ void* hookdata)
 {
-  if(!have_compclass_class_meta)
+  if(!have_compclass_class)
     croak("Cannot 'method' outside of 'class'");
 
-  if(!sv_eq(PL_curstname, compclass_class_meta->name))
+  if(!sv_eq(PL_curstname, compclass_class->name))
     croak("Current package name no longer matches current class (%" SVf " vs %" SVf ")",
-      PL_curstname, compclass_class_meta->name);
+      PL_curstname, compclass_class->name);
 
   return true;
 }
@@ -334,20 +334,20 @@ static void parse_method_pre_subparse(pTHX_ struct XSParseSublikeContext* ctx, v
 
   intro_my();
 
-  MethodMeta* compmethodclass_meta;
-  Newx(compmethodclass_meta, 1, MethodMeta);
+  MethodMeta* compmethodclass;
+  Newx(compmethodclass, 1, MethodMeta);
 
-  compmethodclass_meta->name = SvREFCNT_inc(ctx->name);
-  compmethodclass_meta->class = NULL;
-  compmethodclass_meta->is_common = false;
+  compmethodclass->name = SvREFCNT_inc(ctx->name);
+  compmethodclass->class = NULL;
+  compmethodclass->is_common = false;
 
-  hv_stores(ctx->moddata, "Class::Plain/compmethodclass_meta", newSVuv(PTR2UV(compmethodclass_meta)));
+  hv_stores(ctx->moddata, "Class::Plain/compmethodclass", newSVuv(PTR2UV(compmethodclass)));
   
   LEAVE;
 }
 
 static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext* ctx, SV* attr, SV* val, void* hookdata) {
-  MethodMeta* compmethodclass_meta = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass_meta", 0)));
+  MethodMeta* compmethodclass = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass", 0)));
 
   struct MethodAttributeDefinition *def;
   for(def = method_attributes; def->attrname; def++) {
@@ -356,7 +356,7 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext* ctx, SV
 
     /* TODO: We might want to wrap the CV in some sort of MethodMeta struct
      * but for now we'll just pass the XSParseSublikeContext context */
-    (*def->apply)(aTHX_ compmethodclass_meta, SvPOK(val) ? SvPVX(val) : NULL, def->applydata);
+    (*def->apply)(aTHX_ compmethodclass, SvPOK(val) ? SvPVX(val) : NULL, def->applydata);
 
     return true;
   }
@@ -366,8 +366,8 @@ static bool parse_method_filter_attr(pTHX_ struct XSParseSublikeContext* ctx, SV
 }
 
 static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
-  MethodMeta* compmethodclass_meta = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass_meta", 0)));
-  if(compmethodclass_meta->is_common) {
+  MethodMeta* compmethodclass = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass", 0)));
+  if(compmethodclass->is_common) {
     IV var_index = pad_add_name_pvs("$class", 0, NULL, NULL);
     if (!(var_index == 1)) {
       croak("[Unexpected]Invalid index of the $class variable:%d", (int)var_index);
@@ -384,13 +384,13 @@ static void parse_method_post_blockstart(pTHX_ struct XSParseSublikeContext* ctx
 }
 
 static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
-  MethodMeta* compmethodclass_meta = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass_meta", 0)));
+  MethodMeta* compmethodclass = NUM2PTR(MethodMeta* , SvUV(*hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass", 0)));
 
   /* If we have no ctx->body that means this was a bodyless method
    * declaration; a required method
    */
   if (ctx->body) {
-    if(compmethodclass_meta->is_common) {
+    if(compmethodclass->is_common) {
       ctx->body = op_append_list(OP_LINESEQ,
         ClassPlain_newCOMMONMETHSTARTOP(aTHX_ 0 |
           (0)),
@@ -411,10 +411,10 @@ static void parse_method_pre_blockend(pTHX_ struct XSParseSublikeContext* ctx, v
 }
 
 static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, void* hookdata) {
-  MethodMeta* compmethodclass_meta;
+  MethodMeta* compmethodclass;
   {
-    SV* tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass_meta", 0);
-    compmethodclass_meta = NUM2PTR(MethodMeta* , SvUV(tmpsv));
+    SV* tmpsv = *hv_fetchs(ctx->moddata, "Class::Plain/compmethodclass", 0);
+    compmethodclass = NUM2PTR(MethodMeta* , SvUV(tmpsv));
     sv_setuv(tmpsv, 0);
   }
 
@@ -422,13 +422,13 @@ static void parse_method_post_newcv(pTHX_ struct XSParseSublikeContext* ctx, voi
     CvMETHOD_on(ctx->cv);
 
     if(ctx->cv && ctx->name && (ctx->actions & XS_PARSE_SUBLIKE_ACTION_INSTALL_SYMBOL)) {
-      MethodMeta* method_class_meta = ClassPlain_class_add_method(aTHX_ compclass_class_meta, ctx->name);
+      MethodMeta* method_class = ClassPlain_class_add_method(aTHX_ compclass_class, ctx->name);
 
-      method_class_meta->is_common = compmethodclass_meta->is_common;
+      method_class->is_common = compmethodclass->is_common;
     }
 
-  SvREFCNT_dec(compmethodclass_meta->name);
-  Safefree(compmethodclass_meta);
+  SvREFCNT_dec(compmethodclass->name);
+  Safefree(compmethodclass);
 }
 
 static struct XSParseSublikeHooks parse_method_hooks = {
