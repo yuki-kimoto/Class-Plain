@@ -13,6 +13,7 @@ struct ClassMeta {
   AV *fields;   /* each elem is a raw pointer directly to a FieldMeta */
   AV *methods;  /* each elem is a raw pointer directly to a MethodMeta */
   IV isa_empty;
+  IV is_role;
 };
 
 /* Class API */

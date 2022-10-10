@@ -172,6 +172,10 @@ static int build_classlike(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t n
   IV type = (IV)(intptr_t)hookdata;
 
   ClassMeta *meta = ClassPlain_create_class(aTHX_ type, packagename);
+  
+  if (type == 1) {
+    meta->is_role = 1;
+  }
 
   int nattrs = args[argi++]->i;
   if(nattrs) {
