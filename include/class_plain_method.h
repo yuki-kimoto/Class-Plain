@@ -8,6 +8,7 @@ struct MethodMeta {
   SV *name;
   ClassMeta *class;
   int8_t is_common;
+  int8_t is_required;
 };
 
 struct MethodAttributeDefinition {
