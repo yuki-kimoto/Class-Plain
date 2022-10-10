@@ -284,7 +284,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
   SV *name = args[argi++]->sv;
 
-  FieldMeta *fieldmeta = ClassPlain_class_add_field(aTHX_ compclass_meta, name);
+  FieldMeta *field_meta = ClassPlain_class_add_field(aTHX_ compclass_meta, name);
   SvREFCNT_dec(name);
 
   int nattrs = args[argi++]->i;
@@ -295,7 +295,7 @@ static int build_field(pTHX_ OP **out, XSParseKeywordPiece *args[], size_t nargs
 
       inplace_trim_whitespace(attrval);
 
-      ClassPlain_field_apply_attribute(aTHX_ fieldmeta, SvPVX(attrname), attrval);
+      ClassPlain_field_apply_attribute(aTHX_ field_meta, SvPVX(attrname), attrval);
 
       if(attrval)
         SvREFCNT_dec(attrval);
