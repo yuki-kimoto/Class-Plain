@@ -16,6 +16,12 @@ use Class::Plain;
   }
 }
 
+{
+  class MyClassForMyRoleDeclaration : does(MyRoleDeclaration) {
+    
+  }
+}
+
 ok(1);
 
 done_testing;
