@@ -90,7 +90,6 @@ static bool S_have_comp_class_class(pTHX) {
   return false;
 }
 
-#define comp_class_class_set(class)  S_comp_class_class_set(aTHX_ class)
 static void S_comp_class_class_set(pTHX_ ClassMeta *class) {
   SV* sv = *hv_fetchs(GvHV(PL_hintgv), "Class::Plain/comp_class_class", GV_ADD);
   sv_setiv(sv, (IV)(intptr_t)class);
@@ -216,7 +215,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
 
   if (exists_class_block) {
     I32 save_ix = block_start(TRUE);
-    comp_class_class_set(class_class);
+    S_comp_class_class_set(aTHX_ class_class);
 
     OP* body = parse_stmtseq(0);
     body = block_end(save_ix, body);
@@ -237,7 +236,7 @@ static int build_classlike(pTHX_ OP* *out, XSParseKeywordPiece* args[], size_t n
   }
   else {
     SAVEHINTS();
-    comp_class_class_set(class_class);
+    S_comp_class_class_set(aTHX_ class_class);
 
     *out = newSVOP(OP_CONST, 0, &PL_sv_yes);
     return KEYWORD_PLUGIN_STMT;
