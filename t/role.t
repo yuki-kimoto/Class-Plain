@@ -36,6 +36,23 @@ use Class::Plain;
 }
 
 {
+  role RoleJoin1 {
+    method role_join1_method { return 1 }
+  }
+  
+  role RoleJoin2 : does(RoleJoin1) {
+    
+  }
+  
+  class ClassForRoleJoin : does(RoleJoin2) {
+    
+  }
+  
+  my $object = ClassForRoleJoin->new;
+  is($object->role_join1_method, 1);
+}
+
+{
   eval "use ClassRequired;";
   like($@, qr/required_method1/);
 }
